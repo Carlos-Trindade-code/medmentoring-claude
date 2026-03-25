@@ -7,6 +7,8 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
+import { StepWizard } from "@/components/StepWizard";
+import type { WizardStep } from "@/components/StepWizard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -337,73 +339,80 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
 
   if (!currentSection) return null;
 
-  return (
-    <div className="space-y-6">
-      {/* Progresso geral */}
-      <div className="flex gap-1.5 mb-2">
-        {sections.map((s, i) => (
-          <button
-            key={s.id}
-            onClick={() => setCurrentSectionIdx(i)}
-            className={`flex-1 h-2 rounded-full transition-colors ${
-              completedSections.has(s.id) ? "bg-emerald-500" :
-              i === currentSectionIdx ? "bg-primary" : "bg-muted"
-            }`}
-            title={s.titulo}
-          />
-        ))}
-      </div>
+  const wizardSteps: WizardStep[] = sections.map((s) => ({
+    id: s.id,
+    title: s.titulo,
+    subtitle: s.descricao,
+  }));
 
-      {/* Cabeçalho da seção */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            {currentSection.icone && <span className="text-2xl">{currentSection.icone}</span>}
-            <h3 className="font-bold text-foreground text-lg">{currentSection.titulo}</h3>
-            {completedSections.has(currentSection.id) && (
-              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-xs">Concluída</Badge>
-            )}
-          </div>
-          {currentSection.descricao && (
-            <p className="text-muted-foreground text-sm">{currentSection.descricao}</p>
-          )}
-        </div>
-        <span className="text-xs text-muted-foreground shrink-0 ml-4">
-          {currentSectionIdx + 1} / {sections.length}
+  const autoSaveIndicator = (
+    <div className="flex items-center gap-2">
+      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+      {lastSaved && !saving && (
+        <span className="text-xs text-emerald-600">
+          Salvo às {lastSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
         </span>
+      )}
+    </div>
+  );
+
+  return (
+    <StepWizard
+      steps={wizardSteps}
+      currentStep={currentSectionIdx}
+      onStepChange={(idx) => {
+        // Auto-save current section before navigating
+        if (isDirty) handleSaveProgress();
+        setCurrentSectionIdx(idx);
+      }}
+      completedSteps={completedSections}
+      canAdvance={true}
+      onFinish={handleNext}
+      footerLeft={autoSaveIndicator}
+    >
+      {/* Section progress within step */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs text-muted-foreground">
+          {answeredCount} de {visibleQuestions.length} respondidas
+        </span>
+        <div className="flex items-center gap-2">
+          {!isSectionLocked && (
+            <button
+              onClick={handleSectionAiSuggestion}
+              disabled={loadingSectionAi}
+              className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-violet-200 text-violet-500 hover:bg-violet-50 transition-colors"
+              title="Pedir orientação para esta seção"
+            >
+              {loadingSectionAi ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              <span className="hidden sm:inline">Orientar</span>
+            </button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSaveProgress}
+            disabled={saving}
+            className="border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400 font-medium bg-green-50 h-7 text-xs"
+          >
+            {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
+            {completedSections.has(currentSection?.id ?? "") ? "Atualizar" : "Salvar"}
+          </Button>
+        </div>
       </div>
 
-      {/* Barra de progresso da seção */}
-      <div>
-        <div className="flex justify-between text-xs text-muted-foreground mb-1">
-          <span>{answeredCount} de {visibleQuestions.length} respondidas</span>
-          <div className="flex items-center gap-2">
-            <span>{progress}%</span>
-            {!isSectionLocked && (
-              <button
-                onClick={handleSectionAiSuggestion}
-                disabled={loadingSectionAi}
-                className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-violet-200 text-violet-500 hover:bg-violet-50 transition-colors"
-                title="Pedir orientação para esta seção"
-              >
-                {loadingSectionAi ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                <span className="hidden sm:inline">Orientar</span>
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
-        </div>
+      {/* Section progress bar */}
+      <div className="h-1 bg-muted rounded-full overflow-hidden mb-4">
+        <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
       </div>
-      {/* Orientação Proativa — sugestão de dados esquecidos na seção */}
+
+      {/* AI Suggestion */}
       {sectionAiSuggestion[currentSection.id] && (
-        <div className="p-3 bg-violet-50 border border-violet-200 rounded-lg">
+        <div className="p-3 bg-violet-50 border border-violet-200 rounded-lg mb-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2 flex-1">
               <Sparkles className="w-3.5 h-3.5 text-violet-600 shrink-0 mt-0.5" />
               <div>
-                <span className="text-xs font-semibold text-violet-700 block mb-1">Orientação — Algo que pode enriquecer suas respostas</span>
+                <span className="text-xs font-semibold text-violet-700 block mb-1">Orientação</span>
                 <p className="text-xs text-violet-800 leading-relaxed whitespace-pre-wrap">{sectionAiSuggestion[currentSection.id]}</p>
               </div>
             </div>
@@ -417,7 +426,7 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
         </div>
       )}
 
-      {/* Perguntas */}
+      {/* Questions */}
       <div className="space-y-5">
         {visibleQuestions.map((q) => {
           const answer = getAnswer(q.id);
@@ -459,7 +468,7 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
                 </div>
               </div>
 
-              {/* Guia de orientação */}
+              {/* Guide */}
               {showGuide === q.id && q.guia && (
                 <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
                   <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
@@ -470,7 +479,7 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
                 </div>
               )}
 
-              {/* Dica de Orientação */}
+              {/* AI Hint */}
               {showHint === q.id && (
                 <div className="mb-3 p-3 bg-violet-50 border border-violet-200 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
@@ -493,7 +502,7 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
                 </div>
               )}
 
-              {/* Campo de resposta */}
+              {/* Input */}
               {!answer?.naoSabe && (
                 <QuestionInput
                   question={q}
@@ -503,12 +512,12 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
                 />
               )}
 
-              {/* Botão "Não sei" */}
+              {/* "Não sei" button */}
               <div className="mt-2 flex items-center gap-2">
                 {isSectionLocked ? (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Seção concluída — não é possível editar
+                    Seção concluída
                   </span>
                 ) : (
                   <button
@@ -520,7 +529,7 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
                     }`}
                   >
                     <HelpCircle className="w-3 h-3" />
-                    {answer?.naoSabe ? "✓ Marcado como 'Não sei'" : "Não sei / Não tenho certeza"}
+                    {answer?.naoSabe ? "Marcado como 'Não sei'" : "Não sei"}
                   </button>
                 )}
               </div>
@@ -528,53 +537,7 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
           );
         })}
       </div>
-
-      {/* Indicador de salvamento */}
-      {lastSaved && !saving && (
-        <div className="text-xs text-emerald-600 pt-1">
-          ✓ Salvo às {lastSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-        </div>
-      )}
-
-      {/* Ações */}
-      <div className="flex items-center justify-between pt-2 border-t">
-        <div className="flex gap-2">
-          {currentSectionIdx > 0 && (
-            <Button variant="outline" size="sm" onClick={() => setCurrentSectionIdx(prev => prev - 1)}>
-              <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
-            </Button>
-          )}
-          <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveProgress}
-              disabled={saving}
-              className="border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400 font-medium bg-green-50"
-            >
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-1" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4 mr-1" />
-              )}
-              {completedSections.has(currentSection?.id ?? "") ? "Atualizar respostas" : "Salvar respostas"}
-            </Button>
-        </div>
-        {isSectionLocked ? (
-          <Button variant="outline" size="sm" onClick={() => setCurrentSectionIdx(prev => Math.min(prev + 1, sections.length - 1))} disabled={currentSectionIdx >= sections.length - 1}>
-            Próxima seção <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
-        ) : (
-          <Button onClick={handleNext} disabled={saving} className="gap-2">
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            {currentSectionIdx < sections.length - 1 ? (
-              <><span>Próxima seção</span><ChevronRight className="w-4 h-4" /></>
-            ) : (
-              <><CheckCircle2 className="w-4 h-4" /><span>Concluir pilar</span></>
-            )}
-          </Button>
-        )}
-      </div>
-    </div>
+    </StepWizard>
   );
 }
 
