@@ -37,6 +37,7 @@ import {
   MoreHorizontal,
   Info,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import {
   EXPENSE_CATEGORIES,
@@ -193,6 +194,14 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
     [expenses]
   );
 
+  // Category-level progress
+  const totalCategories = EXPENSE_CATEGORIES.length;
+  const filledCategories = useMemo(() => {
+    return EXPENSE_CATEGORIES.filter(
+      (cat) => cat.subcategories.some((sub) => (expenses[`${cat.id}.${sub.id}`] ?? 0) > 0)
+    ).length;
+  }, [expenses]);
+
   return (
       <div className="space-y-4">
         {/* Indicador de salvamento */}
@@ -217,6 +226,19 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
           {/* TAB 1: DESPESAS FIXAS          */}
           {/* ============================== */}
           <TabsContent value="despesas" className="space-y-4 mt-4">
+            {/* Category progress */}
+            <div className="flex items-center gap-3 mb-4 px-4 py-3 bg-muted/50 rounded-xl">
+              <span className="text-sm font-medium text-foreground">
+                {filledCategories}/{totalCategories} categorias preenchidas
+              </span>
+              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${totalCategories > 0 ? (filledCategories / totalCategories) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
             {/* Barra de progresso */}
             <div>
               <div className="flex justify-between text-xs text-muted-foreground mb-1">
@@ -271,6 +293,7 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
                         >
                           {filled} de {total} preenchidos
                         </Badge>
+                        {filled > 0 && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>

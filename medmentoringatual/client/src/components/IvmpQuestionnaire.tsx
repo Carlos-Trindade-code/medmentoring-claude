@@ -198,23 +198,27 @@ export function IvmpQuestionnaire({ onComplete }: IvmpQuestionnaireProps) {
           )}
         </div>
 
-        {/* Barra de progresso geral */}
+        {/* Barra de progresso por dimensão */}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>
-              {answeredCount} de {TOTAL_IVMP_QUESTIONS} perguntas respondidas
+              Dimensão {currentDimIndex + 1} de {IVMP_DIMENSIONS.length} — {getDimAnsweredCount(currentDim)} de {currentDim.perguntas.length} perguntas
             </span>
             <span>
-              {Math.round((answeredCount / TOTAL_IVMP_QUESTIONS) * 100)}%
+              {Math.round((IVMP_DIMENSIONS.filter((d) => isDimComplete(d)).length / IVMP_DIMENSIONS.length) * 100)}%
             </span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-500"
               style={{
-                width: `${(answeredCount / TOTAL_IVMP_QUESTIONS) * 100}%`,
+                width: `${(IVMP_DIMENSIONS.filter((d) => isDimComplete(d)).length / IVMP_DIMENSIONS.length) * 100}%`,
               }}
             />
+          </div>
+          <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+            <span>{IVMP_DIMENSIONS.filter((d) => isDimComplete(d)).length} dimensões completas</span>
+            <span>{answeredCount}/{TOTAL_IVMP_QUESTIONS} perguntas</span>
           </div>
         </div>
       </div>
@@ -340,6 +344,12 @@ export function IvmpQuestionnaire({ onComplete }: IvmpQuestionnaireProps) {
                   <span className="hidden sm:inline">5</span>
                   <span>10 - Excelencia</span>
                 </div>
+                {/* Semantic labels */}
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>Nunca</span>
+                  <span>Às vezes</span>
+                  <span>Sempre</span>
+                </div>
               </div>
             </div>
           );
@@ -359,7 +369,7 @@ export function IvmpQuestionnaire({ onComplete }: IvmpQuestionnaireProps) {
         </Button>
 
         <span className="text-xs text-muted-foreground">
-          {currentDimIndex + 1} de {IVMP_DIMENSIONS.length}
+          Dimensão {currentDimIndex + 1} de {IVMP_DIMENSIONS.length}
         </span>
 
         {isLastDim && allAnswered ? (
