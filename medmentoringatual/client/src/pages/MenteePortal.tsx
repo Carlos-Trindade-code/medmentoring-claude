@@ -14,83 +14,22 @@ import { PillarPartsView } from "@/components/PillarPartsView";
 import { PILLAR_SECTIONS, PILLAR_TITLES } from "@/lib/pillar-questions";
 import { IncompleteBanner } from "@/components/IncompleteBanner";
 import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // ============================================================
-// DOWNLOAD PDF BUTTON — baixa o relatório final premium como PDF real
-// ============================================================
-function DownloadPdfButton({ pillarId }: { menteeId: number; pillarId: number }) {
-  const generatePdf = trpc.portal.generatePdf.useMutation({
-    onSuccess: (data) => {
-      const byteCharacters = atob(data.base64);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = data.fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success("PDF baixado com sucesso!");
-    },
-    onError: (err) => {
-      toast.error("Erro ao gerar PDF", { description: err.message });
-    },
-  });
-
-  return (
-    <button
-      onClick={() => generatePdf.mutate({ pillarId })}
-      disabled={generatePdf.isPending}
-      className="flex items-center gap-1.5 text-xs text-primary border border-primary/30 rounded-lg px-3 py-1.5 hover:bg-primary/5 transition-colors disabled:opacity-60"
-    >
-      {generatePdf.isPending ? (
-        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando PDF...</>
-      ) : (
-        <><Download className="w-3.5 h-3.5" /> Baixar PDF</>
-      )}
-    </button>
-  );
-}
-
-// ============================================================
-// PILLAR CARD — Sanfona com questionário embutido
+// PILLAR CARD — Clickable premium card with progress ring
 // ============================================================
 function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId: number }) {
-  const [open, setOpen] = useState(false);
-  const [sessionForm, setSessionForm] = useState({ assunto: "", dataPreferida: "", mensagem: "" });
-  const [showSessionForm, setShowSessionForm] = useState(false);
-  const [activeView, setActiveView] = useState<"questionnaire" | "materials" | "session" | "report">("questionnaire");
-  const { data: pillarReport } = trpc.pillarReport.getMy.useQuery({ menteeId, pillarId: pillar.id });
-
+  const [, navigate] = useLocation();
   const myDataQuery = trpc.portal.myData.useQuery();
   const releases = myDataQuery.data?.releases || [];
-  const materials = (myDataQuery.data?.materials || []).filter((m: any) => m.pillarId === pillar.id);
 
   const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId: pillar.id });
   const { data: feedbackData } = trpc.pillarAnswers.getFeedback.useQuery({ pillarId: pillar.id });
   const { data: savedAnswers } = trpc.pillarAnswers.getByPillar.useQuery({ pillarId: pillar.id });
-  const { data: partReleasesData } = trpc.portal.getMyPartReleases.useQuery();
-
-  const requestSession = trpc.portal.requestSession.useMutation({
-    onSuccess: () => {
-      toast.success("Sessão solicitada! Seu mentor responderá em breve.");
-      setShowSessionForm(false);
-      setSessionForm({ assunto: "", dataPreferida: "", mensagem: "" });
-    },
-    onError: (e) => toast.error(e.message),
-  });
 
   const sections = PILLAR_SECTIONS[pillar.id] ?? [];
-  const release = (releases as any[]).find((r: any) => r.pillarId === pillar.id);
-  const hasMaterials = (materials as any[]).length > 0 && release?.materiaisReleased;
-
-  // Progresso do questionário
   const completedSections = new Set<string>(
     (savedAnswers ?? []).filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
   );
@@ -98,336 +37,79 @@ function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId:
   const completedCount = sections.filter(s => completedSections.has(s.id)).length;
   const progressPct = totalSections > 0 ? Math.round((completedCount / totalSections) * 100) : 0;
   const allDone = completedCount === totalSections && totalSections > 0;
-
-  // Estado do pilar
   const isFeedbackReleased = conclusionData?.released && feedbackData;
-  const isAwaitingFeedback = allDone && !isFeedbackReleased;
-
-  const statusBadge = isFeedbackReleased
-    ? { label: "Feedback disponível", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
-    : isAwaitingFeedback
-    ? { label: "Aguardando mentor", color: "bg-amber-100 text-amber-700 border-amber-200" }
-    : completedCount > 0
-    ? { label: `${completedCount}/${totalSections} seções`, color: "bg-blue-100 text-blue-700 border-blue-200" }
-    : { label: "Não iniciado", color: "bg-muted text-muted-foreground border-border" };
 
   return (
-    <div id={`pillar-card-${pillar.id}`} className={`bg-card rounded-xl border overflow-hidden transition-shadow ${open ? "shadow-md border-primary/30" : "border-border"}`}>
-      {/* Header do card — clicável para abrir/fechar */}
-      <button
-        className="w-full flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors text-left"
-        onClick={() => setOpen(!open)}
-      >
-        <div className={`w-10 h-10 rounded-xl ${pillar.color} flex items-center justify-center flex-shrink-0`}>
-          <span className="text-white text-lg">{pillar.emoji}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-foreground text-sm">Pilar {pillar.id} — {pillar.title}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${statusBadge.color}`}>
-              {statusBadge.label}
-            </span>
-          </div>
-          {totalSections > 0 && (
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[120px]">
-                <div
-                  className={`h-full rounded-full transition-all ${isFeedbackReleased ? "bg-emerald-500" : "bg-primary"}`}
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              <span className="text-xs text-muted-foreground">{progressPct}%</span>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: (pillar.id - 1) * 0.08 }}
+      className={cn(
+        "group relative bg-card rounded-2xl border overflow-hidden cursor-pointer",
+        "hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
+        allDone && isFeedbackReleased ? "border-secondary/50" : "border-border"
+      )}
+      onClick={() => navigate(`/portal/pilar/${pillar.id}`)}
+    >
+      {/* Colored top bar */}
+      <div className={cn("h-1.5", pillar.color)} />
+
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{pillar.emoji}</span>
+            <div>
+              <h3 className="font-display font-bold text-foreground text-base">
+                {pillar.title}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {completedCount}/{totalSections} seções
+              </p>
             </div>
+          </div>
+          {allDone && isFeedbackReleased && (
+            <span className="text-xs px-2.5 py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/30 font-medium flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Feedback
+            </span>
+          )}
+          {allDone && !isFeedbackReleased && (
+            <span className="text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-medium flex items-center gap-1">
+              <Clock className="w-3 h-3" /> Aguardando
+            </span>
           )}
         </div>
-        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-      </button>
 
-      {/* Conteúdo expandido */}
-      {open && (
-        <div className="border-t border-border">
-          {/* Sub-navegação */}
-          <div className="flex border-b bg-muted/20">
-            <button
-              onClick={() => setActiveView("questionnaire")}
-              className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                activeView === "questionnaire" ? "text-primary border-b-2 border-primary bg-white" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Questionário
-            </button>
-            {hasMaterials && (
-              <button
-                onClick={() => setActiveView("materials")}
-                className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                  activeView === "materials" ? "text-primary border-b-2 border-primary bg-white" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" /> Materiais
-              </button>
-            )}
-            <button
-              onClick={() => setActiveView("session")}
-              className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                activeView === "session" ? "text-primary border-b-2 border-primary bg-white" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Calendar className="w-3.5 h-3.5" /> Sessão
-            </button>
-            {pillarReport && (
-              <button
-                onClick={() => setActiveView("report")}
-                className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                  activeView === "report" ? "text-primary border-b-2 border-primary bg-white" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" /> Relatório
-              </button>
-            )}
+        {/* Progress ring + message */}
+        <div className="flex items-center gap-4">
+          <div className="relative w-14 h-14 flex-shrink-0">
+            <svg className="w-14 h-14 -rotate-90" viewBox="0 0 36 36">
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none" stroke="currentColor" strokeWidth="3"
+                className="text-muted/40"
+              />
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none" strokeWidth="3" strokeLinecap="round"
+                className={allDone ? "text-secondary" : "text-primary"}
+                strokeDasharray={`${progressPct}, 100`}
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
+              {progressPct}%
+            </span>
           </div>
-
-          <div className="p-4">
-            {/* ── QUESTIONÁRIO ── */}
-            {activeView === "questionnaire" && (
-              <>
-                {/* Feedback do mentor liberado */}
-                {isFeedbackReleased && feedbackData && (
-                  <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-600" />
-                      <h3 className="font-bold text-emerald-800 text-sm">Feedback do seu mentor</h3>
-                    </div>
-                    {feedbackData.feedback && (
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Análise</p>
-                        <p className="text-sm text-foreground whitespace-pre-wrap">{feedbackData.feedback}</p>
-                      </div>
-                    )}
-                    {feedbackData.planoAcao && (
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Plano de Ação</p>
-                        <p className="text-sm text-foreground whitespace-pre-wrap">{feedbackData.planoAcao}</p>
-                      </div>
-                    )}
-                    {Array.isArray(feedbackData.pontosFortesJson) && feedbackData.pontosFortesJson.length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1 flex items-center gap-1">
-                          <Star className="w-3 h-3" /> Pontos Fortes
-                        </p>
-                        <ul className="space-y-1">
-                          {(feedbackData.pontosFortesJson as string[]).map((p, i) => (
-                            <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />{p}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {Array.isArray(feedbackData.pontosMelhoriaJson) && feedbackData.pontosMelhoriaJson.length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1 flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" /> Pontos de Melhoria
-                        </p>
-                        <ul className="space-y-1">
-                          {(feedbackData.pontosMelhoriaJson as string[]).map((p, i) => (
-                            <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                              <ChevronRight className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />{p}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="pt-2 border-t border-emerald-200">
-                      <p className="text-xs text-emerald-600 font-medium">Você ainda pode revisar e complementar suas respostas abaixo.</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Aguardando feedback */}
-                {isAwaitingFeedback && !isFeedbackReleased && (
-                  <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                    <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-amber-800 text-sm">Questionário concluído!</p>
-                      <p className="text-xs text-amber-700 mt-0.5">
-                        Seu mentor está avaliando suas respostas. Em breve você receberá o feedback personalizado.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Partes do pilar */}
-                <PillarPartsView
-                  pillarId={pillar.id}
-                  menteeId={menteeId}
-                  partReleases={(partReleasesData as any[]) || []}
-                  onComplete={() => {
-                    myDataQuery.refetch();
-                  }}
-                />
-              </>
-            )}
-
-            {/* ── MATERIAIS ── */}
-            {activeView === "materials" && (
-              <div className="space-y-2">
-                {(materials as any[]).map((mat: any) => (
-                  <a
-                    key={mat.id}
-                    href={mat.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {mat.tipo === "pdf" ? <FileText className="w-4 h-4 text-primary" /> :
-                       mat.tipo === "video" ? <ExternalLink className="w-4 h-4 text-primary" /> :
-                       <Download className="w-4 h-4 text-primary" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{mat.titulo}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{mat.tipo}</p>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  </a>
-                ))}
-              </div>
-            )}
-
-            {/* ── RELATÓRIO FINAL ── */}
-            {activeView === "report" && (
-              <div className="space-y-4">
-                {pillarReport ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-bold text-foreground">{pillarReport.title}</h3>
-                        {pillarReport.subtitle && <p className="text-sm text-muted-foreground">{pillarReport.subtitle}</p>}
-                      </div>
-                      <DownloadPdfButton menteeId={menteeId} pillarId={pillar.id} />
-                    </div>
-                    <div className="border rounded-xl overflow-hidden shadow-sm">
-                      <iframe
-                        srcDoc={pillarReport.htmlContent ?? ""}
-                        className="w-full"
-                        style={{ height: "600px", border: "none" }}
-                        title={`Relatório Pilar ${pillar.id}`}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-5 py-10 px-4 text-center">
-                    {/* Ícone animado */}
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center">
-                        <Clock className="w-10 h-10 text-amber-500" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <FileText className="w-3 h-3 text-white" />
-                      </div>
-                    </div>
-                    {/* Texto principal */}
-                    <div className="space-y-1.5 max-w-xs">
-                      <h4 className="font-bold text-foreground text-base">
-                        Relatório em preparação
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {allDone
-                          ? "Suas respostas foram recebidas. Seu mentor está preparando o relatório personalizado deste pilar."
-                          : "Complete os questionários deste pilar para que seu mentor possa gerar o relatório."}
-                      </p>
-                    </div>
-                    {/* Barra de progresso */}
-                    <div className="w-full max-w-xs space-y-1.5">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Progresso do questionário</span>
-                        <span>{progressPct}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            allDone ? "bg-amber-400 animate-pulse" : "bg-primary"
-                          }`}
-                          style={{ width: `${progressPct}%` }}
-                        />
-                      </div>
-                    </div>
-                    {/* Status badge */}
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium border ${
-                      allDone
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-muted text-muted-foreground border-border"
-                    }`}>
-                      {allDone ? (
-                        <><Clock className="w-3.5 h-3.5" /> Aguardando liberação do mentor</>
-                      ) : (
-                        <><Circle className="w-3.5 h-3.5" /> {completedCount} de {totalSections} seções concluídas</>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {/* ── SOLICITAR SESSÃO ── */}
-            {activeView === "session" && (
-              <div>
-                {!showSessionForm ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setShowSessionForm(true)}
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Solicitar sessão sobre este pilar
-                  </Button>
-                ) : (
-                  <div className="space-y-3 bg-muted/30 rounded-xl p-4">
-                    <input
-                      placeholder="Assunto da sessão *"
-                      value={sessionForm.assunto}
-                      onChange={(e) => setSessionForm((p) => ({ ...p, assunto: e.target.value }))}
-                      className="w-full border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white"
-                    />
-                    <input
-                      type="date"
-                      value={sessionForm.dataPreferida}
-                      onChange={(e) => setSessionForm((p) => ({ ...p, dataPreferida: e.target.value }))}
-                      className="w-full border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white"
-                    />
-                    <textarea
-                      placeholder="Mensagem para o mentor (opcional)"
-                      value={sessionForm.mensagem}
-                      onChange={(e) => setSessionForm((p) => ({ ...p, mensagem: e.target.value }))}
-                      className="w-full border border-border rounded-lg p-2.5 text-sm resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring bg-white"
-                    />
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowSessionForm(false)}>
-                        Cancelar
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        disabled={!sessionForm.assunto || requestSession.isPending}
-                        onClick={() => requestSession.mutate({
-                          pillarId: pillar.id,
-                          assunto: sessionForm.assunto,
-                          dataPreferida: sessionForm.dataPreferida || undefined,
-                          mensagem: sessionForm.mensagem || undefined,
-                        })}
-                      >
-                        <Send className="w-3.5 h-3.5 mr-1" />
-                        {requestSession.isPending ? "Enviando..." : "Solicitar"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="flex-1 text-sm text-muted-foreground">
+            {!allDone && completedCount === 0 && "Comece agora"}
+            {!allDone && completedCount > 0 && "Continue de onde parou"}
+            {allDone && isFeedbackReleased && "Veja o que seu mentor preparou"}
+            {allDone && !isFeedbackReleased && "Seu mentor está analisando"}
           </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
-      )}
-    </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -666,6 +348,45 @@ function NpsSection() {
 }
 
 // ============================================================
+// WELCOME SCREEN — First-time mentee onboarding
+// ============================================================
+function WelcomeScreen({ onStart }: { onStart: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="max-w-lg mx-auto text-center px-6 py-16"
+    >
+      <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+        <Sparkles className="w-10 h-10 text-primary" />
+      </div>
+      <h1 className="text-3xl font-display font-bold text-foreground mb-3">
+        Bem-vindo ao MedMentoring
+      </h1>
+      <p className="text-muted-foreground mb-8 leading-relaxed">
+        Sua jornada de transformação profissional começa agora. Vamos trabalhar juntos em
+        {" "}<strong>7 pilares</strong> que vão estruturar sua carreira médica.
+      </p>
+      <div className="space-y-3 text-left mb-8">
+        {[
+          { icon: "📝", text: "Responda as perguntas no seu ritmo" },
+          { icon: "💾", text: "Tudo é salvo automaticamente" },
+          { icon: "🎯", text: "Seu mentor analisa e devolve insights exclusivos" },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-3 bg-muted/50 rounded-xl px-4 py-3">
+            <span className="text-xl">{item.icon}</span>
+            <span className="text-sm text-foreground">{item.text}</span>
+          </div>
+        ))}
+      </div>
+      <Button onClick={onStart} size="lg" className="w-full gap-2">
+        Começar Jornada <ChevronRight className="w-4 h-4" />
+      </Button>
+    </motion.div>
+  );
+}
+
+// ============================================================
 // MAIN PORTAL
 // ============================================================
 export default function MenteePortal() {
@@ -776,22 +497,15 @@ export default function MenteePortal() {
       {/* Content */}
       <main className="flex-1 container py-5">
         {activeTab === "home" && (
-          <div className="space-y-3">
+          <div>
             <IncompleteBanner
-              onNavigateToPillar={(pillarId) => {
-                const el = document.getElementById(`pillar-card-${pillarId}`);
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
+              onNavigateToPillar={(pillarId) => navigate(`/portal/pilar/${pillarId}`)}
             />
-            <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 flex items-start gap-3 mb-4">
-              <Sparkles className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-violet-800">
-                <strong>Como funciona:</strong> Clique em cada pilar para abrir o questionário. Em cada pergunta, o botão <strong>✦ Orientar</strong> oferece uma orientação personalizada para ajudá-lo a responder. Ao concluir, seu mentor receberá suas respostas para análise.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {PILLARS.map((p) => (
+                <PillarCard key={p.id} pillar={p} menteeId={mentee.id} />
+              ))}
             </div>
-            {PILLARS.map((p) => (
-              <PillarCard key={p.id} pillar={p} menteeId={mentee.id} />
-            ))}
           </div>
         )}
 
