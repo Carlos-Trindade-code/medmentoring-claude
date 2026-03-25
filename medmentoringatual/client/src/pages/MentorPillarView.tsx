@@ -732,7 +732,7 @@ export default function MentorPillarView() {
                 <div className="mt-4">
                   <MenteeAnswersSummary
                     sections={PILLAR_SECTIONS[Number(pillarId)] ?? []}
-                    answers={answers ?? []}
+                    answers={(answers ?? []) as any}
                   />
                 </div>
               )}

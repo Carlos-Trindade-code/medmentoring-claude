@@ -26,7 +26,7 @@ export function MenteeAnswersSummary({ sections, answers }: Props) {
   const answerMap = new Map<string, Answer>();
   answers.forEach((a) => a.respostas.forEach((r) => answerMap.set(r.id, r)));
 
-  const filledCount = [...answerMap.values()].filter(
+  const filledCount = Array.from(answerMap.values()).filter(
     (a) => a.resposta !== null && a.resposta !== "" && !a.naoSabe
   ).length;
   const totalCount = sections.reduce((s, sec) => s + sec.perguntas.length, 0);
