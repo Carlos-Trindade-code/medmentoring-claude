@@ -1,0 +1,46 @@
+{
+  "query": "SELECT id, mentee_id, pillar_id, status, title, html_content IS NOT NULL as has_html, generated_at FROM pillar_reports LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT id, mentee_id, pillar_id, status, title, html_content IS NOT NULL as has_html, generated_at FROM pillar_reports LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "mentee_id": "60001",
+      "pillar_id": "1",
+      "status": "released",
+      "title": "Relatório Final: Identidade e Propósito - Dr. Luis Gustavo",
+      "has_html": "1",
+      "generated_at": "2026-03-22 22:09:43"
+    },
+    {
+      "id": "30001",
+      "mentee_id": "60001",
+      "pillar_id": "2",
+      "status": "released",
+      "title": "Relatório Executivo: Posicionamento Estratégico",
+      "has_html": "1",
+      "generated_at": "2026-03-22 22:53:28"
+    },
+    {
+      "id": "30002",
+      "mentee_id": "60001",
+      "pillar_id": "3",
+      "status": "draft",
+      "title": "Relatório Executivo: Pilar 3 – Diagnóstico do Negócio",
+      "has_html": "1",
+      "generated_at": "2026-03-22 22:23:34"
+    },
+    {
+      "id": "30003",
+      "mentee_id": "1",
+      "pillar_id": "1",
+      "status": "released",
+      "title": "Relatório Premium: Identidade e Propósito - Dr. Bruno Hollanda",
+      "has_html": "1",
+      "generated_at": "2026-03-22 22:25:40"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmentee_id\tpillar_id\tstatus\ttitle\thas_html\tgenerated_at\n1\t60001\t1\treleased\tRelatório Final: Identidade e Propósito - Dr. Luis Gustavo\t1\t2026-03-22 22:09:43\n30001\t60001\t2\treleased\tRelatório Executivo: Posicionamento Estratégico\t1\t2026-03-22 22:53:28\n30002\t60001\t3\tdraft\tRelatório Executivo: Pilar 3 – Diagnóstico do Negócio\t1\t2026-03-22 22:23:34\n30003\t1\t1\treleased\tRelatório Premium: Identidade e Propósito - Dr. Bruno Hollanda\t1\t2026-03-22 22:25:40\n",
+  "stderr": "",
+  "execution_time_ms": 375
+}

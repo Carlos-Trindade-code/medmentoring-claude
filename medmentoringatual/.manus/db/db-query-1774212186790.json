@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, name, email, role FROM users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT id, name, email, role FROM users LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Carlos A F Trindade",
+      "email": "carlostrindade@me.com",
+      "role": "admin"
+    },
+    {
+      "id": "630001",
+      "name": "Luis Trindade",
+      "email": "trindadeluisgustavo@gmail.com",
+      "role": "user"
+    },
+    {
+      "id": "1710001",
+      "name": "Luis Trindade",
+      "email": "trindadeluisgustavo@gmail.com",
+      "role": "user"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tCarlos A F Trindade\tcarlostrindade@me.com\tadmin\n630001\tLuis Trindade\ttrindadeluisgustavo@gmail.com\tuser\n1710001\tLuis Trindade\ttrindadeluisgustavo@gmail.com\tuser\n",
+  "stderr": "",
+  "execution_time_ms": 381
+}

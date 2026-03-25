@@ -1,0 +1,82 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "checklist_items"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "diagnosis_sessions"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "financial_data"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "ivmp_data"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "materials"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "mentee_documents"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "mentee_questionnaire"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "mentees"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "mentor_ai_chat"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "mentor_notes"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "mentor_suggestions"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "nps_responses"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "onboarding_forms"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "part_releases"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_answers"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_conclusions"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_diagnostics"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_feedback"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_part_content"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_releases"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "pillar_reports"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "session_requests"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_Df4SoG4Cek64exRNkmgRUJ\n__drizzle_migrations\nchecklist_items\ndiagnosis_sessions\nfinancial_data\nivmp_data\nmaterials\nmentee_documents\nmentee_questionnaire\nmentees\nmentor_ai_chat\nmentor_notes\nmentor_suggestions\nnps_responses\nonboarding_forms\npart_releases\npillar_answers\npillar_conclusions\npillar_diagnostics\npillar_feedback\npillar_part_content\npillar_releases\npillar_reports\nsession_requests\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 370
+}

@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE '%ivmp%'; SHOW TABLES LIKE '%expense%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SHOW TABLES LIKE '%ivmp%'; SHOW TABLES LIKE '%expense%';",
+  "rows": [
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (%ivmp%)": "ivmp_data"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_Df4SoG4Cek64exRNkmgRUJ (%ivmp%)\nivmp_data\n",
+  "stderr": "",
+  "execution_time_ms": 400
+}

@@ -1,0 +1,8 @@
+{
+  "query": "SELECT pillarId, partId, partLabel, released, releasedAt FROM part_releases WHERE menteeId = 60001 ORDER BY pillarId, partId;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillarId, partId, partLabel, released, releasedAt FROM part_releases WHERE menteeId = 60001 ORDER BY pillarId, partId;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'menteeid' in 'where clause'"
+  ]
+}

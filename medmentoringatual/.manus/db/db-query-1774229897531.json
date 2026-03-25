@@ -1,0 +1,206 @@
+{
+  "query": "SELECT pillarId, secao, status, updatedAt, CHAR_LENGTH(JSON_UNQUOTE(respostas)) as tamanho FROM pillar_answers WHERE menteeId = 60001 ORDER BY pillarId, secao;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillarId, secao, status, updatedAt, CHAR_LENGTH(JSON_UNQUOTE(respostas)) as tamanho FROM pillar_answers WHERE menteeId = 60001 ORDER BY pillarId, secao;",
+  "rows": [
+    {
+      "pillarId": "1",
+      "secao": "ikigai",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:18:14",
+      "tamanho": "1427"
+    },
+    {
+      "pillarId": "1",
+      "secao": "missao_visao",
+      "status": "concluida",
+      "updatedAt": "2026-03-13 18:04:10",
+      "tamanho": "1511"
+    },
+    {
+      "pillarId": "1",
+      "secao": "quem_sou",
+      "status": "concluida",
+      "updatedAt": "2026-03-13 17:54:15",
+      "tamanho": "1616"
+    },
+    {
+      "pillarId": "1",
+      "secao": "reflexao_identidade",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:24:56",
+      "tamanho": "2171"
+    },
+    {
+      "pillarId": "1",
+      "secao": "valores",
+      "status": "concluida",
+      "updatedAt": "2026-03-13 17:57:10",
+      "tamanho": "650"
+    },
+    {
+      "pillarId": "1",
+      "secao": "valores_avancados",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:18:19",
+      "tamanho": "2"
+    },
+    {
+      "pillarId": "2",
+      "secao": "diferencial",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:30:25",
+      "tamanho": "1040"
+    },
+    {
+      "pillarId": "2",
+      "secao": "especialidade_atuacao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:28:06",
+      "tamanho": "1031"
+    },
+    {
+      "pillarId": "2",
+      "secao": "proposta_valor",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:34:22",
+      "tamanho": "1354"
+    },
+    {
+      "pillarId": "2",
+      "secao": "publico_ideal",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:28:11",
+      "tamanho": "2"
+    },
+    {
+      "pillarId": "3",
+      "secao": "custos_deslocamento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:38:38",
+      "tamanho": "2"
+    },
+    {
+      "pillarId": "3",
+      "secao": "custos_fixos",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:38:31",
+      "tamanho": "1367"
+    },
+    {
+      "pillarId": "3",
+      "secao": "estrutura_clinica",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:36:03",
+      "tamanho": "844"
+    },
+    {
+      "pillarId": "3",
+      "secao": "faturamento_producao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:39:58",
+      "tamanho": "1441"
+    },
+    {
+      "pillarId": "3",
+      "secao": "ociosidade_potencial",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:40:01",
+      "tamanho": "2"
+    },
+    {
+      "pillarId": "3",
+      "secao": "reflexao_financeira",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:43:37",
+      "tamanho": "1315"
+    },
+    {
+      "pillarId": "4",
+      "secao": "equipe_gestao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:45:44",
+      "tamanho": "941"
+    },
+    {
+      "pillarId": "4",
+      "secao": "processos_atendimento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:46:29",
+      "tamanho": "758"
+    },
+    {
+      "pillarId": "4",
+      "secao": "reflexao_operacional",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:53:41",
+      "tamanho": "1171"
+    },
+    {
+      "pillarId": "5",
+      "secao": "custos_variaveis",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:55",
+      "tamanho": "285"
+    },
+    {
+      "pillarId": "5",
+      "secao": "precificacao_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:21",
+      "tamanho": "952"
+    },
+    {
+      "pillarId": "5",
+      "secao": "reflexao_precificacao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:57:55",
+      "tamanho": "1133"
+    },
+    {
+      "pillarId": "6",
+      "secao": "comunicacao_tom_voz",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:59:49",
+      "tamanho": "739"
+    },
+    {
+      "pillarId": "6",
+      "secao": "presenca_digital_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:58:49",
+      "tamanho": "975"
+    },
+    {
+      "pillarId": "6",
+      "secao": "reflexao_marketing",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:01:36",
+      "tamanho": "1199"
+    },
+    {
+      "pillarId": "7",
+      "secao": "apresentacao_tratamento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:03:31",
+      "tamanho": "609"
+    },
+    {
+      "pillarId": "7",
+      "secao": "objecoes_comuns",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:04:23",
+      "tamanho": "745"
+    },
+    {
+      "pillarId": "7",
+      "secao": "reflexao_conversao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:10:30",
+      "tamanho": "2154"
+    }
+  ],
+  "messages": [],
+  "stdout": "pillarId\tsecao\tstatus\tupdatedAt\ttamanho\n1\tikigai\tconcluida\t2026-03-19 01:18:14\t1427\n1\tmissao_visao\tconcluida\t2026-03-13 18:04:10\t1511\n1\tquem_sou\tconcluida\t2026-03-13 17:54:15\t1616\n1\treflexao_identidade\tconcluida\t2026-03-19 01:24:56\t2171\n1\tvalores\tconcluida\t2026-03-13 17:57:10\t650\n1\tvalores_avancados\tconcluida\t2026-03-19 01:18:19\t2\n2\tdiferencial\tconcluida\t2026-03-19 01:30:25\t1040\n2\tespecialidade_atuacao\tconcluida\t2026-03-19 01:28:06\t1031\n2\tproposta_valor\tconcluida\t2026-03-19 01:34:22\t1354\n2\tpublico_ideal\tconcluida\t2026-03-19 01:28:11\t2\n3\tcustos_deslocamento\tconcluida\t2026-03-19 01:38:38\t2\n3\tcustos_fixos\tconcluida\t2026-03-19 01:38:31\t1367\n3\testrutura_clinica\tconcluida\t2026-03-19 01:36:03\t844\n3\tfaturamento_producao\tconcluida\t2026-03-19 01:39:58\t1441\n3\tociosidade_potencial\tconcluida\t2026-03-19 01:40:01\t2\n3\treflexao_financeira\tconcluida\t2026-03-19 01:43:37\t1315\n4\tequipe_gestao\tconcluida\t2026-03-19 01:45:44\t941\n4\tprocessos_atendimento\tconcluida\t2026-03-19 01:46:29\t758\n4\treflexao_operacional\tconcluida\t2026-03-19 01:53:41\t1171\n5\tcustos_variaveis\tconcluida\t2026-03-19 01:55:55\t285\n5\tprecificacao_atual\tconcluida\t2026-03-19 01:55:21\t952\n5\treflexao_precificacao\tconcluida\t2026-03-19 01:57:55\t1133\n6\tcomunicacao_tom_voz\tconcluida\t2026-03-19 01:59:49\t739\n6\tpresenca_digital_atual\tconcluida\t2026-03-19 01:58:49\t975\n6\treflexao_marketing\tconcluida\t2026-03-19 02:01:36\t1199\n7\tapresentacao_tratamento\tconcluida\t2026-03-19 02:03:31\t609\n7\tobjecoes_comuns\tconcluida\t2026-03-19 02:04:23\t745\n7\treflexao_conversao\tconcluida\t2026-03-19 02:10:30\t2154\n",
+  "stderr": "",
+  "execution_time_ms": 351
+}

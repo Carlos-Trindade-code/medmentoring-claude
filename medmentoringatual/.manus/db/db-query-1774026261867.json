@@ -1,0 +1,38 @@
+{
+  "query": "SELECT id, nome, email, especialidade, accessCode FROM mentees ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT id, nome, email, especialidade, accessCode FROM mentees ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Bruno Holanda",
+      "email": "",
+      "especialidade": "Otorrino",
+      "accessCode": "BRUNO2657"
+    },
+    {
+      "id": "30001",
+      "nome": "Carlos Alexandre de Freitas Trindade",
+      "email": "carlostrindade@me.com",
+      "especialidade": "Medicina da Dor",
+      "accessCode": "CARLOS2647"
+    },
+    {
+      "id": "60001",
+      "nome": "Luis Gustavo de Freitas Trindade",
+      "email": "",
+      "especialidade": "Clínica Medica Nefrologia",
+      "accessCode": "LUIS2613"
+    },
+    {
+      "id": "90001",
+      "nome": "Olympio Chacon",
+      "email": "",
+      "especialidade": "",
+      "accessCode": "OLYMPI2617"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\tespecialidade\taccessCode\n1\tBruno Holanda\t\tOtorrino\tBRUNO2657\n30001\tCarlos Alexandre de Freitas Trindade\tcarlostrindade@me.com\tMedicina da Dor\tCARLOS2647\n60001\tLuis Gustavo de Freitas Trindade\t\tClínica Medica Nefrologia\tLUIS2613\n90001\tOlympio Chacon\t\t\tOLYMPI2617\n",
+  "stderr": "",
+  "execution_time_ms": 370
+}

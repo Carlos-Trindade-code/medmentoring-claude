@@ -1,0 +1,25 @@
+{
+  "query": "SELECT COUNT(*) as count FROM pillar_answers; SELECT COUNT(*) as count FROM financial_data; SELECT COUNT(*) as count FROM ivmp_data;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT COUNT(*) as count FROM pillar_answers; SELECT COUNT(*) as count FROM financial_data; SELECT COUNT(*) as count FROM ivmp_data;",
+  "rows": [
+    {
+      "count": "42"
+    },
+    {
+      "count": "count"
+    },
+    {
+      "count": "4"
+    },
+    {
+      "count": "count"
+    },
+    {
+      "count": "4"
+    }
+  ],
+  "messages": [],
+  "stdout": "count\n42\ncount\n4\ncount\n4\n",
+  "stderr": "",
+  "execution_time_ms": 467
+}

@@ -1,0 +1,30 @@
+{
+  "query": "SELECT id, nome, ativo FROM mentees LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT id, nome, ativo FROM mentees LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Bruno Holanda",
+      "ativo": "1"
+    },
+    {
+      "id": "30001",
+      "nome": "Carlos Alexandre de Freitas Trindade",
+      "ativo": "1"
+    },
+    {
+      "id": "60001",
+      "nome": "Luis Gustavo de Freitas Trindade",
+      "ativo": "1"
+    },
+    {
+      "id": "90001",
+      "nome": "Olympio Chacon",
+      "ativo": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tativo\n1\tBruno Holanda\t1\n30001\tCarlos Alexandre de Freitas Trindade\t1\n60001\tLuis Gustavo de Freitas Trindade\t1\n90001\tOlympio Chacon\t1\n",
+  "stderr": "",
+  "execution_time_ms": 366
+}

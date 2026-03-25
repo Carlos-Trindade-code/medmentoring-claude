@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, nome, email, ativo FROM mentees WHERE nome LIKE '%Luis%' OR nome LIKE '%luis%' OR nome LIKE '%Luís%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT id, nome, email, ativo FROM mentees WHERE nome LIKE '%Luis%' OR nome LIKE '%luis%' OR nome LIKE '%Luís%' LIMIT 5;",
+  "rows": [
+    {
+      "id": "60001",
+      "nome": "Luis Gustavo de Freitas Trindade",
+      "email": "",
+      "ativo": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\tativo\n60001\tLuis Gustavo de Freitas Trindade\t\t1\n",
+  "stderr": "",
+  "execution_time_ms": 367
+}

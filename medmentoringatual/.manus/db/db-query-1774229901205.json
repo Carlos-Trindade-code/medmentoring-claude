@@ -1,0 +1,73 @@
+{
+  "query": "SELECT pillarId, secao, status, updatedAt, CHAR_LENGTH(JSON_UNQUOTE(respostas)) as tamanho FROM pillar_answers WHERE menteeId = 60001 AND pillarId >= 5 ORDER BY pillarId, secao;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillarId, secao, status, updatedAt, CHAR_LENGTH(JSON_UNQUOTE(respostas)) as tamanho FROM pillar_answers WHERE menteeId = 60001 AND pillarId >= 5 ORDER BY pillarId, secao;",
+  "rows": [
+    {
+      "pillarId": "5",
+      "secao": "custos_variaveis",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:55",
+      "tamanho": "285"
+    },
+    {
+      "pillarId": "5",
+      "secao": "precificacao_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:21",
+      "tamanho": "952"
+    },
+    {
+      "pillarId": "5",
+      "secao": "reflexao_precificacao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:57:55",
+      "tamanho": "1133"
+    },
+    {
+      "pillarId": "6",
+      "secao": "comunicacao_tom_voz",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:59:49",
+      "tamanho": "739"
+    },
+    {
+      "pillarId": "6",
+      "secao": "presenca_digital_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:58:49",
+      "tamanho": "975"
+    },
+    {
+      "pillarId": "6",
+      "secao": "reflexao_marketing",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:01:36",
+      "tamanho": "1199"
+    },
+    {
+      "pillarId": "7",
+      "secao": "apresentacao_tratamento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:03:31",
+      "tamanho": "609"
+    },
+    {
+      "pillarId": "7",
+      "secao": "objecoes_comuns",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:04:23",
+      "tamanho": "745"
+    },
+    {
+      "pillarId": "7",
+      "secao": "reflexao_conversao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:10:30",
+      "tamanho": "2154"
+    }
+  ],
+  "messages": [],
+  "stdout": "pillarId\tsecao\tstatus\tupdatedAt\ttamanho\n5\tcustos_variaveis\tconcluida\t2026-03-19 01:55:55\t285\n5\tprecificacao_atual\tconcluida\t2026-03-19 01:55:21\t952\n5\treflexao_precificacao\tconcluida\t2026-03-19 01:57:55\t1133\n6\tcomunicacao_tom_voz\tconcluida\t2026-03-19 01:59:49\t739\n6\tpresenca_digital_atual\tconcluida\t2026-03-19 01:58:49\t975\n6\treflexao_marketing\tconcluida\t2026-03-19 02:01:36\t1199\n7\tapresentacao_tratamento\tconcluida\t2026-03-19 02:03:31\t609\n7\tobjecoes_comuns\tconcluida\t2026-03-19 02:04:23\t745\n7\treflexao_conversao\tconcluida\t2026-03-19 02:10:30\t2154\n",
+  "stderr": "",
+  "execution_time_ms": 350
+}

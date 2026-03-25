@@ -1,0 +1,55 @@
+import puppeteer from "puppeteer";
+import { execSync } from "child_process";
+
+/**
+ * Find the system Chromium/Chrome executable.
+ * In production (Manus hosting), the Puppeteer-bundled Chrome may not be
+ * present. We fall back to the system Chromium instead.
+ */
+function findChromiumExecutable(): string | undefined {
+  const candidates = [
+    "/usr/bin/chromium-browser",
+    "/usr/bin/chromium",
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/local/bin/chromium",
+    "/snap/bin/chromium",
+  ];
+
+  for (const path of candidates) {
+    try {
+      execSync(`test -x "${path}"`, { stdio: "ignore" });
+      return path;
+    } catch {
+      // not found, try next
+    }
+  }
+
+  return undefined; // let Puppeteer use its bundled Chrome (dev environment)
+}
+
+const SYSTEM_CHROMIUM = findChromiumExecutable();
+
+/**
+ * Launch a Puppeteer browser using the system Chromium when available,
+ * falling back to the Puppeteer-bundled Chrome in development.
+ */
+export async function launchBrowser() {
+  const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--disable-extensions",
+    ],
+  };
+
+  if (SYSTEM_CHROMIUM) {
+    launchOptions.executablePath = SYSTEM_CHROMIUM;
+  }
+
+  console.log(`[Puppeteer] Launching browser: ${SYSTEM_CHROMIUM ?? "bundled Chrome"}`);
+  return puppeteer.launch(launchOptions);
+}

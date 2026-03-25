@@ -1,0 +1,37 @@
+{
+  "query": "SELECT id, mentee_id, pillar_id, title, status, LENGTH(html_content) as html_size, created_at FROM pillar_reports WHERE mentee_id = 60001 LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT id, mentee_id, pillar_id, title, status, LENGTH(html_content) as html_size, created_at FROM pillar_reports WHERE mentee_id = 60001 LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "mentee_id": "60001",
+      "pillar_id": "1",
+      "title": "Relatório Final: Identidade e Propósito - Dr. Luis Gustavo",
+      "status": "released",
+      "html_size": "69061",
+      "created_at": "2026-03-20 16:59:59"
+    },
+    {
+      "id": "30001",
+      "mentee_id": "60001",
+      "pillar_id": "2",
+      "title": "Relatório de Posicionamento: Dr. Luis Gustavo Trindade",
+      "status": "released",
+      "html_size": "68730",
+      "created_at": "2026-03-22 22:12:36"
+    },
+    {
+      "id": "30002",
+      "mentee_id": "60001",
+      "pillar_id": "3",
+      "title": "Pilar 3: Diagnóstico do Negócio - Dr. Luis Gustavo",
+      "status": "draft",
+      "html_size": "88372",
+      "created_at": "2026-03-22 22:23:33"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmentee_id\tpillar_id\ttitle\tstatus\thtml_size\tcreated_at\n1\t60001\t1\tRelatório Final: Identidade e Propósito - Dr. Luis Gustavo\treleased\t69061\t2026-03-20 16:59:59\n30001\t60001\t2\tRelatório de Posicionamento: Dr. Luis Gustavo Trindade\treleased\t68730\t2026-03-22 22:12:36\n30002\t60001\t3\tPilar 3: Diagnóstico do Negócio - Dr. Luis Gustavo\tdraft\t88372\t2026-03-22 22:23:33\n",
+  "stderr": "",
+  "execution_time_ms": 1380
+}

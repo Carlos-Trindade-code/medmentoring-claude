@@ -1,0 +1,8 @@
+{
+  "query": "SELECT mentee_id, JSON_EXTRACT(precificacao_json, '$.servicos') as servicos, JSON_EXTRACT(precificacao_json, '$.mixAtendimentos') as mix FROM financial_data WHERE mentee_id = 1 LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT mentee_id, JSON_EXTRACT(precificacao_json, '$.servicos') as servicos, JSON_EXTRACT(precificacao_json, '$.mixAtendimentos') as mix FROM financial_data WHERE mentee_id = 1 LIMIT 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'mentee_id' in 'where clause'"
+  ]
+}

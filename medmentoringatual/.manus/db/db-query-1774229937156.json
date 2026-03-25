@@ -1,0 +1,14 @@
+{
+  "query": "SELECT menteeId, JSON_LENGTH(despesasJson) as num_despesas FROM financial_data WHERE menteeId = 60001;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT menteeId, JSON_LENGTH(despesasJson) as num_despesas FROM financial_data WHERE menteeId = 60001;",
+  "rows": [
+    {
+      "menteeId": "60001",
+      "num_despesas": "5"
+    }
+  ],
+  "messages": [],
+  "stdout": "menteeId\tnum_despesas\n60001\t5\n",
+  "stderr": "",
+  "execution_time_ms": 357
+}

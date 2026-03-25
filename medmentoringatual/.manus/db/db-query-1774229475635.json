@@ -1,0 +1,80 @@
+{
+  "query": "SELECT pillar_id, part_id, titulo, status, created_at FROM pillar_part_content WHERE mentee_id = 60001 ORDER BY pillar_id, part_id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillar_id, part_id, titulo, status, created_at FROM pillar_part_content WHERE mentee_id = 60001 ORDER BY pillar_id, part_id;",
+  "rows": [
+    {
+      "pillar_id": "1",
+      "part_id": "a",
+      "titulo": "Sua Jornada: Ética, Excelência e Autonomia",
+      "status": "ready",
+      "created_at": "2026-03-22 20:54:49"
+    },
+    {
+      "pillar_id": "1",
+      "part_id": "b",
+      "titulo": "Ikigai: O Mestre Clínico Resolutivo",
+      "status": "ready",
+      "created_at": "2026-03-22 21:08:11"
+    },
+    {
+      "pillar_id": "1",
+      "part_id": "c",
+      "titulo": "Nefrologia e Liderança: Construindo um Legado de Cuidado Integral",
+      "status": "ready",
+      "created_at": "2026-03-22 21:08:28"
+    },
+    {
+      "pillar_id": "2",
+      "part_id": "a",
+      "titulo": "Nefrologia de Alta Complexidade: Otimizando Seu Posicionamento em BH",
+      "status": "ready",
+      "created_at": "2026-03-22 22:11:00"
+    },
+    {
+      "pillar_id": "2",
+      "part_id": "b",
+      "titulo": "Sua Vantagem Estratégica: A Nefrologia Integrada",
+      "status": "ready",
+      "created_at": "2026-03-22 22:11:06"
+    },
+    {
+      "pillar_id": "2",
+      "part_id": "c",
+      "titulo": "Refinando Sua Essência: Proposta de Valor e Tagline",
+      "status": "ready",
+      "created_at": "2026-03-22 22:11:05"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "a",
+      "titulo": "Otimizando o Consultório Compartilhado: Foco em Escala e Rentabilidade",
+      "status": "ready",
+      "created_at": "2026-03-23 01:26:27"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "b",
+      "titulo": "Otimizando Despesas: Maximizando o Lucro por Consulta",
+      "status": "ready",
+      "created_at": "2026-03-23 01:26:29"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "c",
+      "titulo": "Reinventando o Valor: Estratégias para o Crescimento Médico",
+      "status": "ready",
+      "created_at": "2026-03-23 01:26:32"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "d",
+      "titulo": "Desvendando o Potencial: Estratégias para Acelerar seu Crescimento Médico",
+      "status": "ready",
+      "created_at": "2026-03-23 01:27:07"
+    }
+  ],
+  "messages": [],
+  "stdout": "pillar_id\tpart_id\ttitulo\tstatus\tcreated_at\n1\ta\tSua Jornada: Ética, Excelência e Autonomia\tready\t2026-03-22 20:54:49\n1\tb\tIkigai: O Mestre Clínico Resolutivo\tready\t2026-03-22 21:08:11\n1\tc\tNefrologia e Liderança: Construindo um Legado de Cuidado Integral\tready\t2026-03-22 21:08:28\n2\ta\tNefrologia de Alta Complexidade: Otimizando Seu Posicionamento em BH\tready\t2026-03-22 22:11:00\n2\tb\tSua Vantagem Estratégica: A Nefrologia Integrada\tready\t2026-03-22 22:11:06\n2\tc\tRefinando Sua Essência: Proposta de Valor e Tagline\tready\t2026-03-22 22:11:05\n3\ta\tOtimizando o Consultório Compartilhado: Foco em Escala e Rentabilidade\tready\t2026-03-23 01:26:27\n3\tb\tOtimizando Despesas: Maximizando o Lucro por Consulta\tready\t2026-03-23 01:26:29\n3\tc\tReinventando o Valor: Estratégias para o Crescimento Médico\tready\t2026-03-23 01:26:32\n3\td\tDesvendando o Potencial: Estratégias para Acelerar seu Crescimento Médico\tready\t2026-03-23 01:27:07\n",
+  "stderr": "",
+  "execution_time_ms": 359
+}

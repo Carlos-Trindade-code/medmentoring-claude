@@ -1,0 +1,80 @@
+{
+  "query": "SELECT menteeId, pillarId, secao, status, updatedAt FROM pillar_answers ORDER BY updatedAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT menteeId, pillarId, secao, status, updatedAt FROM pillar_answers ORDER BY updatedAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "menteeId": "60001",
+      "pillarId": "7",
+      "secao": "reflexao_conversao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:10:30"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "7",
+      "secao": "objecoes_comuns",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:04:23"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "7",
+      "secao": "apresentacao_tratamento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:03:31"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "6",
+      "secao": "reflexao_marketing",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:01:36"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "6",
+      "secao": "comunicacao_tom_voz",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:59:49"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "6",
+      "secao": "presenca_digital_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:58:49"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "5",
+      "secao": "reflexao_precificacao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:57:55"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "5",
+      "secao": "custos_variaveis",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:55"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "5",
+      "secao": "precificacao_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:21"
+    },
+    {
+      "menteeId": "60001",
+      "pillarId": "4",
+      "secao": "reflexao_operacional",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:53:41"
+    }
+  ],
+  "messages": [],
+  "stdout": "menteeId\tpillarId\tsecao\tstatus\tupdatedAt\n60001\t7\treflexao_conversao\tconcluida\t2026-03-19 02:10:30\n60001\t7\tobjecoes_comuns\tconcluida\t2026-03-19 02:04:23\n60001\t7\tapresentacao_tratamento\tconcluida\t2026-03-19 02:03:31\n60001\t6\treflexao_marketing\tconcluida\t2026-03-19 02:01:36\n60001\t6\tcomunicacao_tom_voz\tconcluida\t2026-03-19 01:59:49\n60001\t6\tpresenca_digital_atual\tconcluida\t2026-03-19 01:58:49\n60001\t5\treflexao_precificacao\tconcluida\t2026-03-19 01:57:55\n60001\t5\tcustos_variaveis\tconcluida\t2026-03-19 01:55:55\n60001\t5\tprecificacao_atual\tconcluida\t2026-03-19 01:55:21\n60001\t4\treflexao_operacional\tconcluida\t2026-03-19 01:53:41\n",
+  "stderr": "",
+  "execution_time_ms": 400
+}

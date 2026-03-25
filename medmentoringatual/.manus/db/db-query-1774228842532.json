@@ -1,0 +1,178 @@
+{
+  "query": "SELECT pillarId, secao, status, updatedAt FROM pillar_answers WHERE menteeId = 60001 ORDER BY pillarId, secao LIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillarId, secao, status, updatedAt FROM pillar_answers WHERE menteeId = 60001 ORDER BY pillarId, secao LIMIT 30;",
+  "rows": [
+    {
+      "pillarId": "1",
+      "secao": "ikigai",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:18:14"
+    },
+    {
+      "pillarId": "1",
+      "secao": "missao_visao",
+      "status": "concluida",
+      "updatedAt": "2026-03-13 18:04:10"
+    },
+    {
+      "pillarId": "1",
+      "secao": "quem_sou",
+      "status": "concluida",
+      "updatedAt": "2026-03-13 17:54:15"
+    },
+    {
+      "pillarId": "1",
+      "secao": "reflexao_identidade",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:24:56"
+    },
+    {
+      "pillarId": "1",
+      "secao": "valores",
+      "status": "concluida",
+      "updatedAt": "2026-03-13 17:57:10"
+    },
+    {
+      "pillarId": "1",
+      "secao": "valores_avancados",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:18:19"
+    },
+    {
+      "pillarId": "2",
+      "secao": "diferencial",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:30:25"
+    },
+    {
+      "pillarId": "2",
+      "secao": "especialidade_atuacao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:28:06"
+    },
+    {
+      "pillarId": "2",
+      "secao": "proposta_valor",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:34:22"
+    },
+    {
+      "pillarId": "2",
+      "secao": "publico_ideal",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:28:11"
+    },
+    {
+      "pillarId": "3",
+      "secao": "custos_deslocamento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:38:38"
+    },
+    {
+      "pillarId": "3",
+      "secao": "custos_fixos",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:38:31"
+    },
+    {
+      "pillarId": "3",
+      "secao": "estrutura_clinica",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:36:03"
+    },
+    {
+      "pillarId": "3",
+      "secao": "faturamento_producao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:39:58"
+    },
+    {
+      "pillarId": "3",
+      "secao": "ociosidade_potencial",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:40:01"
+    },
+    {
+      "pillarId": "3",
+      "secao": "reflexao_financeira",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:43:37"
+    },
+    {
+      "pillarId": "4",
+      "secao": "equipe_gestao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:45:44"
+    },
+    {
+      "pillarId": "4",
+      "secao": "processos_atendimento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:46:29"
+    },
+    {
+      "pillarId": "4",
+      "secao": "reflexao_operacional",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:53:41"
+    },
+    {
+      "pillarId": "5",
+      "secao": "custos_variaveis",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:55"
+    },
+    {
+      "pillarId": "5",
+      "secao": "precificacao_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:55:21"
+    },
+    {
+      "pillarId": "5",
+      "secao": "reflexao_precificacao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:57:55"
+    },
+    {
+      "pillarId": "6",
+      "secao": "comunicacao_tom_voz",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:59:49"
+    },
+    {
+      "pillarId": "6",
+      "secao": "presenca_digital_atual",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 01:58:49"
+    },
+    {
+      "pillarId": "6",
+      "secao": "reflexao_marketing",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:01:36"
+    },
+    {
+      "pillarId": "7",
+      "secao": "apresentacao_tratamento",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:03:31"
+    },
+    {
+      "pillarId": "7",
+      "secao": "objecoes_comuns",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:04:23"
+    },
+    {
+      "pillarId": "7",
+      "secao": "reflexao_conversao",
+      "status": "concluida",
+      "updatedAt": "2026-03-19 02:10:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "pillarId\tsecao\tstatus\tupdatedAt\n1\tikigai\tconcluida\t2026-03-19 01:18:14\n1\tmissao_visao\tconcluida\t2026-03-13 18:04:10\n1\tquem_sou\tconcluida\t2026-03-13 17:54:15\n1\treflexao_identidade\tconcluida\t2026-03-19 01:24:56\n1\tvalores\tconcluida\t2026-03-13 17:57:10\n1\tvalores_avancados\tconcluida\t2026-03-19 01:18:19\n2\tdiferencial\tconcluida\t2026-03-19 01:30:25\n2\tespecialidade_atuacao\tconcluida\t2026-03-19 01:28:06\n2\tproposta_valor\tconcluida\t2026-03-19 01:34:22\n2\tpublico_ideal\tconcluida\t2026-03-19 01:28:11\n3\tcustos_deslocamento\tconcluida\t2026-03-19 01:38:38\n3\tcustos_fixos\tconcluida\t2026-03-19 01:38:31\n3\testrutura_clinica\tconcluida\t2026-03-19 01:36:03\n3\tfaturamento_producao\tconcluida\t2026-03-19 01:39:58\n3\tociosidade_potencial\tconcluida\t2026-03-19 01:40:01\n3\treflexao_financeira\tconcluida\t2026-03-19 01:43:37\n4\tequipe_gestao\tconcluida\t2026-03-19 01:45:44\n4\tprocessos_atendimento\tconcluida\t2026-03-19 01:46:29\n4\treflexao_operacional\tconcluida\t2026-03-19 01:53:41\n5\tcustos_variaveis\tconcluida\t2026-03-19 01:55:55\n5\tprecificacao_atual\tconcluida\t2026-03-19 01:55:21\n5\treflexao_precificacao\tconcluida\t2026-03-19 01:57:55\n6\tcomunicacao_tom_voz\tconcluida\t2026-03-19 01:59:49\n6\tpresenca_digital_atual\tconcluida\t2026-03-19 01:58:49\n6\treflexao_marketing\tconcluida\t2026-03-19 02:01:36\n7\tapresentacao_tratamento\tconcluida\t2026-03-19 02:03:31\n7\tobjecoes_comuns\tconcluida\t2026-03-19 02:04:23\n7\treflexao_conversao\tconcluida\t2026-03-19 02:10:30\n",
+  "stderr": "",
+  "execution_time_ms": 347
+}

@@ -1,0 +1,31 @@
+{
+  "query": "SHOW TABLES LIKE 'pillar_%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SHOW TABLES LIKE 'pillar_%';",
+  "rows": [
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_answers"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_conclusions"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_diagnostics"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_feedback"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_part_content"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_releases"
+    },
+    {
+      "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)": "pillar_reports"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_Df4SoG4Cek64exRNkmgRUJ (pillar_%)\npillar_answers\npillar_conclusions\npillar_diagnostics\npillar_feedback\npillar_part_content\npillar_releases\npillar_reports\n",
+  "stderr": "",
+  "execution_time_ms": 884
+}

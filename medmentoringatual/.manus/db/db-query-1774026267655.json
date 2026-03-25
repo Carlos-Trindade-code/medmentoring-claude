@@ -1,0 +1,178 @@
+{
+  "query": "SELECT pillarId, secao, JSON_LENGTH(respostas) as num_respostas, updatedAt FROM pillar_answers WHERE menteeId = 60001 ORDER BY pillarId, secao;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillarId, secao, JSON_LENGTH(respostas) as num_respostas, updatedAt FROM pillar_answers WHERE menteeId = 60001 ORDER BY pillarId, secao;",
+  "rows": [
+    {
+      "pillarId": "1",
+      "secao": "ikigai",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:18:14"
+    },
+    {
+      "pillarId": "1",
+      "secao": "missao_visao",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-13 18:04:10"
+    },
+    {
+      "pillarId": "1",
+      "secao": "quem_sou",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-13 17:54:15"
+    },
+    {
+      "pillarId": "1",
+      "secao": "reflexao_identidade",
+      "num_respostas": "6",
+      "updatedAt": "2026-03-19 01:24:56"
+    },
+    {
+      "pillarId": "1",
+      "secao": "valores",
+      "num_respostas": "3",
+      "updatedAt": "2026-03-13 17:57:10"
+    },
+    {
+      "pillarId": "1",
+      "secao": "valores_avancados",
+      "num_respostas": "0",
+      "updatedAt": "2026-03-19 01:18:19"
+    },
+    {
+      "pillarId": "2",
+      "secao": "diferencial",
+      "num_respostas": "4",
+      "updatedAt": "2026-03-19 01:30:25"
+    },
+    {
+      "pillarId": "2",
+      "secao": "especialidade_atuacao",
+      "num_respostas": "6",
+      "updatedAt": "2026-03-19 01:28:06"
+    },
+    {
+      "pillarId": "2",
+      "secao": "proposta_valor",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:34:22"
+    },
+    {
+      "pillarId": "2",
+      "secao": "publico_ideal",
+      "num_respostas": "0",
+      "updatedAt": "2026-03-19 01:28:11"
+    },
+    {
+      "pillarId": "3",
+      "secao": "custos_deslocamento",
+      "num_respostas": "0",
+      "updatedAt": "2026-03-19 01:38:38"
+    },
+    {
+      "pillarId": "3",
+      "secao": "custos_fixos",
+      "num_respostas": "10",
+      "updatedAt": "2026-03-19 01:38:31"
+    },
+    {
+      "pillarId": "3",
+      "secao": "estrutura_clinica",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:36:03"
+    },
+    {
+      "pillarId": "3",
+      "secao": "faturamento_producao",
+      "num_respostas": "10",
+      "updatedAt": "2026-03-19 01:39:58"
+    },
+    {
+      "pillarId": "3",
+      "secao": "ociosidade_potencial",
+      "num_respostas": "0",
+      "updatedAt": "2026-03-19 01:40:01"
+    },
+    {
+      "pillarId": "3",
+      "secao": "reflexao_financeira",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:43:37"
+    },
+    {
+      "pillarId": "4",
+      "secao": "equipe_gestao",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:45:44"
+    },
+    {
+      "pillarId": "4",
+      "secao": "processos_atendimento",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:46:29"
+    },
+    {
+      "pillarId": "4",
+      "secao": "reflexao_operacional",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:53:41"
+    },
+    {
+      "pillarId": "5",
+      "secao": "custos_variaveis",
+      "num_respostas": "2",
+      "updatedAt": "2026-03-19 01:55:55"
+    },
+    {
+      "pillarId": "5",
+      "secao": "precificacao_atual",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:55:21"
+    },
+    {
+      "pillarId": "5",
+      "secao": "reflexao_precificacao",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 01:57:55"
+    },
+    {
+      "pillarId": "6",
+      "secao": "comunicacao_tom_voz",
+      "num_respostas": "3",
+      "updatedAt": "2026-03-19 01:59:49"
+    },
+    {
+      "pillarId": "6",
+      "secao": "presenca_digital_atual",
+      "num_respostas": "7",
+      "updatedAt": "2026-03-19 01:58:49"
+    },
+    {
+      "pillarId": "6",
+      "secao": "reflexao_marketing",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 02:01:36"
+    },
+    {
+      "pillarId": "7",
+      "secao": "apresentacao_tratamento",
+      "num_respostas": "3",
+      "updatedAt": "2026-03-19 02:03:31"
+    },
+    {
+      "pillarId": "7",
+      "secao": "objecoes_comuns",
+      "num_respostas": "4",
+      "updatedAt": "2026-03-19 02:04:23"
+    },
+    {
+      "pillarId": "7",
+      "secao": "reflexao_conversao",
+      "num_respostas": "5",
+      "updatedAt": "2026-03-19 02:10:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "pillarId\tsecao\tnum_respostas\tupdatedAt\n1\tikigai\t5\t2026-03-19 01:18:14\n1\tmissao_visao\t5\t2026-03-13 18:04:10\n1\tquem_sou\t5\t2026-03-13 17:54:15\n1\treflexao_identidade\t6\t2026-03-19 01:24:56\n1\tvalores\t3\t2026-03-13 17:57:10\n1\tvalores_avancados\t0\t2026-03-19 01:18:19\n2\tdiferencial\t4\t2026-03-19 01:30:25\n2\tespecialidade_atuacao\t6\t2026-03-19 01:28:06\n2\tproposta_valor\t5\t2026-03-19 01:34:22\n2\tpublico_ideal\t0\t2026-03-19 01:28:11\n3\tcustos_deslocamento\t0\t2026-03-19 01:38:38\n3\tcustos_fixos\t10\t2026-03-19 01:38:31\n3\testrutura_clinica\t5\t2026-03-19 01:36:03\n3\tfaturamento_producao\t10\t2026-03-19 01:39:58\n3\tociosidade_potencial\t0\t2026-03-19 01:40:01\n3\treflexao_financeira\t5\t2026-03-19 01:43:37\n4\tequipe_gestao\t5\t2026-03-19 01:45:44\n4\tprocessos_atendimento\t5\t2026-03-19 01:46:29\n4\treflexao_operacional\t5\t2026-03-19 01:53:41\n5\tcustos_variaveis\t2\t2026-03-19 01:55:55\n5\tprecificacao_atual\t5\t2026-03-19 01:55:21\n5\treflexao_precificacao\t5\t2026-03-19 01:57:55\n6\tcomunicacao_tom_voz\t3\t2026-03-19 01:59:49\n6\tpresenca_digital_atual\t7\t2026-03-19 01:58:49\n6\treflexao_marketing\t5\t2026-03-19 02:01:36\n7\tapresentacao_tratamento\t3\t2026-03-19 02:03:31\n7\tobjecoes_comuns\t4\t2026-03-19 02:04:23\n7\treflexao_conversao\t5\t2026-03-19 02:10:30\n",
+  "stderr": "",
+  "execution_time_ms": 412
+}

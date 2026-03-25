@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT m.id, m.nome,\n  fd.updatedAt as financial_updated,\n  iv.updatedAt as ivmp_updated,\n  (SELECT COUNT(*) FROM pillar_part_content ppc WHERE ppc.menteeId = m.id) as part_content_count,\n  (SELECT GROUP_CONCAT(DISTINCT pc.pillarId ORDER BY pc.pillarId) FROM pillar_conclusions pc WHERE pc.menteeId = m.id AND pc.liberadoParaMentorado = 1) as released_pillars\nFROM mentees m\nLEFT JOIN financial_data fd ON fd.menteeId = m.id\nLEFT JOIN ivmp_data iv ON iv.menteeId = m.id\nWHERE m.ativo = 1\nORDER BY m.id;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute \nSELECT m.id, m.nome,\n  fd.updatedAt as financial_updated,\n  iv.updatedAt as ivmp_updated,\n  (SELECT COUNT(*) FROM pillar_part_content ppc WHERE ppc.menteeId = m.id) as part_content_count,\n  (SELECT GROUP_CONCAT(DISTINCT pc.pillarId ORDER BY pc.pillarId) FROM pillar_conclusions pc WHERE pc.menteeId = m.id AND pc.liberadoParaMentorado = 1) as released_pillars\nFROM mentees m\nLEFT JOIN financial_data fd ON fd.menteeId = m.id\nLEFT JOIN ivmp_data iv ON iv.menteeId = m.id\nWHERE m.ativo = 1\nORDER BY m.id;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'ppc.menteeid' in 'where clause'"
+  ]
+}

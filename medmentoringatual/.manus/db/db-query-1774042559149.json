@@ -1,0 +1,50 @@
+{
+  "query": "\nSELECT \n  m.id, m.nome, m.especialidade,\n  (SELECT COUNT(*) FROM pillar_answers pa WHERE pa.menteeId = m.id) as pillar_answers_count,\n  (SELECT COUNT(*) FROM pillar_answers pa WHERE pa.menteeId = m.id AND pa.status = 'concluida') as pillar_answers_done,\n  (SELECT COUNT(*) FROM financial_data fd WHERE fd.menteeId = m.id) as has_financial_data,\n  (SELECT COUNT(*) FROM ivmp_data iv WHERE iv.menteeId = m.id) as has_ivmp_data,\n  (SELECT COUNT(*) FROM pillar_conclusions pc WHERE pc.menteeId = m.id) as pillar_conclusions_count\nFROM mentees m\nWHERE m.ativo = 1\nORDER BY m.dataCadastro DESC\nLIMIT 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute \nSELECT \n  m.id, m.nome, m.especialidade,\n  (SELECT COUNT(*) FROM pillar_answers pa WHERE pa.menteeId = m.id) as pillar_answers_count,\n  (SELECT COUNT(*) FROM pillar_answers pa WHERE pa.menteeId = m.id AND pa.status = 'concluida') as pillar_answers_done,\n  (SELECT COUNT(*) FROM financial_data fd WHERE fd.menteeId = m.id) as has_financial_data,\n  (SELECT COUNT(*) FROM ivmp_data iv WHERE iv.menteeId = m.id) as has_ivmp_data,\n  (SELECT COUNT(*) FROM pillar_conclusions pc WHERE pc.menteeId = m.id) as pillar_conclusions_count\nFROM mentees m\nWHERE m.ativo = 1\nORDER BY m.dataCadastro DESC\nLIMIT 20;\n",
+  "rows": [
+    {
+      "id": "90001",
+      "nome": "Olympio Chacon",
+      "especialidade": "",
+      "pillar_answers_count": "0",
+      "pillar_answers_done": "0",
+      "has_financial_data": "1",
+      "has_ivmp_data": "1",
+      "pillar_conclusions_count": "0"
+    },
+    {
+      "id": "60001",
+      "nome": "Luis Gustavo de Freitas Trindade",
+      "especialidade": "Clínica Medica Nefrologia",
+      "pillar_answers_count": "28",
+      "pillar_answers_done": "28",
+      "has_financial_data": "1",
+      "has_ivmp_data": "1",
+      "pillar_conclusions_count": "3"
+    },
+    {
+      "id": "30001",
+      "nome": "Carlos Alexandre de Freitas Trindade",
+      "especialidade": "Medicina da Dor",
+      "pillar_answers_count": "11",
+      "pillar_answers_done": "11",
+      "has_financial_data": "1",
+      "has_ivmp_data": "1",
+      "pillar_conclusions_count": "1"
+    },
+    {
+      "id": "1",
+      "nome": "Bruno Holanda",
+      "especialidade": "Otorrino",
+      "pillar_answers_count": "4",
+      "pillar_answers_done": "3",
+      "has_financial_data": "1",
+      "has_ivmp_data": "1",
+      "pillar_conclusions_count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tespecialidade\tpillar_answers_count\tpillar_answers_done\thas_financial_data\thas_ivmp_data\tpillar_conclusions_count\n90001\tOlympio Chacon\t\t0\t0\t1\t1\t0\n60001\tLuis Gustavo de Freitas Trindade\tClínica Medica Nefrologia\t28\t28\t1\t1\t3\n30001\tCarlos Alexandre de Freitas Trindade\tMedicina da Dor\t11\t11\t1\t1\t1\n1\tBruno Holanda\tOtorrino\t4\t3\t1\t1\t1\n",
+  "stderr": "",
+  "execution_time_ms": 396
+}

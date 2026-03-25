@@ -1,0 +1,164 @@
+{
+  "query": "SELECT pillar_id, part_id, part_label, released, released_at FROM part_releases WHERE mentee_id = 60001 ORDER BY pillar_id, part_id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute SELECT pillar_id, part_id, part_label, released, released_at FROM part_releases WHERE mentee_id = 60001 ORDER BY pillar_id, part_id;",
+  "rows": [
+    {
+      "pillar_id": "1",
+      "part_id": "a",
+      "part_label": "Autoconhecimento e Valores",
+      "released": "1",
+      "released_at": "2026-03-20 16:51:36"
+    },
+    {
+      "pillar_id": "1",
+      "part_id": "b",
+      "part_label": "Ikigai Profissional",
+      "released": "1",
+      "released_at": "2026-03-20 16:51:37"
+    },
+    {
+      "pillar_id": "1",
+      "part_id": "c",
+      "part_label": "Missao, Visao e Proposito",
+      "released": "1",
+      "released_at": "2026-03-20 16:51:39"
+    },
+    {
+      "pillar_id": "2",
+      "part_id": "a",
+      "part_label": "Publico e Nicho",
+      "released": "1",
+      "released_at": "2026-03-22 20:18:05"
+    },
+    {
+      "pillar_id": "2",
+      "part_id": "b",
+      "part_label": "Diferencial Competitivo",
+      "released": "1",
+      "released_at": "2026-03-22 20:18:07"
+    },
+    {
+      "pillar_id": "2",
+      "part_id": "c",
+      "part_label": "Proposta de Valor e Tagline",
+      "released": "1",
+      "released_at": "2026-03-22 20:18:17"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "a",
+      "part_label": "Diagnostico de Estrutura e Espaco",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:09"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "b",
+      "part_label": "Despesas Fixas Completas",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:11"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "c",
+      "part_label": "iVMP — 53 Perguntas",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:12"
+    },
+    {
+      "pillar_id": "3",
+      "part_id": "d",
+      "part_label": "Simulador de Cenarios",
+      "released": "0",
+      "released_at": "NULL"
+    },
+    {
+      "pillar_id": "4",
+      "part_id": "a",
+      "part_label": "Rotina e Gargalos",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:18"
+    },
+    {
+      "pillar_id": "4",
+      "part_id": "b",
+      "part_label": "Equipe e Delegacao",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:20"
+    },
+    {
+      "pillar_id": "4",
+      "part_id": "c",
+      "part_label": "Mapa de Processos",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:21"
+    },
+    {
+      "pillar_id": "5",
+      "part_id": "a",
+      "part_label": "Precificacao Atual e Crencas",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:27"
+    },
+    {
+      "pillar_id": "5",
+      "part_id": "b",
+      "part_label": "Engenharia de Precos",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:33"
+    },
+    {
+      "pillar_id": "5",
+      "part_id": "c",
+      "part_label": "Dinheiro Invisivel",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:35"
+    },
+    {
+      "pillar_id": "6",
+      "part_id": "a",
+      "part_label": "Presenca Digital Atual",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:40"
+    },
+    {
+      "pillar_id": "6",
+      "part_id": "b",
+      "part_label": "Estrategia de Conteudo",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:41"
+    },
+    {
+      "pillar_id": "6",
+      "part_id": "c",
+      "part_label": "Plano de 30 Dias",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:42"
+    },
+    {
+      "pillar_id": "7",
+      "part_id": "a",
+      "part_label": "Processo de Atendimento",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:47"
+    },
+    {
+      "pillar_id": "7",
+      "part_id": "b",
+      "part_label": "Script da Consulta de Alto Valor",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:49"
+    },
+    {
+      "pillar_id": "7",
+      "part_id": "c",
+      "part_label": "Objecoes e Follow-up",
+      "released": "1",
+      "released_at": "2026-03-20 21:45:50"
+    }
+  ],
+  "messages": [],
+  "stdout": "pillar_id\tpart_id\tpart_label\treleased\treleased_at\n1\ta\tAutoconhecimento e Valores\t1\t2026-03-20 16:51:36\n1\tb\tIkigai Profissional\t1\t2026-03-20 16:51:37\n1\tc\tMissao, Visao e Proposito\t1\t2026-03-20 16:51:39\n2\ta\tPublico e Nicho\t1\t2026-03-22 20:18:05\n2\tb\tDiferencial Competitivo\t1\t2026-03-22 20:18:07\n2\tc\tProposta de Valor e Tagline\t1\t2026-03-22 20:18:17\n3\ta\tDiagnostico de Estrutura e Espaco\t1\t2026-03-20 21:45:09\n3\tb\tDespesas Fixas Completas\t1\t2026-03-20 21:45:11\n3\tc\tiVMP — 53 Perguntas\t1\t2026-03-20 21:45:12\n3\td\tSimulador de Cenarios\t0\tNULL\n4\ta\tRotina e Gargalos\t1\t2026-03-20 21:45:18\n4\tb\tEquipe e Delegacao\t1\t2026-03-20 21:45:20\n4\tc\tMapa de Processos\t1\t2026-03-20 21:45:21\n5\ta\tPrecificacao Atual e Crencas\t1\t2026-03-20 21:45:27\n5\tb\tEngenharia de Precos\t1\t2026-03-20 21:45:33\n5\tc\tDinheiro Invisivel\t1\t2026-03-20 21:45:35\n6\ta\tPresenca Digital Atual\t1\t2026-03-20 21:45:40\n6\tb\tEstrategia de Conteudo\t1\t2026-03-20 21:45:41\n6\tc\tPlano de 30 Dias\t1\t2026-03-20 21:45:42\n7\ta\tProcesso de Atendimento\t1\t2026-03-20 21:45:47\n7\tb\tScript da Consulta de Alto Valor\t1\t2026-03-20 21:45:49\n7\tc\tObjecoes e Follow-up\t1\t2026-03-20 21:45:50\n",
+  "stderr": "",
+  "execution_time_ms": 349
+}

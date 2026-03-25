@@ -1,0 +1,1 @@
+ALTER TABLE `pillar_reports` MODIFY COLUMN `html_content` mediumtext;

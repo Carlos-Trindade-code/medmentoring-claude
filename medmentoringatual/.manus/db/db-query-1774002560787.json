@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `pillar_reports` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,\n  `mentee_id` int NOT NULL,\n  `pillar_id` int NOT NULL,\n  `title` varchar(300),\n  `subtitle` varchar(300),\n  `executive_summary` text,\n  `strengths_json` text,\n  `attention_json` text,\n  `action_plan_json` text,\n  `conclusions_text` text,\n  `suggestions_json` text,\n  `status` varchar(50) NOT NULL DEFAULT 'draft',\n  `html_content` mediumtext,\n  `pdf_url` varchar(500),\n  `generated_at` timestamp NULL,\n  `released_at` timestamp NULL,\n  `email_sent_at` timestamp NULL,\n  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (`mentee_id`) REFERENCES `mentees`(`id`) ON DELETE CASCADE\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2PvRk7CdeKrAqtj.86906cb24d68 --database Df4SoG4Cek64exRNkmgRUJ --execute CREATE TABLE IF NOT EXISTS `pillar_reports` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,\n  `mentee_id` int NOT NULL,\n  `pillar_id` int NOT NULL,\n  `title` varchar(300),\n  `subtitle` varchar(300),\n  `executive_summary` text,\n  `strengths_json` text,\n  `attention_json` text,\n  `action_plan_json` text,\n  `conclusions_text` text,\n  `suggestions_json` text,\n  `status` varchar(50) NOT NULL DEFAULT 'draft',\n  `html_content` mediumtext,\n  `pdf_url` varchar(500),\n  `generated_at` timestamp NULL,\n  `released_at` timestamp NULL,\n  `email_sent_at` timestamp NULL,\n  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (`mentee_id`) REFERENCES `mentees`(`id`) ON DELETE CASCADE\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 590
+}
