@@ -419,8 +419,84 @@ export function generatePillarReportHtml(data: ReportData): string {
   <title>${theme.name} — ${data.menteeName}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #2C3E50; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1a1a2e;
+      padding: 40px;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #1a1a2e;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: #1a1a2e;
+      margin: 0;
+    }
+    .header .logo {
+      font-size: 14px;
+      color: #b8860b;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+    .subtitle {
+      color: #b8860b;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: #1a1a2e;
+      border-left: 4px solid #b8860b;
+      padding-left: 12px;
+      margin-top: 30px;
+    }
+    .highlight-box {
+      background: #f8f6f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+    .strength-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .action-item {
+      background: #1a1a2e;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 8px 0;
+    }
+    .action-item .priority {
+      display: inline-block;
+      background: #b8860b;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #eee;
+      text-align: center;
+      color: #999;
+      font-size: 11px;
+    }
     @media print {
       body { background: white; }
       .page-break { page-break-before: always; }
@@ -430,8 +506,17 @@ export function generatePillarReportHtml(data: ReportData): string {
 </head>
 <body>
 
+<!-- ===== HEADER ITC MENTOR ===== -->
+<div class="header">
+  <div>
+    <p class="subtitle">Pilar ${data.pillarId} de 7 — ${theme.name}</p>
+    <h1>${data.title}</h1>
+  </div>
+  <div class="logo">ITC MENTOR</div>
+</div>
+
 <!-- ===== CAPA ===== -->
-<div style="min-height:100vh;background:${theme.gradient};display:flex;flex-direction:column;justify-content:space-between;padding:60px;position:relative;overflow:hidden;">
+<div style="min-height:80vh;background:${theme.gradient};display:flex;flex-direction:column;justify-content:space-between;padding:60px;position:relative;overflow:hidden;border-radius:12px;margin-bottom:30px;">
   <!-- Decorative circles -->
   <div style="position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
   <div style="position:absolute;bottom:-150px;left:-80px;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,0.04);"></div>
@@ -439,12 +524,12 @@ export function generatePillarReportHtml(data: ReportData): string {
   <!-- Header -->
   <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;background:${theme.accentColor};border-radius:12px;display:flex;align-items:center;justify-content:center;">
+      <div style="width:48px;height:48px;background:#b8860b;border-radius:12px;display:flex;align-items:center;justify-content:center;">
         <span style="font-size:24px;">${theme.emoji}</span>
       </div>
       <div>
-        <p style="color:rgba(255,255,255,0.7);font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">MedMentoring</p>
-        <p style="color:white;font-size:16px;font-weight:600;">Plataforma de Mentoria Médica</p>
+        <p style="color:#b8860b;font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:600;">ITC MENTOR</p>
+        <p style="color:white;font-size:16px;font-weight:600;">MedMentoring</p>
       </div>
     </div>
     <div style="text-align:right;">
@@ -455,7 +540,7 @@ export function generatePillarReportHtml(data: ReportData): string {
 
   <!-- Main content -->
   <div style="position:relative;z-index:1;">
-    <div style="display:inline-block;background:${theme.accentColor};color:white;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:24px;">
+    <div style="display:inline-block;background:#b8860b;color:white;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:24px;">
       Relatório Final — Pilar ${data.pillarId}
     </div>
     <h1 style="font-family:'Playfair Display',serif;font-size:52px;color:white;line-height:1.15;margin-bottom:16px;">${data.title}</h1>
@@ -465,7 +550,7 @@ export function generatePillarReportHtml(data: ReportData): string {
     <div style="background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);border-radius:16px;padding:24px 32px;display:inline-block;border:1px solid rgba(255,255,255,0.2);">
       <p style="color:rgba(255,255,255,0.7);font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Preparado para</p>
       <p style="color:white;font-size:28px;font-weight:700;font-family:'Playfair Display',serif;">${data.menteeName}</p>
-      ${data.menteeSpecialty ? `<p style="color:${theme.accentColor};font-size:15px;margin-top:4px;">${data.menteeSpecialty}</p>` : ""}
+      ${data.menteeSpecialty ? `<p style="color:#b8860b;font-size:15px;margin-top:4px;">${data.menteeSpecialty}</p>` : ""}
     </div>
   </div>
 
@@ -476,26 +561,18 @@ export function generatePillarReportHtml(data: ReportData): string {
   </div>
 </div>
 
-<!-- ===== SUMÁRIO EXECUTIVO ===== -->
-<div class="page-break" style="background:white;padding:60px;max-width:900px;margin:0 auto;">
-  <!-- Section header -->
-  <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
-    <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
-    <div>
-      <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Visão Geral</p>
-      <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Sumário Executivo</h2>
-    </div>
+<!-- ===== RESUMO EXECUTIVO ===== -->
+<div class="page-break" style="margin-bottom:30px;">
+  <h2>Resumo Executivo</h2>
+
+  <div class="highlight-box" style="margin-top:16px;">
+    <p style="font-size:15px;line-height:1.8;color:#1a1a2e;">${data.executiveSummary}</p>
   </div>
 
-  <div style="background:${theme.lightBg};border-radius:16px;padding:32px;border-left:4px solid ${theme.accentColor};">
-    <p style="font-size:16px;line-height:1.8;color:#2C3E50;">${data.executiveSummary}</p>
-  </div>
-
-  <!-- Subtitle / focus -->
   ${data.subtitle ? `
-  <div style="margin-top:24px;padding:20px 24px;background:#FAFAFA;border-radius:12px;border:1px solid #E8E8E8;">
-    <p style="font-size:14px;color:#7F8C8D;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Foco deste Pilar</p>
-    <p style="font-size:16px;color:#2C3E50;font-weight:500;">${data.subtitle}</p>
+  <div style="margin-top:16px;padding:16px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+    <p class="subtitle">Foco deste Pilar</p>
+    <p style="font-size:15px;color:#1a1a2e;font-weight:500;">${data.subtitle}</p>
   </div>` : ""}
 </div>
 
@@ -515,93 +592,75 @@ ${partAnalysesHtml ? `
 </div>
 ${partAnalysesHtml}` : ""}
 
-<!-- ===== PONTOS FORTES E ATENÇÃO ===== -->
-<div style="background:#F8F9FA;padding:60px;max-width:900px;margin:0 auto;">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
-    <!-- Pontos Fortes -->
-    <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:${theme.accentColor}22;display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:20px;">⭐</span>
-        </div>
-        <div>
-          <p style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Diagnóstico</p>
-          <h3 style="font-size:18px;color:${theme.primaryColor};font-weight:700;">Pontos Fortes</h3>
-        </div>
-      </div>
-      ${strengthsHtml || '<p style="color:#7F8C8D;font-style:italic;font-size:14px;">Nenhum ponto forte registrado.</p>'}
-    </div>
+<!-- ===== PONTOS FORTES ===== -->
+<div style="margin-bottom:30px;">
+  <h2>Pontos Fortes</h2>
+  <div class="highlight-box" style="margin-top:16px;">
+    ${data.strengths.length > 0
+      ? data.strengths.map(s => `<div class="strength-item"><p style="margin:0;font-size:14px;color:#1a1a2e;">${s}</p></div>`).join("")
+      : '<p style="color:#999;font-style:italic;font-size:14px;">Nenhum ponto forte registrado.</p>'}
+  </div>
+</div>
 
-    <!-- Pontos de Atenção -->
-    <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:#F3930022;display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:20px;">⚠️</span>
-        </div>
-        <div>
-          <p style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Diagnóstico</p>
-          <h3 style="font-size:18px;color:${theme.primaryColor};font-weight:700;">Pontos de Atenção</h3>
-        </div>
-      </div>
-      ${attentionHtml || '<p style="color:#7F8C8D;font-style:italic;font-size:14px;">Nenhum ponto de atenção registrado.</p>'}
-    </div>
+<!-- ===== PONTOS DE ATENÇÃO ===== -->
+<div style="margin-bottom:30px;">
+  <h2>Pontos de Atenção</h2>
+  <div class="highlight-box" style="margin-top:16px;">
+    ${data.attentionPoints.length > 0
+      ? data.attentionPoints.map(a => `<div class="strength-item"><p style="margin:0;font-size:14px;color:#1a1a2e;">${a}</p></div>`).join("")
+      : '<p style="color:#999;font-style:italic;font-size:14px;">Nenhum ponto de atenção registrado.</p>'}
   </div>
 </div>
 
 <!-- ===== PLANO DE AÇÃO ===== -->
-<div class="page-break" style="background:white;padding:60px;max-width:900px;margin:0 auto;">
-  <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
-    <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
-    <div>
-      <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Próximos Passos</p>
-      <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Plano de Ação</h2>
-    </div>
-  </div>
+<div class="page-break" style="margin-bottom:30px;">
+  <h2>Plano de Ação</h2>
 
-  ${actionPlanHtml || '<p style="color:#7F8C8D;font-style:italic;">Nenhuma ação registrada.</p>'}
+  <div style="margin-top:16px;">
+    ${data.actionPlan.length > 0
+      ? data.actionPlan.map((item, i) => `
+        <div class="action-item">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:700;">${i + 1}.</span>
+            <span style="flex:1;font-size:14px;font-weight:600;">${item.action}</span>
+            <span class="priority">${item.priority}</span>
+          </div>
+          <div style="display:flex;gap:20px;font-size:12px;color:rgba(255,255,255,0.7);">
+            <span>Prazo: ${item.deadline}</span>
+            <span>Resultado: ${item.expectedResult}</span>
+          </div>
+        </div>`).join("")
+      : '<p style="color:#999;font-style:italic;">Nenhuma ação registrada.</p>'}
+  </div>
 </div>
 
 <!-- ===== CONCLUSÕES DO MENTOR (pillarConclusions) ===== -->
 ${mentorConclusionsHtml}
 
-<!-- ===== MENSAGEM FINAL DO MENTOR ===== -->
-<div style="background:${theme.gradient};padding:60px;max-width:900px;margin:0 auto;">
-  <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
-    <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
-    <div>
-      <p style="font-size:12px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Mensagem do Mentor</p>
-      <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:white;">Orientações Finais</h2>
-    </div>
-  </div>
-
-  <div style="background:rgba(255,255,255,0.12);border-radius:16px;padding:32px;border:1px solid rgba(255,255,255,0.2);">
-    <p style="font-size:16px;line-height:1.9;color:rgba(255,255,255,0.9);">${data.conclusions || "Conclusões a serem adicionadas pelo mentor."}</p>
+<!-- ===== CONCLUSÕES ===== -->
+<div style="margin-bottom:30px;">
+  <h2>Conclusões</h2>
+  <div class="highlight-box" style="margin-top:16px;">
+    <p style="font-size:15px;line-height:1.8;color:#1a1a2e;">${data.conclusions || "Conclusões a serem adicionadas pelo mentor."}</p>
   </div>
 </div>
 
 <!-- ===== CHECKLIST DE SUGESTÕES ===== -->
-<div style="background:#F8F9FA;padding:60px;max-width:900px;margin:0 auto;">
-  <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
-    <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
-    <div>
-      <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Acompanhamento</p>
-      <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Checklist de Compromissos</h2>
-    </div>
-  </div>
-
-  <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+<div style="margin-bottom:30px;">
+  <h2>Checklist de Compromissos</h2>
+  <div class="highlight-box" style="margin-top:16px;">
     ${suggestionsHtml}
   </div>
 </div>
 
 <!-- ===== ASSINATURA DO MENTOR ===== -->
-<div style="background:#F8F9FA;padding:48px 60px;max-width:900px;margin:0 auto;border-top:3px solid ${theme.accentColor};">
+<div style="margin-top:40px;padding-top:20px;border-top:3px solid #b8860b;">
   <div style="display:flex;align-items:flex-start;gap:32px;">
     <div style="flex:1;">
-      <p style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:8px;">Elaborado por</p>
-      <p style="font-family:'Playfair Display',serif;font-size:22px;color:${theme.primaryColor};font-weight:700;margin-bottom:4px;">Dr. Carlos Trindade Castro</p>
+      <p style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:8px;">Elaborado por</p>
+      <p style="font-family:'Playfair Display',serif;font-size:22px;color:#1a1a2e;font-weight:700;margin-bottom:4px;">Dr. Carlos Trindade Castro</p>
       <p style="font-size:13px;color:#555;margin-bottom:2px;">CRM-MG 45568 &nbsp;|&nbsp; RQE 24768 / 39342</p>
-      <div style="width:48px;height:2px;background:${theme.accentColor};margin:12px 0;"></div>
+      <div style="width:48px;height:2px;background:#b8860b;margin:12px 0;"></div>
       <p style="font-size:12px;color:#666;line-height:1.7;">
         Diretor Técnico do Instituto Trindade Castro<br>
         Coordenador da Especialização Clínica em Dor — Afya Educação Médica<br>
@@ -611,20 +670,15 @@ ${mentorConclusionsHtml}
       </p>
     </div>
     <div style="text-align:right;min-width:160px;">
-      <p style="font-size:11px;color:#7F8C8D;margin-bottom:4px;">Belo Horizonte, ${date}</p>
-      <p style="font-size:11px;color:#7F8C8D;">Pilar ${data.pillarId} — ${theme.name}</p>
-      <div style="margin-top:32px;border-top:1px solid #CCC;padding-top:8px;">
-        <p style="font-size:10px;color:#AAA;font-style:italic;">Documento confidencial — uso exclusivo do mentorado</p>
-      </div>
+      <p style="font-size:11px;color:#999;margin-bottom:4px;">Belo Horizonte, ${date}</p>
+      <p style="font-size:11px;color:#999;">Pilar ${data.pillarId} — ${theme.name}</p>
     </div>
   </div>
 </div>
 <!-- ===== RODAPÉ ===== -->
-<div style="background:${theme.primaryColor};padding:20px 60px;max-width:900px;margin:0 auto;">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <p style="color:rgba(255,255,255,0.5);font-size:11px;">MedMentoring — Instituto Trindade Castro</p>
-    <p style="color:rgba(255,255,255,0.4);font-size:10px;">Documento gerado em ${date}</p>
-  </div>
+<div class="footer">
+  <p>Relatório gerado por ITC MedMentoring — Confidencial</p>
+  <p style="margin-top:4px;">Documento gerado em ${date}</p>
 </div>
 
 </body>
