@@ -50,6 +50,10 @@ function MenteeCard({ mentee, onClick }: { mentee: any; onClick: () => void }) {
     (r) => r.checklistReleased || r.resumoReleased || r.materiaisReleased
   ).length || 0;
 
+  const pendingAnalysis = (releases.data ?? []).filter(
+    (r: any) => !r.resumoReleased
+  ).length;
+
   return (
     <div
       className="bg-card rounded-xl border border-border p-5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
@@ -83,6 +87,15 @@ function MenteeCard({ mentee, onClick }: { mentee: any; onClick: () => void }) {
           />
         </div>
       </div>
+
+      {pendingAnalysis > 0 && (
+        <div className="mb-2">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+            <AlertCircle className="w-3 h-3" />
+            {pendingAnalysis} {pendingAnalysis === 1 ? "pilar para analisar" : "pilares para analisar"}
+          </span>
+        </div>
+      )}
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
