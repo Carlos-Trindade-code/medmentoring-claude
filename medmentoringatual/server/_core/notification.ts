@@ -69,6 +69,10 @@ export async function notifyOwner(
   const { title, content } = validatePayload(payload);
 
   if (!ENV.forgeApiUrl) {
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[Notification] (dev skip) ${title}: ${content.substring(0, 100)}`);
+      return true;
+    }
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service URL is not configured.",
