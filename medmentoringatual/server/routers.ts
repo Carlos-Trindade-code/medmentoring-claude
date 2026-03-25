@@ -87,8 +87,8 @@ import { invokeLLM } from "./_core/llm";
 import { pillarReportRouter } from "./routers/pillarReport";
 import { getPillarPartContent, upsertPillarPartContent } from "./db";
 import { generateReportPdf } from "./pdfPremium";
-import { pillarReports } from "../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { pillarReports, mentorAiChat } from "../drizzle/schema";
+import { eq, and, gte, desc } from "drizzle-orm";
 import { getDb } from "./db";
 
 // ============================================================
@@ -2978,6 +2978,73 @@ O texto sera incluido num PDF entregue ao mentorado, entao deve ser claro e dida
 
       // For expenses, recalculate totals
       return { message: "Custo fixo atualizado", oldScore: 0, newScore: 0, diff: 0 };
+    }),
+
+  // Auto-summary: gera resumo rápido ao abrir pilar (com cache de 24h)
+  autoSummary: adminProcedure
+    .input(z.object({ menteeId: z.number(), pillarId: z.number().min(1).max(7) }))
+    .query(async ({ input }) => {
+      const { menteeId, pillarId } = input;
+      const db = await getDb();
+      if (!db) return { summary: null, cached: false };
+
+      // Verifica cache: mensagem "assistant" com prefixo [AUTO_SUMMARY] nas últimas 24h
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentMessages = await db.select().from(mentorAiChat)
+        .where(and(
+          eq(mentorAiChat.menteeId, menteeId),
+          eq(mentorAiChat.pillarId, pillarId),
+          eq(mentorAiChat.role, "assistant"),
+          gte(mentorAiChat.createdAt, oneDayAgo),
+        ))
+        .orderBy(desc(mentorAiChat.createdAt))
+        .limit(10);
+
+      const cachedEntry = recentMessages.find(m => m.content.startsWith("[AUTO_SUMMARY]"));
+      if (cachedEntry) {
+        return { summary: cachedEntry.content.replace("[AUTO_SUMMARY]\n", ""), cached: true };
+      }
+
+      // Sem cache — busca respostas do mentorado
+      const answers = await getPillarAnswers(menteeId, pillarId);
+      const allAnswersText = answers
+        .flatMap(a => (a.respostas as any[] ?? []))
+        .filter((r: any) => r.resposta !== null && r.resposta !== undefined && r.resposta !== "" && !r.naoSabe)
+        .map((r: any) => `- ${r.pergunta}: ${r.resposta}`)
+        .join("\n");
+
+      if (!allAnswersText) return { summary: null, cached: false };
+
+      const pillarNames: Record<number, string> = {
+        1: "Identidade e Propósito",
+        2: "Posicionamento",
+        3: "Diagnóstico do Negócio",
+        4: "Gestão e Processos",
+        5: "Precificação",
+        6: "Marketing Digital",
+        7: "Vendas e Comunicação",
+      };
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `Voce e um assistente de mentoria medica. Gere um RESUMO EXECUTIVO curto (3-5 frases) das respostas do mentorado no Pilar ${pillarId} — ${pillarNames[pillarId]}. Destaque os pontos-chave, gaps e oportunidades. Seja direto e pratico. Escreva em portugues.`,
+          },
+          {
+            role: "user",
+            content: `Respostas do mentorado:\n${allAnswersText}`,
+          },
+        ],
+      });
+
+      const summaryText = String(response?.choices?.[0]?.message?.content || "").trim();
+      if (!summaryText) return { summary: null, cached: false };
+
+      // Salva no cache com prefixo [AUTO_SUMMARY]
+      await saveMentorAiChatMessage(menteeId, pillarId, "assistant", `[AUTO_SUMMARY]\n${summaryText}`);
+
+      return { summary: summaryText, cached: false };
     }),
 });
 

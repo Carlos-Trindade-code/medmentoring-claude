@@ -315,6 +315,12 @@ export default function MentorPillarView() {
     pillarId,
   });
 
+  // Auto-summary IA ao abrir pilar
+  const { data: autoSummary, isLoading: summaryLoading } = trpc.mentorAI.autoSummary.useQuery(
+    { menteeId: Number(menteeId), pillarId: Number(pillarId) },
+    { staleTime: 5 * 60 * 1000 }
+  );
+
   // Inicializa conclusões existentes
   useState(() => {
     if (existingConclusions?.conclusoesJson) {
@@ -573,6 +579,27 @@ export default function MentorPillarView() {
             </div>
           </div>
         </div>
+
+        {/* Auto-summary IA */}
+        {summaryLoading && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 animate-pulse">
+            <div className="h-4 bg-primary/10 rounded w-1/3 mb-2" />
+            <div className="h-3 bg-primary/10 rounded w-full mb-1" />
+            <div className="h-3 bg-primary/10 rounded w-2/3" />
+          </div>
+        )}
+        {autoSummary?.summary && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Resumo IA</span>
+              {autoSummary.cached && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Cache</span>
+              )}
+            </div>
+            <div className="text-sm text-foreground whitespace-pre-line leading-relaxed">{autoSummary.summary}</div>
+          </div>
+        )}
 
         {/* SEÇÃO 1: Roteiro do Mentor */}
         <div className="border rounded-xl mb-3 overflow-hidden">
