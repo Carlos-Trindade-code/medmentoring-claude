@@ -20,7 +20,17 @@ import {
 import { generatePillarReportHtml, PILLAR_THEMES, PartAnalysis, DiagnosisData } from "../reportGenerator";
 import { pillarReports, mentees } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { generateReportPdf } from "../pdfPremium";
+import {
+  generateReportPdf,
+  createPremiumPdf,
+  addCoverPage,
+  addSectionPage,
+  addNarrative,
+  addBulletList,
+  addActionPlan,
+  addClosingPage,
+  addTable,
+} from "../pdfPremium";
 
 // ── DB helpers for pillarReports ──
 async function getPillarReport(menteeId: number, pillarId: number) {
@@ -61,6 +71,100 @@ async function releasePillarReport(menteeId: number, pillarId: number) {
   await db.update(pillarReports)
     .set({ status: "released", releasedAt: new Date(), updatedAt: new Date() })
     .where(and(eq(pillarReports.menteeId, menteeId), eq(pillarReports.pillarId, pillarId)));
+}
+
+// ── Final Report types & PDF generator ──
+interface FinalReportData {
+  menteeName: string;
+  menteeSpecialty: string;
+  title: string;
+  diagnosticoGeral: string;
+  principaisConquistas: string[];
+  areasTransformacao: string[];
+  propostasMelhoria: { proposta: string; area: string; impacto: string; prioridade: string }[];
+  proximosPassos: string[];
+  mensagemFinal: string;
+  pillarSummaries: { pillarId: number; title: string | null; summary: string | null }[];
+  totalPillarsCompleted: number;
+}
+
+async function generateFinalPdf(data: FinalReportData): Promise<Buffer> {
+  const today = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+
+  const pdfOpts = {
+    menteeNome: data.menteeName,
+    titulo: data.title,
+    subtitulo: `${data.menteeName} — ${data.menteeSpecialty}`,
+    data: today,
+  };
+
+  const doc = createPremiumPdf(pdfOpts);
+
+  const chunks: Buffer[] = [];
+  doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+  // Cover page
+  addCoverPage(doc, {
+    ...pdfOpts,
+    subtitulo: `Consolidação de ${data.totalPillarsCompleted} pilares`,
+  });
+
+  // Page 2: Diagnóstico Geral
+  let y = addSectionPage(doc, "Diagnóstico Geral");
+  y = addNarrative(doc, y, data.diagnosticoGeral);
+
+  // Page 3: Resumo dos Pilares
+  y = addSectionPage(doc, "Resumo por Pilar");
+  for (const p of data.pillarSummaries) {
+    if (y > doc.page.height - 120) {
+      doc.addPage();
+      y = 50;
+    }
+    doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a2332")
+      .text(`Pilar ${p.pillarId}: ${p.title ?? ""}`, 50, y);
+    y += 18;
+    doc.font("Helvetica").fontSize(10).fillColor("#6b7280")
+      .text(p.summary ?? "Sem resumo disponível.", 50, y, { width: doc.page.width - 100 });
+    const textH = doc.heightOfString(p.summary ?? "Sem resumo disponível.", { width: doc.page.width - 100 });
+    y += textH + 15;
+  }
+
+  // Page 4: Principais Conquistas
+  y = addSectionPage(doc, "Principais Conquistas");
+  y = addBulletList(doc, y, data.principaisConquistas, { accentColor: "#059669" });
+
+  // Page 5: Áreas de Transformação
+  y = addSectionPage(doc, "Áreas de Maior Transformação");
+  y = addBulletList(doc, y, data.areasTransformacao, { accentColor: "#c9a84c" });
+
+  // Page 6: Propostas de Melhoria
+  y = addSectionPage(doc, "Propostas de Melhoria");
+  const tableW = doc.page.width - 100;
+  const colWidths = [tableW * 0.35, tableW * 0.20, tableW * 0.30, tableW * 0.15];
+  const rows = data.propostasMelhoria.map(p => [p.proposta, p.area, p.impacto, p.prioridade]);
+  y = addTable(doc, y, ["Proposta", "Área", "Impacto Esperado", "Prioridade"], rows, { colWidths });
+
+  // Page 7: Próximos Passos
+  addClosingPage(doc, { ...pdfOpts, proximosPassos: data.proximosPassos });
+
+  // Mensagem final on new page
+  doc.addPage();
+  doc.font("Helvetica-Bold").fontSize(20).fillColor("#1a2332")
+    .text("Mensagem Final", 50, 60);
+  doc.moveDown(0.5);
+  doc.font("Helvetica").fontSize(11).fillColor("#374151")
+    .text(data.mensagemFinal, 50, doc.y, { width: doc.page.width - 100, lineGap: 4 });
+
+  // Footer on last page
+  doc.moveDown(3);
+  doc.font("Helvetica").fontSize(9).fillColor("#9ca3af")
+    .text("Relatório gerado por ITC MedMentoring — Confidencial", 50, doc.page.height - 60, { align: "center", width: doc.page.width - 100 });
+
+  doc.end();
+
+  return new Promise((resolve) => {
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+  });
 }
 
 export const pillarReportRouter = router({
@@ -401,6 +505,118 @@ Gere um JSON com exatamente estes campos:
       });
 
       const base64 = pdfBuffer.toString("base64");
+      return { base64, fileName };
+    }),
+
+  // ── Mentor: gera relatório final completo (todos os pilares) ──
+  generateFinalReport: protectedProcedure
+    .input(z.object({ menteeId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Acesso negado");
+
+      const mentee = await getMenteeById(input.menteeId);
+      if (!mentee) throw new Error("Mentorado não encontrado");
+
+      const allReports = await getAllPillarReports(input.menteeId);
+      const generatedReports = allReports.filter(r => r.htmlContent);
+
+      if (generatedReports.length === 0) {
+        throw new Error("Nenhum relatório de pilar gerado. Gere pelo menos um relatório de pilar antes.");
+      }
+
+      // Collect all data for LLM consolidation
+      const pillarSummaries = generatedReports.map(r => ({
+        pillarId: r.pillarId,
+        title: r.title,
+        summary: r.executiveSummary,
+        strengths: JSON.parse(r.strengthsJson ?? "[]"),
+        attentionPoints: JSON.parse(r.attentionJson ?? "[]"),
+        actionPlan: JSON.parse(r.actionPlanJson ?? "[]"),
+        conclusions: r.conclusionsText,
+      }));
+
+      const llmPrompt = `Você é um especialista em mentoria médica. Com base nos relatórios individuais dos pilares abaixo do médico ${mentee.nome} (${mentee.especialidade || "especialidade não informada"}), gere um RELATÓRIO FINAL CONSOLIDADO de toda a mentoria.
+
+RELATÓRIOS POR PILAR:
+${pillarSummaries.map(p => `
+=== PILAR ${p.pillarId}: ${p.title} ===
+Resumo: ${p.summary}
+Pontos Fortes: ${p.strengths.join("; ")}
+Pontos de Atenção: ${p.attentionPoints.join("; ")}
+Ações: ${p.actionPlan.map((a: any) => a.action).join("; ")}
+Conclusão: ${p.conclusions}
+`).join("\n")}
+
+Gere um JSON com:
+- title: título impactante do relatório final (ex: "Relatório Final de Mentoria")
+- diagnosticoGeral: 2-3 parágrafos com visão geral da jornada do mentorado, evolução e momento atual
+- principaisConquistas: array de 5-7 conquistas principais ao longo dos pilares
+- areasTransformacao: array de 3-5 áreas onde houve maior transformação
+- propostasMelhoria: array de 5-8 propostas concretas de melhoria para o próximo ciclo, cada uma com: proposta (o que fazer), area (qual pilar/área), impacto (resultado esperado), prioridade ("alta"|"média"|"baixa")
+- proximosPassos: array de 3-5 próximos passos recomendados para após a mentoria
+- mensagemFinal: mensagem motivadora e pessoal de encerramento (2-3 parágrafos)`;
+
+      const llmResponse = await invokeLLM({
+        messages: [
+          { role: "system", content: "Você é especialista em mentoria médica. Responda APENAS com JSON válido." },
+          { role: "user", content: llmPrompt },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "final_report",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                diagnosticoGeral: { type: "string" },
+                principaisConquistas: { type: "array", items: { type: "string" } },
+                areasTransformacao: { type: "array", items: { type: "string" } },
+                propostasMelhoria: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      proposta: { type: "string" },
+                      area: { type: "string" },
+                      impacto: { type: "string" },
+                      prioridade: { type: "string", enum: ["alta", "média", "baixa"] },
+                    },
+                    required: ["proposta", "area", "impacto", "prioridade"],
+                    additionalProperties: false,
+                  },
+                },
+                proximosPassos: { type: "array", items: { type: "string" } },
+                mensagemFinal: { type: "string" },
+              },
+              required: ["title", "diagnosticoGeral", "principaisConquistas", "areasTransformacao", "propostasMelhoria", "proximosPassos", "mensagemFinal"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+
+      const content = llmResponse?.choices?.[0]?.message?.content ?? "{}";
+      const parsed = JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+
+      // Generate PDF using pdfPremium components
+      const pdfBuffer = await generateFinalPdf({
+        menteeName: mentee.nome,
+        menteeSpecialty: mentee.especialidade ?? "",
+        title: parsed.title ?? "Relatório Final de Mentoria",
+        diagnosticoGeral: parsed.diagnosticoGeral ?? "",
+        principaisConquistas: parsed.principaisConquistas ?? [],
+        areasTransformacao: parsed.areasTransformacao ?? [],
+        propostasMelhoria: parsed.propostasMelhoria ?? [],
+        proximosPassos: parsed.proximosPassos ?? [],
+        mensagemFinal: parsed.mensagemFinal ?? "",
+        pillarSummaries,
+        totalPillarsCompleted: generatedReports.length,
+      });
+
+      const base64 = pdfBuffer.toString("base64");
+      const fileName = `MedMentoring_RelatorioFinal_${mentee.nome.replace(/\s+/g, "-")}.pdf`;
       return { base64, fileName };
     }),
 });

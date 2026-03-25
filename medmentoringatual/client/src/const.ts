@@ -30,6 +30,7 @@ export const getLoginUrl = (returnPath?: string) => {
   const statePayload = JSON.stringify({ redirectUri, returnPath: path });
   const state = btoa(statePayload);
 
+  if (!oauthPortalUrl) return "#";
   const url = new URL(`${oauthPortalUrl}/app-auth`);
   url.searchParams.set("appId", appId);
   url.searchParams.set("redirectUri", redirectUri);

@@ -258,6 +258,28 @@ export default function MenteeDetail() {
   });
   const handleGeneratePptx = () => generatePptx.mutate({ menteeId });
 
+  const generateFinal = trpc.pillarReport.generateFinalReport.useMutation({
+    onSuccess: (data) => {
+      const byteCharacters = atob(data.base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = data.fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Relatório Final gerado com sucesso!");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const m = mentee.data;
 
   const copyCode = () => {
@@ -321,6 +343,15 @@ export default function MenteeDetail() {
           <span className="text-muted-foreground">/</span>
           <span className="text-sm font-medium text-foreground">{m.nome}</span>
           <div className="ml-auto flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => generateFinal.mutate({ menteeId })}
+              disabled={generateFinal.isPending}
+              className="text-xs"
+            >
+              {generateFinal.isPending ? <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Gerando...</> : "📄 Relatório Final"}
+            </Button>
             <Button
               variant="outline"
               size="sm"
