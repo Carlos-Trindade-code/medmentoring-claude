@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import {
   ChevronLeft, ChevronDown, ChevronUp, CheckCircle2,
   MessageSquare, BookOpen, Wrench, Send, Lock, Unlock,
-  User, AlertCircle, Star, Loader2, Eye, EyeOff,
+  User, AlertCircle, Star, Loader2, Eye,
   Sparkles, Map, RefreshCw, TrendingUp, AlertTriangle, Target, Zap, FileDown
 } from "lucide-react";
 import { Link } from "wouter";
@@ -30,6 +30,7 @@ import type { Answer } from "@/components/MenteePillarQuestionnaire";
 import { MentorAIChat } from "@/components/MentorAIChat";
 import { PillarReportGenerator } from "@/components/PillarReportGenerator";
 import { PillarPartAnalysis } from "@/components/PillarPartAnalysis";
+import { MenteeAnswersSummary } from "@/components/MenteeAnswersSummary";
 
 // ============================================================
 // TIPOS DE IA
@@ -266,7 +267,7 @@ export default function MentorPillarView() {
   const [pontosFortes, setPontosFortes] = useState<string[]>([""]);
   const [pontosMelhoria, setPontosMelhoria] = useState<string[]>([""]);
   const [savingFeedback, setSavingFeedback] = useState(false);
-  const [showAllAnswers, setShowAllAnswers] = useState(false);
+
   const [aiTab, setAiTab] = useState<"especializacoes" | "roteiro">("especializacoes");
   const [generatingSpec, setGeneratingSpec] = useState(false);
   const [generatingRoadmap, setGeneratingRoadmap] = useState(false);
@@ -701,46 +702,11 @@ export default function MentorPillarView() {
                   <p className="text-sm text-muted-foreground">O mentorado ainda não respondeu este pilar.</p>
                 </div>
               ) : (
-                <div className="mt-4 space-y-4">
-                  {sections?.map(section => {
-                    const sectionAnswers = answersBySection[section.id] ?? [];
-                    if (sectionAnswers.length === 0) return null;
-                    const visibleAnswers = showAllAnswers ? sectionAnswers : sectionAnswers.slice(0, 3);
-
-                    return (
-                      <div key={section.id} className="border rounded-lg overflow-hidden">
-                        <div className="px-3 py-2 bg-muted/30 flex items-center gap-2">
-                          <span className="text-base">{section.icone}</span>
-                          <p className="text-sm font-semibold text-foreground">{section.titulo}</p>
-                          <Badge variant="outline" className="ml-auto text-xs">{sectionAnswers.length} respostas</Badge>
-                        </div>
-                        <div className="divide-y">
-                          {visibleAnswers.map(answer => (
-                            <div key={answer.id} className="px-3 py-2.5">
-                              <p className="text-xs text-muted-foreground mb-1">{answer.pergunta}</p>
-                              {answer.naoSabe ? (
-                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Não sabe</Badge>
-                              ) : (
-                                <p className="text-sm text-foreground font-medium">
-                                  {answer.resposta === null || answer.resposta === undefined || answer.resposta === ""
-                                    ? <span className="text-muted-foreground italic">Não respondeu</span>
-                                    : String(answer.resposta)}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                          {sectionAnswers.length > 3 && (
-                            <button
-                              onClick={() => setShowAllAnswers(!showAllAnswers)}
-                              className="w-full px-3 py-2 text-xs text-primary hover:bg-muted/30 flex items-center justify-center gap-1"
-                            >
-                              {showAllAnswers ? <><EyeOff className="w-3 h-3" /> Mostrar menos</> : <><Eye className="w-3 h-3" /> Ver todas ({sectionAnswers.length})</>}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="mt-4">
+                  <MenteeAnswersSummary
+                    sections={PILLAR_SECTIONS[Number(pillarId)] ?? []}
+                    answers={answers ?? []}
+                  />
                 </div>
               )}
             </div>
