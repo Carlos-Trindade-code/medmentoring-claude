@@ -537,8 +537,40 @@ export function PricingTableMentee({ isReleased, onComplete }: Props) {
         </div>
       </div>
 
+      {/* Mobile: card stack */}
+      <div className="block md:hidden space-y-3">
+        {services.map((s, i) => {
+          const calc = calcService(s, taxaSalaHora);
+          return (
+            <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                  {calc.margemOperacional >= 30
+                    ? <TrendingUp className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    : calc.margemOperacional >= 15
+                    ? <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    : <TrendingDown className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+                  {s.nome || `Serviço ${i + 1}`}
+                </div>
+                <Badge className={`text-xs ${marginBg(calc.margemOperacional)}`}>
+                  {fmtPct(calc.margemOperacional)}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-muted-foreground text-xs">Preço:</span> <span className="font-medium">{fmt(s.precoVenda)}</span></div>
+                <div><span className="text-muted-foreground text-xs">Duração:</span> <span className="font-medium">{s.duracaoHoras}h</span></div>
+                <div><span className="text-muted-foreground text-xs">L. Bruto:</span> <span className={`font-medium ${calc.lucroBruto >= 0 ? "text-emerald-600" : "text-red-600"}`}>{fmt(calc.lucroBruto)}</span></div>
+                <div><span className="text-muted-foreground text-xs">L. Oper.:</span> <span className={`font-medium ${calc.lucroOperacional >= 0 ? "text-blue-600" : "text-red-600"}`}>{fmt(calc.lucroOperacional)}</span></div>
+                <div><span className="text-muted-foreground text-xs">Honorário:</span> <span className="font-medium text-violet-600">{fmt(calc.honorarioMedico)}</span></div>
+                <div><span className="text-muted-foreground text-xs">Qtd/mês:</span> <span className="font-medium">{s.quantidadeMes || 0}</span></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Tabela completa */}
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="hidden md:block overflow-x-auto rounded-xl border">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-muted/50 border-b">
