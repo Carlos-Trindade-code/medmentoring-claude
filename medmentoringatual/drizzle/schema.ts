@@ -444,7 +444,7 @@ export type InsertMentorSuggestion = typeof mentorSuggestions.$inferInsert;
 // ============================================================
 export const partReleases = mysqlTable("part_releases", {
   id: int("id").primaryKey().autoincrement(),
-  menteeId: int("mentee_id").notNull(),
+  menteeId: int("mentee_id").notNull().references(() => mentees.id, { onDelete: "cascade" }),
   pillarId: int("pillar_id").notNull(),
   partId: varchar("part_id", { length: 50 }).notNull(),
   partLabel: varchar("part_label", { length: 200 }).notNull(),
