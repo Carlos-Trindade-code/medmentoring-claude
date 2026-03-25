@@ -109,8 +109,18 @@ export default function Pillar2WorkRoom() {
   const [diferencialPos, setDiferencialPos] = useState("");
   const [posResult, setPosResult] = useState<PosResult | null>(null);
 
-  // Checklist
-  const [checklist, setChecklist] = useState<boolean[]>(new Array(CHECKLIST_ITEMS.length).fill(false));
+  // Checklist (DB-backed)
+  const utils = trpc.useUtils();
+  const { data: checklistData } = trpc.mentor.getChecklist.useQuery({ menteeId });
+  const updateChecklistItem = trpc.mentor.updateChecklistItem.useMutation({
+    onSuccess: () => utils.mentor.getChecklist.invalidate({ menteeId }),
+  });
+  const pillarChecklist = (checklistData ?? []).filter((c: any) => c.pillarId === 2);
+  const checklist = CHECKLIST_ITEMS.map((_item, i) => {
+    const saved = pillarChecklist.find((c: any) => c.itemIndex === i);
+    return saved?.status === "completed";
+  });
+  const completedCount = checklist.filter(Boolean).length;
 
   // Mentee data
   const { data: mentee } = trpc.mentor.getMentee.useQuery({ id: menteeId }, { enabled: !!menteeId });
@@ -195,13 +205,6 @@ export default function Pillar2WorkRoom() {
   };
 
   const toggleSection = (s: string) => setOpenSection(openSection === s ? "" : s);
-  const toggleChecklist = (i: number) => {
-    const next = [...checklist];
-    next[i] = !next[i];
-    setChecklist(next);
-  };
-
-  const completedCount = checklist.filter(Boolean).length;
   const scoreColor = diffResult
     ? diffResult.score >= 7 ? "text-green-600" : diffResult.score >= 4 ? "text-yellow-600" : "text-red-600"
     : "";
@@ -473,7 +476,12 @@ export default function Pillar2WorkRoom() {
             <div className="px-5 pb-5 border-t border-slate-100">
               <div className="pt-4 space-y-2">
                 {CHECKLIST_ITEMS.map((item, i) => (
-                  <button key={i} onClick={() => toggleChecklist(i)}
+                  <button key={i} onClick={() => updateChecklistItem.mutate({
+                    menteeId,
+                    pillarId: 2,
+                    itemIndex: i,
+                    status: checklist[i] ? "pending" : "completed",
+                  })}
                     className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition-colors ${checklist[i] ? "bg-green-50 border border-green-200" : "bg-slate-50 border border-slate-200 hover:bg-slate-100"}`}>
                     {checklist[i] ? <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" /> : <Circle className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />}
                     <span className={`text-sm ${checklist[i] ? "text-green-800 line-through" : "text-slate-700"}`}>{item}</span>

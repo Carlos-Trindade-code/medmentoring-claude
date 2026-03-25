@@ -247,7 +247,17 @@ export default function Pillar6WorkRoom() {
   // Mentor notes
   const [mentorNotes, setMentorNotes] = useState<Record<number, string>>({});
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(0);
-  const [checklistStatus, setChecklistStatus] = useState<boolean[]>(new Array(CHECKLIST_PILAR.length).fill(false));
+  // Checklist (DB-backed)
+  const utils = trpc.useUtils();
+  const { data: checklistData } = trpc.mentor.getChecklist.useQuery({ menteeId: mid });
+  const updateChecklistItem = trpc.mentor.updateChecklistItem.useMutation({
+    onSuccess: () => utils.mentor.getChecklist.invalidate({ menteeId: mid }),
+  });
+  const pillarChecklist = (checklistData ?? []).filter((c: any) => c.pillarId === 6);
+  const checklistStatus = CHECKLIST_PILAR.map((_item, i) => {
+    const saved = pillarChecklist.find((c: any) => c.itemIndex === i);
+    return saved?.status === "completed";
+  });
 
   // Marketing data
   const [bloqueiosMarketing, setBloqueiosMarketing] = useState("");
@@ -315,7 +325,6 @@ export default function Pillar6WorkRoom() {
       if (saved.referenciasMedico) setReferenciasMedico(saved.referenciasMedico as string);
       if (saved.presencaAtual) setPresencaAtual(saved.presencaAtual as string);
       if (saved.mentorNotes) setMentorNotes(saved.mentorNotes as Record<number, string>);
-      if (saved.checklistStatus) setChecklistStatus(saved.checklistStatus as boolean[]);
       if (saved.promptGerado) setPromptGerado(saved.promptGerado as string);
       if (saved.promptGeradoEm) setPromptGeradoEm(saved.promptGeradoEm as string);
     }
@@ -344,7 +353,7 @@ export default function Pillar6WorkRoom() {
     try {
       await saveDiagnostic.mutateAsync({
         menteeId: mid, pillarId: 6,
-        respostasJson: { bloqueiosMarketing, referenciasMedico, presencaAtual, mentorNotes, checklistStatus, promptGerado, promptGeradoEm },
+        respostasJson: { bloqueiosMarketing, referenciasMedico, presencaAtual, mentorNotes, promptGerado, promptGeradoEm },
         angustiasJson: [], tecnicasJson: [],
       });
       setLastSaved(new Date());
@@ -773,11 +782,12 @@ export default function Pillar6WorkRoom() {
               </div>
               <div className="space-y-2">
                 {CHECKLIST_PILAR.map((item, i) => (
-                  <button key={i} onClick={() => {
-                    const newStatus = [...checklistStatus];
-                    newStatus[i] = !newStatus[i];
-                    setChecklistStatus(newStatus);
-                  }} className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${checklistStatus[i] ? "border-green-300 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <button key={i} onClick={() => updateChecklistItem.mutate({
+                    menteeId: mid,
+                    pillarId: 6,
+                    itemIndex: i,
+                    status: checklistStatus[i] ? "pending" : "completed",
+                  })} className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${checklistStatus[i] ? "border-green-300 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${checklistStatus[i] ? "border-green-500 bg-green-500" : "border-gray-300"}`}>
                       {checklistStatus[i] && <CheckCircle2 className="w-3 h-3 text-white" />}
                     </div>

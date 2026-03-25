@@ -80,7 +80,6 @@ export default function Pillar3WorkRoom() {
   const [openSection, setOpenSection] = useState<string>("roteiro");
   const [openQuestion, setOpenQuestion] = useState<number | null>(null);
   const [notes, setNotes] = useState<Record<number, string>>({});
-  const [checklist, setChecklist] = useState<boolean[]>(new Array(CHECKLIST_ITEMS.length).fill(false));
 
   // Calculadora de custo por hora
   const [aluguel, setAluguel] = useState("");
@@ -88,6 +87,19 @@ export default function Pillar3WorkRoom() {
   const [outros, setOutros] = useState("");
   const [horasMes, setHorasMes] = useState("");
   const [taxaOciosidade, setTaxaOciosidade] = useState("20");
+
+  // Checklist (DB-backed)
+  const utils = trpc.useUtils();
+  const { data: checklistData } = trpc.mentor.getChecklist.useQuery({ menteeId });
+  const updateChecklistItem = trpc.mentor.updateChecklistItem.useMutation({
+    onSuccess: () => utils.mentor.getChecklist.invalidate({ menteeId }),
+  });
+  const pillarChecklist = (checklistData ?? []).filter((c: any) => c.pillarId === 3);
+  const checklist = CHECKLIST_ITEMS.map((_item, i) => {
+    const saved = pillarChecklist.find((c: any) => c.itemIndex === i);
+    return saved?.status === "completed";
+  });
+  const completedCount = checklist.filter(Boolean).length;
 
   const { data: mentee } = trpc.mentor.getMentee.useQuery({ id: menteeId }, { enabled: !!menteeId });
 
@@ -162,9 +174,6 @@ export default function Pillar3WorkRoom() {
   };
 
   const toggleSection = (s: string) => setOpenSection(openSection === s ? "" : s);
-  const toggleChecklist = (i: number) => {
-    const next = [...checklist]; next[i] = !next[i]; setChecklist(next);
-  };
 
   // Cálculos da calculadora
   const totalFixo = (parseFloat(aluguel) || 0) + (parseFloat(funcionarios) || 0) + (parseFloat(outros) || 0);
@@ -174,8 +183,6 @@ export default function Pillar3WorkRoom() {
   const custoPorHora = horasEfetivas > 0 ? totalFixo / horasEfetivas : 0;
   const custoPorHoraComOciosidade = horas > 0 ? totalFixo / horas : 0;
   const custoOciosidade = totalFixo - (horasEfetivas > 0 ? custoPorHoraComOciosidade * horasEfetivas : 0);
-  const completedCount = checklist.filter(Boolean).length;
-
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
@@ -420,7 +427,12 @@ export default function Pillar3WorkRoom() {
             <div className="px-5 pb-5 border-t border-slate-100">
               <div className="pt-4 space-y-2">
                 {CHECKLIST_ITEMS.map((item, i) => (
-                  <button key={i} onClick={() => toggleChecklist(i)}
+                  <button key={i} onClick={() => updateChecklistItem.mutate({
+                    menteeId,
+                    pillarId: 3,
+                    itemIndex: i,
+                    status: checklist[i] ? "pending" : "completed",
+                  })}
                     className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition-colors ${checklist[i] ? "bg-green-50 border border-green-200" : "bg-slate-50 border border-slate-200 hover:bg-slate-100"}`}>
                     {checklist[i] ? <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" /> : <Circle className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />}
                     <span className={`text-sm ${checklist[i] ? "text-green-800 line-through" : "text-slate-700"}`}>{item}</span>

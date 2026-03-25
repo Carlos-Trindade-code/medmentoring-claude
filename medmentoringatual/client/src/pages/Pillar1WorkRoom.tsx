@@ -229,7 +229,17 @@ export default function Pillar1WorkRoom() {
   // Mentor notes state
   const [mentorNotes, setMentorNotes] = useState<Record<number, string>>({});
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(0);
-  const [checklistStatus, setChecklistStatus] = useState<boolean[]>(new Array(CHECKLIST_PILAR.length).fill(false));
+  // Checklist (DB-backed)
+  const utils = trpc.useUtils();
+  const { data: checklistData } = trpc.mentor.getChecklist.useQuery({ menteeId: mid });
+  const updateChecklistItem = trpc.mentor.updateChecklistItem.useMutation({
+    onSuccess: () => utils.mentor.getChecklist.invalidate({ menteeId: mid }),
+  });
+  const pillarChecklist = (checklistData ?? []).filter((c: any) => c.pillarId === 1);
+  const checklistStatus = CHECKLIST_PILAR.map((_item, i) => {
+    const saved = pillarChecklist.find((c: any) => c.itemIndex === i);
+    return saved?.status === "completed";
+  });
 
   // Saving
   const [saving, setSaving] = useState(false);
@@ -293,7 +303,6 @@ export default function Pillar1WorkRoom() {
       if (saved.valoresManifestacoes) setValoresManifestacoes(saved.valoresManifestacoes as Record<string, string>);
       if (saved.valoresCustom) setValoresCustom(saved.valoresCustom as string);
       if (saved.mentorNotes) setMentorNotes(saved.mentorNotes as Record<number, string>);
-      if (saved.checklistStatus) setChecklistStatus(saved.checklistStatus as boolean[]);
     }
   }, [diagnostic]);
 
@@ -373,7 +382,7 @@ export default function Pillar1WorkRoom() {
           missaoAnswers, missaoFinal,
           visaoAnswers, visaoFinal,
           valoresSelecionados, valoresManifestacoes, valoresCustom,
-          mentorNotes, checklistStatus,
+          mentorNotes,
         },
         angustiasJson: [],
         tecnicasJson: [],
@@ -821,11 +830,12 @@ export default function Pillar1WorkRoom() {
               <div className="space-y-2">
                 {CHECKLIST_PILAR.map((item, i) => (
                   <button key={i}
-                    onClick={() => {
-                      const newStatus = [...checklistStatus];
-                      newStatus[i] = !newStatus[i];
-                      setChecklistStatus(newStatus);
-                    }}
+                    onClick={() => updateChecklistItem.mutate({
+                      menteeId: mid,
+                      pillarId: 1,
+                      itemIndex: i,
+                      status: checklistStatus[i] ? "pending" : "completed",
+                    })}
                     className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${
                       checklistStatus[i]
                         ? "border-green-300 bg-green-50"
