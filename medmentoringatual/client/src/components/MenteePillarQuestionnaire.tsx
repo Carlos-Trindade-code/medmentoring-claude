@@ -5,7 +5,7 @@
  * O mentorado responde autonomamente, com guias de orientação e opção "Não sei".
  * As respostas são salvas automaticamente e enviadas ao mentor.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { StepWizard } from "@/components/StepWizard";
 import type { WizardStep } from "@/components/StepWizard";
@@ -81,6 +81,10 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
+
+  // Auto-save refs
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialLoad = useRef(true);
 
   // Aviso de saída sem salvar
   useEffect(() => {
@@ -180,6 +184,8 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
       const firstIncomplete = sections.findIndex(s => !completed.has(s.id));
       if (firstIncomplete >= 0) setCurrentSectionIdx(firstIncomplete);
     }
+    // Mark initial load as complete after a tick so the auto-save effect won't fire
+    setTimeout(() => { isInitialLoad.current = false; }, 0);
   }, [savedAnswers]);
 
   const currentSection = sections[currentSectionIdx];
@@ -257,6 +263,47 @@ export function MenteePillarQuestionnaire({ pillarId, pillarTitle, sections, onC
     const alreadyCompleted = completedSections.has(currentSection?.id ?? "");
     saveSection(alreadyCompleted ? "concluida" : "em_progresso");
   };
+
+  // Auto-save com debounce de 2 segundos
+  const triggerAutoSave = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (!currentSection) return;
+      try {
+        const secaoAnswers = answers[currentSection.id] ?? [];
+        const alreadyCompleted = completedSections.has(currentSection.id);
+        await saveMutation.mutateAsync({
+          pillarId,
+          secao: currentSection.id,
+          respostas: secaoAnswers,
+          status: alreadyCompleted ? "concluida" : "em_progresso",
+        });
+        setLastSaved(new Date());
+        setIsDirty(false);
+      } catch {
+        // Silently fail — user can still save manually
+      }
+    }, 2000);
+  }, [currentSection, answers, completedSections, pillarId, saveMutation]);
+
+  // Trigger auto-save when answers change and isDirty is true
+  useEffect(() => {
+    if (isDirty && !isInitialLoad.current) {
+      triggerAutoSave();
+    }
+  }, [answers, isDirty, triggerAutoSave]);
+
+  // Reset isInitialLoad when section changes
+  useEffect(() => {
+    isInitialLoad.current = true;
+  }, [currentSectionIdx]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const allSectionsCompleted = sections.every(s => completedSections.has(s.id));
   // Pilar bloqueado: seção já concluída E não está em modo de revisão
