@@ -397,6 +397,11 @@ export interface ReportPdfOptions {
     pontosMelhoriaJson?: unknown;
     planoAcao?: string;
   } | null;
+  chatConclusions?: Array<{
+    titulo?: string | null;
+    content: string;
+    categoria?: string | null;
+  }>;
 }
 
 export function generateReportPdf(options: ReportPdfOptions): Promise<Buffer> {
@@ -561,6 +566,27 @@ export function generateReportPdf(options: ReportPdfOptions): Promise<Buffer> {
             y += 20;
             y = addNarrative(doc, y, fb.feedbackText);
           }
+        }
+      }
+
+      // 2e. Orientações da Consultoria (chat conclusions)
+      if (options.chatConclusions?.length) {
+        let y = addSectionPage(doc, 'Orientações da Consultoria');
+        for (const conclusion of options.chatConclusions) {
+          if (y > doc.page.height - 120) {
+            doc.addPage();
+            y = 50;
+          }
+          if (conclusion.titulo) {
+            doc.fontSize(13).fillColor(GOLD).text(conclusion.titulo, 50, y, { continued: false });
+            y = doc.y + 8;
+          }
+          if (conclusion.categoria) {
+            doc.fontSize(9).fillColor(GRAY).text(conclusion.categoria.toUpperCase(), 50, y);
+            y = doc.y + 8;
+          }
+          doc.fontSize(11).fillColor('#374151').text(conclusion.content, 50, y, { width: doc.page.width - 100, lineGap: 4 });
+          y = doc.y + 20;
         }
       }
 

@@ -17,6 +17,7 @@ import {
   getPillarPartContent,
   getFinancialData,
   getIvmpData,
+  getChatConclusionsForReport,
   getDb,
 } from "../db";
 import { generatePillarReportHtml, PILLAR_THEMES, PartAnalysis, DiagnosisData } from "../reportGenerator";
@@ -191,6 +192,7 @@ export const pillarReportRouter = router({
       const partContents = await getPillarPartContent(input.menteeId, input.pillarId);
       const financialDataRow = await getFinancialData(input.menteeId);
       const ivmpDataRow = await getIvmpData(input.menteeId);
+      const chatConclusions = await getChatConclusionsForReport(input.menteeId, input.pillarId);
 
       const answersContext = answers
         .map((a) => `Seção ${a.secao}: ${JSON.stringify(a.respostas)}`)
@@ -353,6 +355,7 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
           pontosMelhoriaJson: feedback.pontosMelhoriaJson ?? undefined,
           planoAcao: feedback.planoAcao ?? undefined,
         } : null,
+        chatConclusions: chatConclusions.map(c => ({ titulo: c.titulo, content: c.content, categoria: c.categoria })),
       });
 
       await upsertPillarReport(input.menteeId, input.pillarId, {
@@ -414,6 +417,7 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
       const answers = await getPillarAnswers(menteeId, pillarId);
       const financialDataRow = await getFinancialData(menteeId);
       const ivmpDataRow = await getIvmpData(menteeId);
+      const chatConclusions = await getChatConclusionsForReport(menteeId, pillarId);
 
       const partAnalyses: PartAnalysis[] = (partContents as any[])
         .filter((p: any) => p.conteudo || p.titulo)
@@ -466,6 +470,7 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
           pontosMelhoriaJson: feedback.pontosMelhoriaJson ?? undefined,
           planoAcao: feedback.planoAcao ?? undefined,
         } : null,
+        chatConclusions: chatConclusions.map(c => ({ titulo: c.titulo, content: c.content, categoria: c.categoria })),
       });
 
       await upsertPillarReport(menteeId, pillarId, { ...data, htmlContent });
@@ -544,6 +549,7 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
       const feedback = await getPillarFeedback(menteeId, pillarId);
       const financialDataRow = await getFinancialData(menteeId);
       const ivmpDataRow = await getIvmpData(menteeId);
+      const chatConclusions = await getChatConclusionsForReport(menteeId, pillarId);
 
       const pdfBuffer = await generateReportPdf({
         menteeName,
@@ -577,6 +583,7 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
           pontosMelhoriaJson: feedback.pontosMelhoriaJson ?? undefined,
           planoAcao: feedback.planoAcao ?? undefined,
         } : null,
+        chatConclusions: chatConclusions.map(c => ({ titulo: c.titulo, content: c.content, categoria: c.categoria })),
       });
 
       const base64 = pdfBuffer.toString("base64");

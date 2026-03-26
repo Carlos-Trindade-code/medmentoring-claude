@@ -157,6 +157,12 @@ export interface ReportData {
     pontosMelhoriaJson?: unknown;
     planoAcao?: string;
   } | null;
+  // Conclusões do chat (Orientações da Consultoria)
+  chatConclusions?: Array<{
+    titulo?: string | null;
+    content: string;
+    categoria?: string | null;
+  }>;
 }
 
 // ============================================================
@@ -635,6 +641,31 @@ export function generatePillarReportHtml(data: ReportData): string {
     </div>`;
   })();
 
+  // ── Orientações da Consultoria (chat conclusions) ──
+  let chatConclusionsHtml = '';
+  if (data.chatConclusions?.length) {
+    const items = data.chatConclusions.map(c => `
+      <div style="margin-bottom: 16px; padding: 16px; border-left: 4px solid ${theme.primaryColor}; background: #f8f9fa; border-radius: 0 8px 8px 0;">
+        ${c.titulo ? `<h4 style="margin: 0 0 8px; font-size: 15px; font-weight: 600; color: ${theme.primaryColor};">${c.titulo}</h4>` : ''}
+        ${c.categoria ? `<span style="display: inline-block; padding: 2px 8px; font-size: 11px; border-radius: 4px; background: ${theme.primaryColor}15; color: ${theme.primaryColor}; margin-bottom: 8px;">${c.categoria}</span>` : ''}
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-wrap;">${c.content}</p>
+      </div>
+    `).join('');
+
+    chatConclusionsHtml = `
+    <!-- ===== ORIENTAÇÕES DA CONSULTORIA ===== -->
+    <div class="page-break" style="margin-bottom:30px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
+        <div>
+          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Consultoria Especializada</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Orientações da Consultoria</h2>
+        </div>
+      </div>
+      ${items}
+    </div>`;
+  }
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -827,6 +858,9 @@ ${partAnalysesHtml}` : ""}
 
 <!-- ===== FEEDBACK ESTRUTURADO DO MENTOR ===== -->
 ${mentorFeedbackHtml}
+
+<!-- ===== ORIENTAÇÕES DA CONSULTORIA ===== -->
+${chatConclusionsHtml}
 
 <!-- ===== PONTOS FORTES ===== -->
 <div style="margin-bottom:30px;">
