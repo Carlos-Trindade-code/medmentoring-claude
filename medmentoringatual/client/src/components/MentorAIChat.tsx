@@ -45,7 +45,7 @@ const QUICK_PROMPTS = [
 
 export function MentorAIChat({ menteeId, pillarId, pillarTitle, autoStart = false }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"chat" | "checklist">("chat");
+  const [activeTab, setActiveTab] = useState<"chat" | "checklist" | "orientacoes">("chat");
   const [message, setMessage] = useState("");
   const [newSuggestion, setNewSuggestion] = useState("");
   const [addingSuggestion, setAddingSuggestion] = useState(false);
@@ -100,6 +100,15 @@ export function MentorAIChat({ menteeId, pillarId, pillarTitle, autoStart = fals
     { enabled: isOpen }
   );
   const addConclusionMutation = trpc.mentorAI.addChatConclusion.useMutation({
+    onSuccess: () => conclusionsQuery.refetch(),
+  });
+  const updateConclusionMutation = trpc.mentorAI.updateChatConclusion.useMutation({
+    onSuccess: () => conclusionsQuery.refetch(),
+  });
+  const deleteConclusionMutation = trpc.mentorAI.deleteChatConclusion.useMutation({
+    onSuccess: () => conclusionsQuery.refetch(),
+  });
+  const toggleReportMutation = trpc.mentorAI.toggleConclusionInReport.useMutation({
     onSuccess: () => conclusionsQuery.refetch(),
   });
 
@@ -236,6 +245,22 @@ export function MentorAIChat({ menteeId, pillarId, pillarTitle, autoStart = fals
               {pendingSuggestions.length > 0 && (
                 <span className="ml-1 text-xs bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">
                   {pendingSuggestions.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("orientacoes")}
+              className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                activeTab === "orientacoes"
+                  ? "text-violet-700 border-b-2 border-violet-500 bg-white"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              Orientações
+              {conclusionsQuery.data && conclusionsQuery.data.length > 0 && (
+                <span className="ml-1 text-xs bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full">
+                  {conclusionsQuery.data.length}
                 </span>
               )}
             </button>
@@ -508,6 +533,61 @@ export function MentorAIChat({ menteeId, pillarId, pillarTitle, autoStart = fals
                   <p className="text-sm">Nenhuma sugestão ainda.</p>
                   <p className="text-xs mt-1">Adicione sugestões manualmente ou peça à IA para gerar.</p>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* ORIENTAÇÕES TAB */}
+          {activeTab === "orientacoes" && (
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              {!conclusionsQuery.data?.length ? (
+                <div className="text-center text-gray-400 py-8">
+                  <Bookmark className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhuma orientação salva ainda</p>
+                  <p className="text-xs mt-1">Marque respostas do chat como orientação para incluí-las no relatório</p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-gray-500">
+                    {conclusionsQuery.data.filter((c: { includedInReport: boolean }) => c.includedInReport).length} de {conclusionsQuery.data.length} incluídas no relatório
+                  </p>
+                  {conclusionsQuery.data.map((c: { id: number; includedInReport: boolean; titulo?: string | null; categoria?: string | null; content: string }) => (
+                    <div
+                      key={c.id}
+                      className={`rounded-lg border p-3 ${c.includedInReport ? 'border-violet-200 bg-violet-50/50' : 'border-gray-200 bg-gray-50/50 opacity-60'}`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => toggleReportMutation.mutate({ id: c.id, included: !c.includedInReport })}>
+                            {c.includedInReport ? <CheckSquare className="w-4 h-4 text-violet-600" /> : <Square className="w-4 h-4 text-gray-400" />}
+                          </button>
+                          <div>
+                            <p className="text-sm font-medium">{c.titulo || 'Sem título'}</p>
+                            {c.categoria && (
+                              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                c.categoria === 'diagnostico' ? 'bg-blue-100 text-blue-700' :
+                                c.categoria === 'plano_acao' ? 'bg-amber-100 text-amber-700' :
+                                c.categoria === 'insight' ? 'bg-emerald-100 text-emerald-700' :
+                                'bg-violet-100 text-violet-700'
+                              }`}>{c.categoria}</span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (confirm('Remover esta orientação?')) {
+                              deleteConclusionMutation.mutate({ id: c.id });
+                            }
+                          }}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2 line-clamp-3">{c.content}</p>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           )}
