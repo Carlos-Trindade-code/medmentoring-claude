@@ -12,6 +12,7 @@ import { MenteePillarQuestionnaire } from "@/components/MenteePillarQuestionnair
 import { ExpenseTool } from "@/components/ExpenseTool";
 import { IvmpQuestionnaire } from "@/components/IvmpQuestionnaire";
 import { ScenarioSimulator } from "@/components/ScenarioSimulator";
+import { PricingTableMentee } from "@/components/PricingTableMentee";
 import { trpc } from "@/lib/trpc";
 import {
   ChevronDown,
@@ -19,7 +20,7 @@ import {
   CheckCircle2,
   Circle,
   FileText,
-  Calculator,
+
   SlidersHorizontal,
   Wrench,
   Sparkles,
@@ -504,12 +505,10 @@ export function PillarPartsView({
                     {part.type === "tool" &&
                       pillarId === 5 &&
                       part.id === "b" && (
-                        <div className="py-6 text-center text-muted-foreground">
-                          <Calculator className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                          <p className="text-sm">
-                            Ferramenta de Engenharia de Preços em preparação.
-                          </p>
-                        </div>
+                        <PricingTableMentee
+                          isReleased={isReleased}
+                          onComplete={onComplete}
+                        />
                       )}
 
                     {part.type === "simulator" &&
