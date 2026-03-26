@@ -133,6 +133,30 @@ export interface ReportData {
   partAnalyses?: PartAnalysis[];
   diagnosisData?: DiagnosisData | null;
   mentorConclusions?: Record<string, unknown> | null;
+  // Respostas do mentorado
+  menteeAnswers?: Array<{
+    secao: string;
+    respostas: Array<{ id: string; pergunta: string; resposta: string | number | boolean | null; naoSabe?: boolean }>;
+    status: string;
+  }>;
+  // Dados financeiros (Pilar 3)
+  financialData?: {
+    expenses?: Record<string, number>;
+    mapaSala?: Record<string, unknown>;
+    pricing?: unknown;
+  } | null;
+  // iVMP scores
+  ivmpData?: {
+    categories?: Record<string, number>;
+    ivmpFinal?: number;
+  } | null;
+  // Feedback estruturado do mentor
+  mentorFeedback?: {
+    feedbackText?: string;
+    pontosFortesJson?: unknown;
+    pontosMelhoriaJson?: unknown;
+    planoAcao?: string;
+  } | null;
 }
 
 // ============================================================

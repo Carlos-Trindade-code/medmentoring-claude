@@ -15,6 +15,8 @@ import {
   getMentorAiChatHistory,
   getPillarFeedback,
   getPillarPartContent,
+  getFinancialData,
+  getIvmpData,
   getDb,
 } from "../db";
 import { generatePillarReportHtml, PILLAR_THEMES, PartAnalysis, DiagnosisData } from "../reportGenerator";
@@ -187,6 +189,8 @@ export const pillarReportRouter = router({
       const chatHistory = await getMentorAiChatHistory(input.menteeId, input.pillarId);
       const feedback = await getPillarFeedback(input.menteeId, input.pillarId);
       const partContents = await getPillarPartContent(input.menteeId, input.pillarId);
+      const financialDataRow = await getFinancialData(input.menteeId);
+      const ivmpDataRow = await getIvmpData(input.menteeId);
 
       const answersContext = answers
         .map((a) => `Seção ${a.secao}: ${JSON.stringify(a.respostas)}`)
@@ -327,6 +331,26 @@ Gere um JSON com exatamente estes campos:
         partAnalyses,
         diagnosisData,
         mentorConclusions,
+        menteeAnswers: answers.map(a => ({
+          secao: a.secao,
+          respostas: Array.isArray(a.respostas) ? a.respostas as any : [],
+          status: a.status,
+        })),
+        financialData: financialDataRow ? {
+          expenses: financialDataRow.despesasJson ? (typeof financialDataRow.despesasJson === 'string' ? JSON.parse(financialDataRow.despesasJson) : financialDataRow.despesasJson) as Record<string, number> : undefined,
+          mapaSala: financialDataRow.mapaSalaJson ? (typeof financialDataRow.mapaSalaJson === 'string' ? JSON.parse(financialDataRow.mapaSalaJson) : financialDataRow.mapaSalaJson) as Record<string, unknown> : undefined,
+          pricing: financialDataRow.precificacaoJson ? (typeof financialDataRow.precificacaoJson === 'string' ? JSON.parse(financialDataRow.precificacaoJson) : financialDataRow.precificacaoJson) : undefined,
+        } : null,
+        ivmpData: ivmpDataRow ? {
+          categories: ivmpDataRow.categoriesJson ? (typeof ivmpDataRow.categoriesJson === 'string' ? JSON.parse(ivmpDataRow.categoriesJson) : ivmpDataRow.categoriesJson) as Record<string, number> : undefined,
+          ivmpFinal: ivmpDataRow.ivmpFinal != null ? Number(ivmpDataRow.ivmpFinal) : undefined,
+        } : null,
+        mentorFeedback: feedback ? {
+          feedbackText: feedback.feedback ?? undefined,
+          pontosFortesJson: feedback.pontosFortesJson ?? undefined,
+          pontosMelhoriaJson: feedback.pontosMelhoriaJson ?? undefined,
+          planoAcao: feedback.planoAcao ?? undefined,
+        } : null,
       });
 
       await upsertPillarReport(input.menteeId, input.pillarId, {
@@ -385,6 +409,9 @@ Gere um JSON com exatamente estes campos:
       const feedback = await getPillarFeedback(menteeId, pillarId);
       const partContents = await getPillarPartContent(menteeId, pillarId);
       const conclusion = await getPillarConclusion(menteeId, pillarId);
+      const answers = await getPillarAnswers(menteeId, pillarId);
+      const financialDataRow = await getFinancialData(menteeId);
+      const ivmpDataRow = await getIvmpData(menteeId);
 
       const partAnalyses: PartAnalysis[] = (partContents as any[])
         .filter((p: any) => p.conteudo || p.titulo)
@@ -417,6 +444,26 @@ Gere um JSON com exatamente estes campos:
         partAnalyses,
         diagnosisData,
         mentorConclusions,
+        menteeAnswers: answers.map(a => ({
+          secao: a.secao,
+          respostas: Array.isArray(a.respostas) ? a.respostas as any : [],
+          status: a.status,
+        })),
+        financialData: financialDataRow ? {
+          expenses: financialDataRow.despesasJson ? (typeof financialDataRow.despesasJson === 'string' ? JSON.parse(financialDataRow.despesasJson) : financialDataRow.despesasJson) as Record<string, number> : undefined,
+          mapaSala: financialDataRow.mapaSalaJson ? (typeof financialDataRow.mapaSalaJson === 'string' ? JSON.parse(financialDataRow.mapaSalaJson) : financialDataRow.mapaSalaJson) as Record<string, unknown> : undefined,
+          pricing: financialDataRow.precificacaoJson ? (typeof financialDataRow.precificacaoJson === 'string' ? JSON.parse(financialDataRow.precificacaoJson) : financialDataRow.precificacaoJson) : undefined,
+        } : null,
+        ivmpData: ivmpDataRow ? {
+          categories: ivmpDataRow.categoriesJson ? (typeof ivmpDataRow.categoriesJson === 'string' ? JSON.parse(ivmpDataRow.categoriesJson) : ivmpDataRow.categoriesJson) as Record<string, number> : undefined,
+          ivmpFinal: ivmpDataRow.ivmpFinal != null ? Number(ivmpDataRow.ivmpFinal) : undefined,
+        } : null,
+        mentorFeedback: feedback ? {
+          feedbackText: feedback.feedback ?? undefined,
+          pontosFortesJson: feedback.pontosFortesJson ?? undefined,
+          pontosMelhoriaJson: feedback.pontosMelhoriaJson ?? undefined,
+          planoAcao: feedback.planoAcao ?? undefined,
+        } : null,
       });
 
       await upsertPillarReport(menteeId, pillarId, { ...data, htmlContent });
