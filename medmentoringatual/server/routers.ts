@@ -66,6 +66,11 @@ import {
   addMentorSuggestion,
   toggleMentorSuggestion,
   deleteMentorSuggestion,
+  getChatConclusions,
+  addChatConclusion,
+  updateChatConclusion,
+  deleteChatConclusion,
+  toggleConclusionInReport,
   getPartReleases,
   upsertPartRelease,
   initPartReleases,
@@ -2860,6 +2865,53 @@ Seja direto, perspicaz e prático. Use linguagem profissional em português. Qua
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       await deleteMentorSuggestion(input.id);
+      return { success: true };
+    }),
+
+  // ---- Chat Conclusions ----
+  getChatConclusions: adminProcedure
+    .input(z.object({ menteeId: z.number(), pillarId: z.number() }))
+    .query(async ({ input }) => {
+      return getChatConclusions(input.menteeId, input.pillarId);
+    }),
+
+  addChatConclusion: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      pillarId: z.number(),
+      content: z.string().min(1),
+      chatMessageId: z.number().optional(),
+      titulo: z.string().optional(),
+      categoria: z.string().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      await addChatConclusion(input.menteeId, input.pillarId, input.content, input.chatMessageId, input.titulo, input.categoria);
+      return { success: true };
+    }),
+
+  updateChatConclusion: adminProcedure
+    .input(z.object({
+      id: z.number(),
+      content: z.string().min(1),
+      titulo: z.string().optional(),
+      categoria: z.string().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      await updateChatConclusion(input.id, input.content, input.titulo, input.categoria);
+      return { success: true };
+    }),
+
+  deleteChatConclusion: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      await deleteChatConclusion(input.id);
+      return { success: true };
+    }),
+
+  toggleConclusionInReport: adminProcedure
+    .input(z.object({ id: z.number(), included: z.boolean() }))
+    .mutation(async ({ input }) => {
+      await toggleConclusionInReport(input.id, input.included);
       return { success: true };
     }),
 

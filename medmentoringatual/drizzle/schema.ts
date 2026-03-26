@@ -506,3 +506,21 @@ export const pillarReports = mysqlTable("pillar_reports", {
 });
 export type PillarReport = typeof pillarReports.$inferSelect;
 export type InsertPillarReport = typeof pillarReports.$inferInsert;
+
+// ============================================================
+// CHAT_CONCLUSIONS — Conclusões marcadas pelo mentor no chat IA
+// ============================================================
+export const chatConclusions = mysqlTable("chat_conclusions", {
+  id: int("id").autoincrement().primaryKey(),
+  menteeId: int("mentee_id").notNull().references(() => mentees.id, { onDelete: "cascade" }),
+  pillarId: int("pillar_id").notNull(),
+  chatMessageId: int("chat_message_id"),
+  content: text("content").notNull(),
+  titulo: varchar("titulo", { length: 300 }),
+  categoria: varchar("categoria", { length: 100 }),
+  includedInReport: boolean("included_in_report").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type ChatConclusion = typeof chatConclusions.$inferSelect;
+export type InsertChatConclusion = typeof chatConclusions.$inferInsert;

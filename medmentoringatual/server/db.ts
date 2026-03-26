@@ -41,6 +41,7 @@ import {
   MentorAiChat,
   mentorSuggestions,
   MentorSuggestion,
+  chatConclusions,
   partReleases,
   pillarPartContent,
   PillarPartContent,
@@ -970,6 +971,65 @@ export async function deleteMentorSuggestion(id: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
   await db.delete(mentorSuggestions).where(eq(mentorSuggestions.id, id));
+}
+
+// ============================================================
+// CHAT_CONCLUSIONS — Conclusões marcadas pelo mentor no chat IA
+// ============================================================
+export async function getChatConclusions(menteeId: number, pillarId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(chatConclusions)
+    .where(and(
+      eq(chatConclusions.menteeId, menteeId),
+      eq(chatConclusions.pillarId, pillarId)
+    ))
+    .orderBy(chatConclusions.createdAt);
+}
+
+export async function getChatConclusionsForReport(menteeId: number, pillarId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(chatConclusions)
+    .where(and(
+      eq(chatConclusions.menteeId, menteeId),
+      eq(chatConclusions.pillarId, pillarId),
+      eq(chatConclusions.includedInReport, true)
+    ))
+    .orderBy(chatConclusions.createdAt);
+}
+
+export async function addChatConclusion(menteeId: number, pillarId: number, content: string, chatMessageId?: number, titulo?: string, categoria?: string) {
+  const db = await getDb();
+  if (!db) return;
+  return db.insert(chatConclusions).values({
+    menteeId, pillarId, content,
+    chatMessageId: chatMessageId ?? null,
+    titulo: titulo ?? null,
+    categoria: categoria ?? null,
+  });
+}
+
+export async function updateChatConclusion(id: number, content: string, titulo?: string, categoria?: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(chatConclusions)
+    .set({ content, titulo: titulo ?? null, categoria: categoria ?? null })
+    .where(eq(chatConclusions.id, id));
+}
+
+export async function deleteChatConclusion(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(chatConclusions).where(eq(chatConclusions.id, id));
+}
+
+export async function toggleConclusionInReport(id: number, included: boolean) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(chatConclusions)
+    .set({ includedInReport: included })
+    .where(eq(chatConclusions.id, id));
 }
 
 // ============================================================
