@@ -913,7 +913,7 @@ ${mentorConclusionsHtml}
 </div>
 <!-- ===== RODAPÉ ===== -->
 <div class="footer">
-  <p>Relatório gerado por ITC MedMentoring — Confidencial</p>
+  <p>Relatório elaborado por ITC MedMentoring — Confidencial</p>
   <p style="margin-top:4px;">Documento gerado em ${date}</p>
 </div>
 

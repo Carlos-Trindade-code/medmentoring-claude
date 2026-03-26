@@ -158,9 +158,9 @@ Analise as respostas do mentorado e gere um resumo estruturado, perspicaz e acio
 
   it("should handle LLM response content safely", () => {
     // Simulates safe string conversion of LLM content
-    const mockContent = "Este é o resumo gerado pela IA.";
+    const mockContent = "Este é o resumo elaborado pela consultoria.";
     const result = String(mockContent || "");
-    expect(result).toBe("Este é o resumo gerado pela IA.");
+    expect(result).toBe("Este é o resumo elaborado pela consultoria.");
 
     const nullContent = null;
     const resultNull = String(nullContent || "");

@@ -1,7 +1,7 @@
 /**
  * pillarReportRouter — Gerador de relatórios finais premium por pilar
  * Mentor gera, edita, pré-visualiza e libera. Mentorado baixa após liberação.
- * Inclui: análises por parte, diagnóstico IA, análise IA, conclusões do mentor, checklist.
+ * Inclui: análises por parte, diagnóstico personalizado, análise especializada, conclusões do mentor, checklist.
  */
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -160,7 +160,7 @@ async function generateFinalPdf(data: FinalReportData): Promise<Buffer> {
   // Footer on last page
   doc.moveDown(3);
   doc.font("Helvetica").fontSize(9).fillColor("#9ca3af")
-    .text("Relatório gerado por ITC MedMentoring — Confidencial", 50, doc.page.height - 60, { align: "center", width: doc.page.width - 100 });
+    .text("Relatório elaborado por ITC MedMentoring — Confidencial", 50, doc.page.height - 60, { align: "center", width: doc.page.width - 100 });
 
   doc.end();
 
@@ -170,7 +170,7 @@ async function generateFinalPdf(data: FinalReportData): Promise<Buffer> {
 }
 
 export const pillarReportRouter = router({
-  // ── Mentor: gera relatório com IA consolidando todos os dados do pilar ──
+  // ── Mentor: gera relatório consolidando todos os dados do pilar ──
   generate: protectedProcedure
     .input(z.object({
       menteeId: z.number(),
@@ -202,10 +202,10 @@ export const pillarReportRouter = router({
         .map((m) => `${m.role}: ${m.content}`)
         .join("\n");
 
-      // Diagnóstico de IA salvo
+      // Diagnóstico personalizado salvo
       const diagnosisData = feedback?.aiDiagnosis as DiagnosisData | null;
       const diagnosisContext = diagnosisData
-        ? `Diagnóstico IA: ${JSON.stringify(diagnosisData)}`
+        ? `Diagnóstico Personalizado: ${JSON.stringify(diagnosisData)}`
         : "";
 
       // Análises por parte salvas
@@ -219,7 +219,7 @@ export const pillarReportRouter = router({
 RESPOSTAS DO MENTORADO:
 ${answersContext || "Sem respostas registradas."}
 
-DIAGNÓSTICO DE IA:
+DIAGNÓSTICO PERSONALIZADO:
 ${diagnosisContext || "Sem diagnóstico gerado."}
 
 ANÁLISES POR PARTE:
@@ -241,7 +241,9 @@ Gere um JSON com exatamente estes campos:
 - strengths: array de 3-5 pontos fortes identificados (frases completas)
 - attentionPoints: array de 3-5 pontos de atenção (frases completas, sem julgamento)
 - actionPlan: array de 3-6 ações, cada uma com: action (o que fazer), deadline (prazo ex: "30 dias"), expectedResult (resultado esperado), priority ("alta"|"média"|"baixa")
-- conclusions: mensagem final do mentor ao mentorado (2-3 parágrafos motivadores e práticos)`;
+- conclusions: mensagem final do mentor ao mentorado (2-3 parágrafos motivadores e práticos)
+
+IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor falando diretamente ao mentorado. NUNCA mencione inteligência artificial, IA, AI, algoritmos ou sistemas automatizados. O texto deve parecer 100% elaborado pelo mentor humano.`;
 
       const llmResponse = await invokeLLM({
         messages: [
@@ -627,7 +629,9 @@ Gere um JSON com:
 - areasTransformacao: array de 3-5 áreas onde houve maior transformação
 - propostasMelhoria: array de 5-8 propostas concretas de melhoria para o próximo ciclo, cada uma com: proposta (o que fazer), area (qual pilar/área), impacto (resultado esperado), prioridade ("alta"|"média"|"baixa")
 - proximosPassos: array de 3-5 próximos passos recomendados para após a mentoria
-- mensagemFinal: mensagem motivadora e pessoal de encerramento (2-3 parágrafos)`;
+- mensagemFinal: mensagem motivadora e pessoal de encerramento (2-3 parágrafos)
+
+IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor falando diretamente ao mentorado. NUNCA mencione inteligência artificial, IA, AI, algoritmos ou sistemas automatizados. O texto deve parecer 100% elaborado pelo mentor humano.`;
 
       const llmResponse = await invokeLLM({
         messages: [
