@@ -51,6 +51,8 @@ import type { ExpenseCategory } from "../../../shared/expense-categories";
 interface ExpenseToolProps {
   pillarId: number;
   onComplete?: () => void;
+  /** Pre-fill values from questionnaire answers (only used if no saved expenses exist) */
+  questionnaireDefaults?: Record<string, number>;
 }
 
 type ExpenseValues = Record<string, number>;
@@ -100,7 +102,7 @@ const DIAS_SEMANA = [
 // ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
-export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
+export function ExpenseTool({ pillarId, onComplete, questionnaireDefaults }: ExpenseToolProps) {
   const [expenses, setExpenses] = useState<ExpenseValues>({});
   const [mapaSala, setMapaSala] = useState<MapaSala>(DEFAULT_MAPA_SALA);
   const [saving, setSaving] = useState(false);
@@ -112,17 +114,21 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
   const { data: savedData } = trpc.portal.getMyExpenses.useQuery();
   const saveMutation = trpc.portal.saveExpenses.useMutation();
 
-  // Carrega dados salvos
+  // Carrega dados salvos — ou pré-preenche com respostas do questionário se vazio
   useEffect(() => {
     if (savedData) {
-      if (savedData.expenses) {
+      const hasSavedExpenses = savedData.expenses && Object.values(savedData.expenses as ExpenseValues).some(v => v > 0);
+      if (hasSavedExpenses) {
         setExpenses(savedData.expenses as ExpenseValues);
+      } else if (questionnaireDefaults && Object.keys(questionnaireDefaults).length > 0) {
+        // Pré-preenche com valores do questionário apenas se não há dados salvos
+        setExpenses(questionnaireDefaults);
       }
       if (savedData.mapaSala) {
         setMapaSala({ ...DEFAULT_MAPA_SALA, ...(savedData.mapaSala as MapaSala) });
       }
     }
-  }, [savedData]);
+  }, [savedData, questionnaireDefaults]);
 
   // Auto-save com debounce de 1.5s
   const triggerSave = useCallback(() => {

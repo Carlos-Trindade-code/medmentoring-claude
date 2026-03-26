@@ -5,7 +5,7 @@
  * em vez do questionário. Quando não liberada, exibe o formulário normalmente
  * (com banner informativo se o mentorado já concluiu e está aguardando).
  */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PILLAR_PARTS } from "../../../shared/pillar-parts";
 import { PILLAR_SECTIONS } from "@/lib/pillar-questions";
 import { MenteePillarQuestionnaire } from "@/components/MenteePillarQuestionnaire";
@@ -215,12 +215,14 @@ function ReleasedPartContentWithFallback({
   part,
   partSections,
   onComplete,
+  questionnaireDefaults,
 }: {
   pillarId: number;
   partId: string;
   part: { id: string; label: string; type: string; description: string };
   partSections: Array<{ id: string; titulo: string; perguntas: any[] }>;
   onComplete?: () => void;
+  questionnaireDefaults?: Record<string, number>;
 }) {
   const { data: releasedParts, isLoading } = trpc.pillarPartContent.getMyReleased.useQuery({ pillarId });
   const [showTool, setShowTool] = useState(false);
@@ -287,7 +289,7 @@ function ReleasedPartContentWithFallback({
 
             {/* Tool: Despesas Fixas */}
             {isToolPart && pillarId === 3 && part.id === "b" && (
-              <ExpenseTool pillarId={pillarId} onComplete={onComplete} />
+              <ExpenseTool pillarId={pillarId} onComplete={onComplete} questionnaireDefaults={questionnaireDefaults} />
             )}
 
             {/* Tool: iVMP */}
@@ -322,6 +324,46 @@ export function PillarPartsView({
   const completedSectionIds = new Set<string>(
     (savedAnswers ?? []).filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
   );
+
+  // Mapeamento: pergunta do questionário Pilar 3 → chave de despesa no ExpenseTool
+  const QUESTIONNAIRE_TO_EXPENSE_MAP: Record<string, string> = {
+    'p3_aluguel_valor': 'espaco.aluguel',
+    'p3_custo_pessoal': 'pessoal.salarios',
+    'p3_custo_energia': 'espaco.energia',
+    'p3_custo_agua': 'espaco.agua',
+    'p3_custo_internet': 'espaco.internet',
+    'p3_custo_limpeza': 'espaco.limpeza',
+    'p3_custo_software': 'administrativo.software_gestao',
+    'p3_custo_marketing': 'marketing.trafego_pago',
+    'p3_custo_seguros': 'seguros_taxas.seguro_profissional',
+    'p3_custo_associacoes': 'seguros_taxas.crm',
+    'p3_custo_gasolina': 'deslocamento.combustivel',
+    'p3_custo_pedagio': 'deslocamento.pedagio',
+    'p3_custo_estacionamento': 'deslocamento.estacionamento',
+    'p3_custo_manutencao_carro': 'deslocamento.manutencao_veiculo',
+    'p3_custo_contador': 'administrativo.contabilidade',
+    'p3_custo_materiais': 'administrativo.material_escritorio',
+  };
+
+  // Extrai valores numéricos das respostas do questionário para pré-preencher o ExpenseTool
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const questionnaireDefaults = useMemo(() => {
+    if (pillarId !== 3 || !savedAnswers || savedAnswers.length === 0) return undefined;
+    const defaults: Record<string, number> = {};
+    for (const row of savedAnswers as any[]) {
+      if (!row.respostas || !Array.isArray(row.respostas)) continue;
+      for (const answer of row.respostas) {
+        const expenseKey = QUESTIONNAIRE_TO_EXPENSE_MAP[answer.id];
+        if (expenseKey && answer.resposta != null && !answer.naoSabe) {
+          const num = Number(answer.resposta);
+          if (!isNaN(num) && num > 0) {
+            defaults[expenseKey] = num;
+          }
+        }
+      }
+    }
+    return Object.keys(defaults).length > 0 ? defaults : undefined;
+  }, [savedAnswers, pillarId]);
 
   if (parts.length === 0) return null;
 
@@ -409,7 +451,7 @@ export function PillarPartsView({
               <div className="border-t p-4">
                 {/* Se liberada: mostra análise da IA (se disponível) */}
                 {isReleased ? (
-                  <ReleasedPartContentWithFallback pillarId={pillarId} partId={part.id} part={part} partSections={partSections} onComplete={onComplete} />
+                  <ReleasedPartContentWithFallback pillarId={pillarId} partId={part.id} part={part} partSections={partSections} onComplete={onComplete} questionnaireDefaults={questionnaireDefaults} />
                 ) : (
                   <>
                     {/* Banner informativo quando aguardando liberação */}
@@ -449,6 +491,7 @@ export function PillarPartsView({
                         <ExpenseTool
                           pillarId={pillarId}
                           onComplete={onComplete}
+                          questionnaireDefaults={questionnaireDefaults}
                         />
                       )}
 
