@@ -10,7 +10,7 @@
  * - Mentor ajusta percentuais e libera
  * - Após liberação: mentorado vê planilha completa + pode fazer simulações + IA assistente
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -156,6 +156,39 @@ export function PricingTableMentee({ isReleased, onComplete }: Props) {
       }
     }
   }, [pricingData]);
+
+  // ─── Auto-save com debounce de 2s ───────────────────────────────────────────
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialLoad = useRef(true);
+
+  const triggerAutoSave = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (services.length === 0) return;
+      try {
+        await saveServicesMutation.mutateAsync({ servicos: services });
+        setLastSaved(new Date());
+        setOriginalServices(JSON.parse(JSON.stringify(services)));
+      } catch {
+        // silently fail — manual save still shows toast
+      }
+    }, 2000);
+  }, [services, saveServicesMutation]);
+
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
+    triggerAutoSave();
+  }, [services, triggerAutoSave]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const taxaSalaHora = pricingData?.taxaSalaHora ?? 0;
   const custoFixoTotal = pricingData?.custoFixoTotal ?? 0;
