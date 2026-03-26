@@ -2,7 +2,7 @@
  * reportGenerator.ts
  * Gera HTML premium para relatórios finais por pilar.
  * Cada pilar tem tema visual distinto (cores, ícone, imagem de fundo).
- * Inclui: análises por parte, diagnóstico IA, análise IA, conclusões do mentor, checklist.
+ * Inclui: análises por parte, diagnóstico personalizado, conclusões do mentor, checklist.
  */
 
 // ============================================================
@@ -307,12 +307,12 @@ export function generatePillarReportHtml(data: ReportData): string {
       </div>`).join("");
 
     return `
-    <!-- ===== DIAGNÓSTICO DE IA ===== -->
+    <!-- ===== DIAGNÓSTICO PERSONALIZADO ===== -->
     <div class="page-break" style="background:white;padding:60px;max-width:900px;margin:0 auto;">
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
         <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
         <div>
-          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Análise Inteligente</p>
+          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Análise Personalizada</p>
           <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Diagnóstico Personalizado</h2>
         </div>
       </div>
@@ -434,6 +434,206 @@ export function generatePillarReportHtml(data: ReportData): string {
       </div>` : ""}
     </div>`;
   })() : "";
+
+  // ── Respostas do Mentorado ──
+  const menteeAnswersHtml = (() => {
+    const sections = (data.menteeAnswers ?? []).filter(s =>
+      s.respostas && s.respostas.some(r => r.resposta != null && r.resposta !== "" && !r.naoSabe)
+    );
+    if (sections.length === 0) return "";
+
+    const sectionsCards = sections.map(section => {
+      const pairs = section.respostas
+        .filter(r => r.resposta != null && r.resposta !== "" && !r.naoSabe)
+        .map(r => `
+          <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #F0F0F0;">
+            <p style="margin:0 0 4px;font-size:12px;color:${theme.primaryColor};font-weight:600;text-transform:uppercase;letter-spacing:0.3px;">${r.pergunta}</p>
+            <p style="margin:0;font-size:14px;color:#2C3E50;line-height:1.6;">${String(r.resposta)}</p>
+          </div>`)
+        .join("");
+      return `
+        <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid ${theme.accentColor};">
+          <p style="font-size:13px;color:${theme.primaryColor};font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.5px;">${section.secao}</p>
+          ${pairs}
+        </div>`;
+    }).join("");
+
+    return `
+    <!-- ===== RESPOSTAS DO MENTORADO ===== -->
+    <div class="page-break" style="margin-bottom:30px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
+        <div>
+          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Dados Coletados</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Respostas do Mentorado</h2>
+        </div>
+      </div>
+      ${sectionsCards}
+    </div>`;
+  })();
+
+  // ── Dados Financeiros ──
+  const financialDataHtml = (() => {
+    const expenses = data.financialData?.expenses;
+    if (!expenses || Object.keys(expenses).length === 0) return "";
+
+    const rows = Object.entries(expenses).map(([category, value]) => {
+      const label = category.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      return `
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #F0F0F0;font-size:14px;color:#2C3E50;">${label}</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #F0F0F0;font-size:14px;color:#2C3E50;text-align:right;font-weight:500;">R$ ${Number(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        </tr>`;
+    }).join("");
+
+    const total = Object.values(expenses).reduce((sum, v) => sum + Number(v), 0);
+
+    return `
+    <!-- ===== DADOS FINANCEIROS ===== -->
+    <div style="margin-bottom:30px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
+        <div>
+          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Panorama Financeiro</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Despesas e Custos</h2>
+        </div>
+      </div>
+      <div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:${theme.primaryColor};">
+              <th style="padding:12px 16px;text-align:left;font-size:12px;color:white;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Categoria</th>
+              <th style="padding:12px 16px;text-align:right;font-size:12px;color:white;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+            <tr style="background:${theme.lightBg};">
+              <td style="padding:12px 16px;font-size:15px;color:${theme.primaryColor};font-weight:700;">Total</td>
+              <td style="padding:12px 16px;font-size:15px;color:${theme.primaryColor};font-weight:700;text-align:right;">R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  })();
+
+  // ── iVMP Score ──
+  const ivmpHtml = (() => {
+    if (!data.ivmpData?.ivmpFinal) return "";
+    const score = data.ivmpData.ivmpFinal;
+    const scoreColor = score > 7 ? "#27AE60" : score >= 5 ? "#F39C12" : "#E74C3C";
+    const scoreLabel = score > 7 ? "Excelente" : score >= 5 ? "Em Desenvolvimento" : "Atenção Necessária";
+
+    const categoriesHtml = data.ivmpData.categories
+      ? Object.entries(data.ivmpData.categories).map(([cat, val]) => {
+          const catColor = Number(val) > 7 ? "#27AE60" : Number(val) >= 5 ? "#F39C12" : "#E74C3C";
+          const label = cat.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+          return `
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <p style="margin:0;flex:1;font-size:14px;color:#2C3E50;">${label}</p>
+            <div style="width:120px;height:8px;background:#ECEFF1;border-radius:4px;overflow:hidden;">
+              <div style="width:${(Number(val) / 10) * 100}%;height:100%;background:${catColor};border-radius:4px;"></div>
+            </div>
+            <p style="margin:0;font-size:14px;font-weight:600;color:${catColor};min-width:32px;text-align:right;">${Number(val).toFixed(1)}</p>
+          </div>`;
+        }).join("")
+      : "";
+
+    return `
+    <!-- ===== iVMP SCORE ===== -->
+    <div style="margin-bottom:30px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
+        <div>
+          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Indicador de Maturidade</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">iVMP — Valor da Prática Médica</h2>
+        </div>
+      </div>
+      <div style="text-align:center;background:white;border-radius:16px;padding:40px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:20px;">
+        <div style="width:120px;height:120px;border-radius:50%;border:8px solid ${scoreColor};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+          <span style="font-size:40px;font-weight:700;color:${scoreColor};">${score.toFixed(1)}</span>
+        </div>
+        <p style="font-size:16px;font-weight:600;color:${scoreColor};margin-bottom:4px;">${scoreLabel}</p>
+        <p style="font-size:13px;color:#7F8C8D;">Escala de 0 a 10</p>
+      </div>
+      ${categoriesHtml ? `
+      <div style="background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <p style="font-size:11px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:16px;">Detalhamento por Categoria</p>
+        ${categoriesHtml}
+      </div>` : ""}
+    </div>`;
+  })();
+
+  // ── Feedback Estruturado do Mentor ──
+  const mentorFeedbackHtml = (() => {
+    const fb = data.mentorFeedback;
+    if (!fb) return "";
+    const hasSomething = fb.feedbackText || fb.planoAcao || fb.pontosFortesJson || fb.pontosMelhoriaJson;
+    if (!hasSomething) return "";
+
+    const parseItems = (raw: unknown): string[] => {
+      if (!raw) return [];
+      if (Array.isArray(raw)) {
+        return raw.map(item => typeof item === "string" ? item : (item as Record<string, unknown>)?.texto ? String((item as Record<string, unknown>).texto) : JSON.stringify(item));
+      }
+      if (typeof raw === "string") {
+        try { return parseItems(JSON.parse(raw)); } catch { return [raw]; }
+      }
+      return [];
+    };
+
+    const fortes = parseItems(fb.pontosFortesJson);
+    const melhoria = parseItems(fb.pontosMelhoriaJson);
+
+    const fortesHtml = fortes.length > 0 ? `
+      <div style="background:#F0FFF4;border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid #27AE60;">
+        <p style="font-size:11px;color:#27AE60;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:12px;">Pontos Fortes Identificados</p>
+        ${fortes.map(f => `
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
+            <span style="color:#27AE60;font-size:14px;line-height:1.2;">✓</span>
+            <p style="margin:0;font-size:14px;color:#2C3E50;line-height:1.5;">${f}</p>
+          </div>`).join("")}
+      </div>` : "";
+
+    const melhoriaHtml = melhoria.length > 0 ? `
+      <div style="background:#FFF8F0;border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid #F39C12;">
+        <p style="font-size:11px;color:#F39C12;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:12px;">Pontos de Melhoria</p>
+        ${melhoria.map(m => `
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
+            <span style="color:#F39C12;font-size:14px;line-height:1.2;">!</span>
+            <p style="margin:0;font-size:14px;color:#2C3E50;line-height:1.5;">${m}</p>
+          </div>`).join("")}
+      </div>` : "";
+
+    const planoHtml = fb.planoAcao ? `
+      <div style="background:#F8F9FA;border-radius:12px;padding:20px;margin-bottom:16px;">
+        <p style="font-size:11px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:8px;">Plano de Ação do Mentor</p>
+        <p style="font-size:14px;color:#2C3E50;line-height:1.7;white-space:pre-wrap;">${fb.planoAcao}</p>
+      </div>` : "";
+
+    const feedbackTextHtml = fb.feedbackText ? `
+      <div style="background:${theme.lightBg};border-radius:12px;padding:20px;border-left:4px solid ${theme.accentColor};">
+        <p style="font-size:11px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:8px;">Feedback do Mentor</p>
+        <p style="font-size:14px;color:#2C3E50;line-height:1.7;white-space:pre-wrap;">${fb.feedbackText}</p>
+      </div>` : "";
+
+    return `
+    <!-- ===== FEEDBACK ESTRUTURADO DO MENTOR ===== -->
+    <div style="margin-bottom:30px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="width:4px;height:40px;background:${theme.accentColor};border-radius:2px;"></div>
+        <div>
+          <p style="font-size:12px;color:${theme.primaryColor};text-transform:uppercase;letter-spacing:1px;font-weight:600;">Avaliação do Mentor</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:28px;color:${theme.primaryColor};">Feedback Estruturado</h2>
+        </div>
+      </div>
+      ${fortesHtml}
+      ${melhoriaHtml}
+      ${planoHtml}
+      ${feedbackTextHtml}
+    </div>`;
+  })();
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -600,7 +800,16 @@ export function generatePillarReportHtml(data: ReportData): string {
   </div>` : ""}
 </div>
 
-<!-- ===== DIAGNÓSTICO DE IA ===== -->
+<!-- ===== RESPOSTAS DO MENTORADO ===== -->
+${menteeAnswersHtml}
+
+<!-- ===== DADOS FINANCEIROS ===== -->
+${financialDataHtml}
+
+<!-- ===== iVMP SCORE ===== -->
+${ivmpHtml}
+
+<!-- ===== DIAGNÓSTICO PERSONALIZADO ===== -->
 ${diagHtml}
 
 <!-- ===== ANÁLISES POR PARTE ===== -->
@@ -615,6 +824,9 @@ ${partAnalysesHtml ? `
   </div>
 </div>
 ${partAnalysesHtml}` : ""}
+
+<!-- ===== FEEDBACK ESTRUTURADO DO MENTOR ===== -->
+${mentorFeedbackHtml}
 
 <!-- ===== PONTOS FORTES ===== -->
 <div style="margin-bottom:30px;">
