@@ -337,6 +337,24 @@ export function addBulletList(
 }
 
 // ============================================================
+// Helper: safely parse feedback lists (may be JSON string, array, or null)
+// ============================================================
+function safeParseFeedbackList(value: unknown): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter((v) => typeof v === "string" && v.trim());
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter((v: unknown) => typeof v === "string" && (v as string).trim());
+    } catch {
+      // Not JSON, treat as single item
+      return value.trim() ? [value] : [];
+    }
+  }
+  return [];
+}
+
+// ============================================================
 // GENERATE REPORT PDF — Replaces Puppeteer HTML-to-PDF
 // ============================================================
 export interface ReportPdfOptions {
@@ -359,6 +377,26 @@ export interface ReportPdfOptions {
   suggestions?: Array<{ texto: string; concluida: boolean }>;
   partAnalyses?: Array<{ partLabel: string; conteudo: string }>;
   mentorConclusions?: Record<string, unknown>;
+  menteeAnswers?: Array<{
+    secao: string;
+    respostas: Array<{ pergunta?: string; resposta?: string; label?: string; value?: unknown }>;
+    status?: string;
+  }>;
+  financialData?: {
+    expenses?: Record<string, number>;
+    mapaSala?: Record<string, unknown>;
+    pricing?: unknown;
+  } | null;
+  ivmpData?: {
+    categories?: Record<string, number>;
+    ivmpFinal?: number;
+  } | null;
+  mentorFeedback?: {
+    feedbackText?: string;
+    pontosFortesJson?: unknown;
+    pontosMelhoriaJson?: unknown;
+    planoAcao?: string;
+  } | null;
 }
 
 export function generateReportPdf(options: ReportPdfOptions): Promise<Buffer> {
@@ -390,6 +428,140 @@ export function generateReportPdf(options: ReportPdfOptions): Promise<Buffer> {
       if (options.executiveSummary) {
         let y = addSectionPage(doc, "Resumo Executivo", options.pillarName);
         y = addNarrative(doc, y, options.executiveSummary);
+      }
+
+      // 2a. Suas Respostas (mentee answers)
+      if (options.menteeAnswers && options.menteeAnswers.length > 0) {
+        const answersWithContent = options.menteeAnswers.filter(
+          (a) => a.respostas && a.respostas.length > 0
+        );
+        if (answersWithContent.length > 0) {
+          let y = addSectionPage(doc, "Suas Respostas", "Respostas do questionario");
+          for (const section of answersWithContent) {
+            if (y > doc.page.height - 100) {
+              doc.addPage();
+              y = 50;
+            }
+            // Section header
+            doc
+              .font("Helvetica-Bold")
+              .fontSize(12)
+              .fillColor(NAVY)
+              .text(section.secao, 50, y);
+            y += 20;
+            for (const item of section.respostas) {
+              if (y > doc.page.height - 80) {
+                doc.addPage();
+                y = 50;
+              }
+              const question = item.pergunta || item.label || "";
+              const answer = item.resposta ?? (item.value != null ? String(item.value) : "");
+              if (!question && !answer) continue;
+              if (question) {
+                doc
+                  .font("Helvetica-Bold")
+                  .fontSize(9)
+                  .fillColor(GRAY)
+                  .text(question, 60, y, { width: doc.page.width - 130 });
+                const qH = doc.heightOfString(question, { width: doc.page.width - 130 });
+                y += qH + 4;
+              }
+              if (answer) {
+                doc
+                  .font("Helvetica")
+                  .fontSize(10)
+                  .fillColor(NAVY)
+                  .text(answer, 60, y, { width: doc.page.width - 130 });
+                const aH = doc.heightOfString(answer, { width: doc.page.width - 130 });
+                y += aH + 10;
+              }
+            }
+            y += 5;
+          }
+        }
+      }
+
+      // 2b. Diagnostico Financeiro
+      if (options.financialData?.expenses && Object.keys(options.financialData.expenses).length > 0) {
+        let y = addSectionPage(doc, "Diagnostico Financeiro", "Despesas e investimentos");
+        const expenses = options.financialData.expenses;
+        const rows: string[][] = [];
+        let total = 0;
+        for (const [category, value] of Object.entries(expenses)) {
+          const numVal = typeof value === "number" ? value : parseFloat(String(value)) || 0;
+          total += numVal;
+          rows.push([category, `R$ ${numVal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`]);
+        }
+        rows.push(["TOTAL", `R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`]);
+        const tableW = doc.page.width - 100;
+        y = addTable(doc, y, ["Categoria", "Valor"], rows, {
+          colWidths: [tableW * 0.65, tableW * 0.35],
+          highlightTotals: true,
+        });
+      }
+
+      // 2c. Indice de Maturidade Profissional (iVMP)
+      if (options.ivmpData?.ivmpFinal != null) {
+        let y = addSectionPage(doc, "Indice de Maturidade Profissional", "Avaliacao consolidada");
+        y = addScoreGauge(doc, y, options.ivmpData.ivmpFinal, "iVMP Final");
+
+        if (options.ivmpData.categories && Object.keys(options.ivmpData.categories).length > 0) {
+          const catRows: string[][] = [];
+          for (const [cat, score] of Object.entries(options.ivmpData.categories)) {
+            const numScore = typeof score === "number" ? score : parseFloat(String(score)) || 0;
+            catRows.push([cat, `${numScore.toFixed(1)}%`]);
+          }
+          const tableW = doc.page.width - 100;
+          y = addTable(doc, y, ["Categoria", "Pontuacao"], catRows, {
+            colWidths: [tableW * 0.7, tableW * 0.3],
+          });
+        }
+      }
+
+      // 2d. Feedback do Mentor
+      if (options.mentorFeedback) {
+        const fb = options.mentorFeedback;
+        const hasFeedback =
+          fb.feedbackText ||
+          fb.pontosFortesJson ||
+          fb.pontosMelhoriaJson ||
+          fb.planoAcao;
+        if (hasFeedback) {
+          let y = addSectionPage(doc, "Feedback do Mentor", "Observacoes e orientacoes");
+
+          // Pontos Fortes do feedback
+          const pontosFortes = safeParseFeedbackList(fb.pontosFortesJson);
+          if (pontosFortes.length > 0) {
+            doc.font("Helvetica-Bold").fontSize(12).fillColor(GREEN).text("Pontos Fortes", 50, y);
+            y += 20;
+            y = addBulletList(doc, y, pontosFortes, { accentColor: GREEN });
+          }
+
+          // Pontos de Melhoria
+          const pontosMelhoria = safeParseFeedbackList(fb.pontosMelhoriaJson);
+          if (pontosMelhoria.length > 0) {
+            if (y > doc.page.height - 100) { doc.addPage(); y = 50; }
+            doc.font("Helvetica-Bold").fontSize(12).fillColor(AMBER).text("Pontos de Melhoria", 50, y);
+            y += 20;
+            y = addBulletList(doc, y, pontosMelhoria, { accentColor: AMBER });
+          }
+
+          // Plano de Acao
+          if (fb.planoAcao) {
+            if (y > doc.page.height - 100) { doc.addPage(); y = 50; }
+            doc.font("Helvetica-Bold").fontSize(12).fillColor(NAVY).text("Plano de Acao", 50, y);
+            y += 20;
+            y = addNarrative(doc, y, fb.planoAcao);
+          }
+
+          // Feedback text
+          if (fb.feedbackText) {
+            if (y > doc.page.height - 100) { doc.addPage(); y = 50; }
+            doc.font("Helvetica-Bold").fontSize(12).fillColor(NAVY).text("Consideracoes Gerais", 50, y);
+            y += 20;
+            y = addNarrative(doc, y, fb.feedbackText);
+          }
+        }
       }
 
       // 3. Pontos Fortes (green accent)

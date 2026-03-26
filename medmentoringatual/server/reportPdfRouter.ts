@@ -7,7 +7,7 @@
  */
 import { Router } from "express";
 import { sdk } from "./_core/sdk";
-import { getDb } from "./db";
+import { getDb, getPillarAnswers, getPillarFeedback, getFinancialData, getIvmpData } from "./db";
 import { pillarReports, mentees } from "../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { generateReportPdf } from "./pdfPremium";
@@ -116,6 +116,12 @@ reportPdfRouter.get("/api/report/pdf/:menteeId/:pillarId", async (req, res) => {
     const actionPlan = JSON.parse(report.actionPlanJson ?? "[]");
     const suggestions = JSON.parse(report.suggestionsJson ?? "[]");
 
+    // Fetch extra data for new PDF sections
+    const answers = await getPillarAnswers(menteeId, pillarId);
+    const feedback = await getPillarFeedback(menteeId, pillarId);
+    const financialDataRow = await getFinancialData(menteeId);
+    const ivmpDataRow = await getIvmpData(menteeId);
+
     // Gera PDF com PDFKit
     const pdfBuffer = await generateReportPdf({
       menteeName: mentee?.nome ?? "Mentorado",
@@ -129,6 +135,26 @@ reportPdfRouter.get("/api/report/pdf/:menteeId/:pillarId", async (req, res) => {
       actionPlan,
       conclusions: report.conclusionsText ?? "",
       suggestions,
+      menteeAnswers: answers.map(a => ({
+        secao: a.secao,
+        respostas: Array.isArray(a.respostas) ? a.respostas as any : [],
+        status: a.status,
+      })),
+      financialData: financialDataRow ? {
+        expenses: financialDataRow.despesasJson ? (typeof financialDataRow.despesasJson === 'string' ? JSON.parse(financialDataRow.despesasJson) : financialDataRow.despesasJson) as Record<string, number> : undefined,
+        mapaSala: financialDataRow.mapaSalaJson ? (typeof financialDataRow.mapaSalaJson === 'string' ? JSON.parse(financialDataRow.mapaSalaJson) : financialDataRow.mapaSalaJson) as Record<string, unknown> : undefined,
+        pricing: financialDataRow.precificacaoJson ? (typeof financialDataRow.precificacaoJson === 'string' ? JSON.parse(financialDataRow.precificacaoJson) : financialDataRow.precificacaoJson) : undefined,
+      } : null,
+      ivmpData: ivmpDataRow ? {
+        categories: ivmpDataRow.categoriesJson ? (typeof ivmpDataRow.categoriesJson === 'string' ? JSON.parse(ivmpDataRow.categoriesJson) : ivmpDataRow.categoriesJson) as Record<string, number> : undefined,
+        ivmpFinal: ivmpDataRow.ivmpFinal != null ? Number(ivmpDataRow.ivmpFinal) : undefined,
+      } : null,
+      mentorFeedback: feedback ? {
+        feedbackText: feedback.feedback ?? undefined,
+        pontosFortesJson: feedback.pontosFortesJson ?? undefined,
+        pontosMelhoriaJson: feedback.pontosMelhoriaJson ?? undefined,
+        planoAcao: feedback.planoAcao ?? undefined,
+      } : null,
     });
 
     res.setHeader("Content-Type", "application/pdf");
