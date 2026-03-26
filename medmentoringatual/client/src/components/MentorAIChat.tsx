@@ -4,7 +4,7 @@
  * Permite ao mentor conversar com a IA sobre as respostas do mentorado,
  * criar conclusões, identificar padrões e salvar sugestões em checklist.
  */
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Sparkles, Send, Loader2, Trash2, Plus, CheckSquare, Square,
-  X, ChevronDown, ChevronUp, MessageSquare, ListChecks, RefreshCw
+  X, ChevronDown, ChevronUp, MessageSquare, ListChecks, RefreshCw,
+  Bookmark, BookmarkCheck
 } from "lucide-react";
 
 // Streamdown for markdown rendering
@@ -93,6 +94,46 @@ export function MentorAIChat({ menteeId, pillarId, pillarTitle, autoStart = fals
   const deleteSuggestion = trpc.mentorAI.deleteSuggestion.useMutation({
     onSuccess: () => utils.mentorAI.getSuggestions.invalidate({ menteeId, pillarId }),
   });
+
+  const conclusionsQuery = trpc.mentorAI.getChatConclusions.useQuery(
+    { menteeId, pillarId },
+    { enabled: isOpen }
+  );
+  const addConclusionMutation = trpc.mentorAI.addChatConclusion.useMutation({
+    onSuccess: () => conclusionsQuery.refetch(),
+  });
+
+  const savedMessageIds = useMemo(() => {
+    const ids = new Set<number>();
+    conclusionsQuery.data?.forEach((c) => {
+      if (c.chatMessageId) ids.add(c.chatMessageId);
+    });
+    return ids;
+  }, [conclusionsQuery.data]);
+
+  const [markingId, setMarkingId] = useState<number | null>(null);
+
+  const handleMarkAsConclusion = async (msg: { id: number; content: string }) => {
+    setMarkingId(msg.id);
+    try {
+      const firstLine = msg.content.split('\n')[0].replace(/^[#*\-\s]+/, '').trim();
+      const titulo = firstLine.length > 80 ? firstLine.slice(0, 77) + '...' : firstLine;
+
+      await addConclusionMutation.mutateAsync({
+        menteeId,
+        pillarId,
+        content: msg.content,
+        chatMessageId: msg.id,
+        titulo,
+        categoria: 'orientacao',
+      });
+      toast.success('Orientação salva para o relatório');
+    } catch {
+      toast.error('Erro ao salvar orientação');
+    } finally {
+      setMarkingId(null);
+    }
+  };
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -243,6 +284,29 @@ export function MentorAIChat({ menteeId, pillarId, pillarTitle, autoStart = fals
                         )
                       ) : (
                         <p className="leading-relaxed">{msg.content}</p>
+                      )}
+                      {msg.role === "assistant" && (
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
+                          {savedMessageIds.has(msg.id) ? (
+                            <span className="flex items-center gap-1 text-xs text-green-600">
+                              <BookmarkCheck className="w-3.5 h-3.5" />
+                              Incluída no relatório
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleMarkAsConclusion(msg)}
+                              disabled={markingId === msg.id}
+                              className="flex items-center gap-1 text-xs text-gray-400 hover:text-violet-600 transition-colors disabled:opacity-50"
+                            >
+                              {markingId === msg.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Bookmark className="w-3.5 h-3.5" />
+                              )}
+                              Usar como orientação
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
