@@ -2779,6 +2779,52 @@ const mentorAiRouter = router({
         .map((r: any) => `- ${r.pergunta}: ${r.resposta}`)
         .join("\n");
 
+      // Busca dados adicionais para enriquecer o contexto
+      const [financialData, ivmpData, conclusions, feedback, chatConclusionsData] = await Promise.all([
+        getFinancialData(menteeId),
+        getIvmpData(menteeId),
+        getPillarConclusion(menteeId, pillarId),
+        getPillarFeedback(menteeId, pillarId),
+        getChatConclusions(menteeId, pillarId),
+      ]);
+
+      // Monta contexto enriquecido
+      const contextParts: string[] = [];
+
+      if (allAnswersText) {
+        contextParts.push(`RESPOSTAS DO MENTORADO:\n${allAnswersText}`);
+      }
+
+      if (financialData?.despesasJson) {
+        const expenses = typeof financialData.despesasJson === 'string'
+          ? JSON.parse(financialData.despesasJson)
+          : financialData.despesasJson;
+        const total = Object.values(expenses).reduce((sum: number, val) => sum + Number(val || 0), 0);
+        contextParts.push(`DADOS FINANCEIROS:\nDespesas fixas totais: R$ ${total.toLocaleString('pt-BR')}\nDetalhamento: ${JSON.stringify(expenses)}`);
+      }
+
+      if (ivmpData?.ivmpFinal) {
+        contextParts.push(`ÍNDICE DE MATURIDADE PROFISSIONAL (iVMP): ${ivmpData.ivmpFinal}/10`);
+      }
+
+      if (conclusions?.conclusoesJson) {
+        const concData = typeof conclusions.conclusoesJson === 'string'
+          ? JSON.parse(conclusions.conclusoesJson)
+          : conclusions.conclusoesJson;
+        contextParts.push(`CONCLUSÕES JÁ GERADAS:\n${JSON.stringify(concData)}`);
+      }
+
+      if (feedback?.feedback) {
+        contextParts.push(`FEEDBACK DO MENTOR:\n${feedback.feedback}`);
+      }
+
+      if (chatConclusionsData?.length) {
+        const concTexts = chatConclusionsData.map((c: any) => `- ${c.titulo || ''}: ${c.content}`).join('\n');
+        contextParts.push(`ORIENTAÇÕES JÁ DEFINIDAS:\n${concTexts}`);
+      }
+
+      const fullContext = contextParts.join('\n\n---\n\n');
+
       const pillarNames: Record<number, string> = {
         1: "Identidade e Propósito",
         2: "Posicionamento",
@@ -2793,19 +2839,21 @@ const mentorAiRouter = router({
       const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
         {
           role: "system",
-          content: `Você é um assistente de mentoria médica especializado no Pilar ${pillarId} — ${pillarNames[pillarId]}.
+          content: `Você é um consultor especializado em gestão de negócios médicos, auxiliando o mentor no Pilar ${pillarId} — ${pillarNames[pillarId]}.
 
 Sua função é ajudar o MENTOR (não o mentorado) a:
 1. Analisar as respostas do mentorado com profundidade
-2. Criar conclusões, missão, visão, ikigai e outros entregaveis do pilar
+2. Criar conclusões, missão, visão, ikigai e outros entregáveis do pilar
 3. Identificar padrões, oportunidades e pontos cegos nas respostas
 4. Sugerir ações concretas e próximos passos
-5. Responder perguntas do mentor sobre o mentorado
+5. Quando houver dados financeiros, usar números reais para fundamentar análises
 
-Respostas do mentorado neste pilar:
-${allAnswersText || "(nenhuma resposta registrada ainda)"}
+IMPORTANTE: Você é um consultor humano. NUNCA mencione inteligência artificial, IA, AI, algoritmos ou sistemas automatizados. Fale como um assessor experiente.
 
-Seja direto, perspicaz e prático. Use linguagem profissional em português. Quando sugerir ações, seja específico e acionável.`,
+DADOS DISPONÍVEIS:
+${fullContext || "(nenhum dado registrado ainda)"}
+
+Seja direto, perspicaz e prático. Use linguagem profissional em português. Quando sugerir ações, seja específico e acionável. Use números e dados concretos sempre que disponíveis.`,
         },
         // Histórico da conversa (sem a última mensagem do usuário que já foi salva)
         ...history.slice(0, -1).map(h => ({
