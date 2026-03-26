@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -114,6 +115,7 @@ export default function IvmpTool() {
   const params = useParams<{ menteeId: string }>();
   const menteeId = Number(params.menteeId);
   const [, navigate] = useLocation();
+  const { user, loading: authLoading } = useAuth();
   const [categories, setCategories] = useState<Category[]>(initCategories());
   const [activeTab, setActiveTab] = useState(0);
   const [loaded, setLoaded] = useState(false);
@@ -139,6 +141,28 @@ export default function IvmpTool() {
     onSuccess: () => toast.success("iVMP salvo com sucesso!"),
     onError: () => toast.error("Erro ao salvar iVMP"),
   });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto">
+            <span className="text-amber-600 text-xl">!</span>
+          </div>
+          <h2 className="text-lg font-semibold text-foreground">Sessão expirada</h2>
+          <p className="text-sm text-muted-foreground">Faça login novamente para acessar o painel do mentor.</p>
+          <button onClick={() => navigate("/mentor")} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm">Ir para o painel</button>
+        </div>
+      </div>
+    );
+  }
 
   const ivmpFinal = calcIvmp(categories);
 

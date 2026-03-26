@@ -16,6 +16,7 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 min — avoid unnecessary re-fetches
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -86,9 +87,10 @@ export function useAuth(options?: UseAuthOptions) {
     state.user,
   ]);
 
-  return {
-    ...state,
-    refresh: () => meQuery.refetch(),
-    logout,
-  };
+  const refresh = useCallback(() => meQuery.refetch(), [meQuery.refetch]);
+
+  return useMemo(
+    () => ({ ...state, refresh, logout }),
+    [state, refresh, logout],
+  );
 }

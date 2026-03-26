@@ -204,7 +204,7 @@ function MenteeRowCard({
 // ─── Página principal ────────────────────────────────────────────────────────
 
 export default function ImportData() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -216,6 +216,14 @@ export default function ImportData() {
     onError: (e) => toast.error(e.message),
   });
 
+  // Aguardar autenticação
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
   // Redirecionar se não for admin
   if (!user || user.role !== "admin") {
     return (
