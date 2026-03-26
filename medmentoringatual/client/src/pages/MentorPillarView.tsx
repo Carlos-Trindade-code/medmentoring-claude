@@ -31,6 +31,8 @@ import { MentorAIChat } from "@/components/MentorAIChat";
 import { PillarReportGenerator } from "@/components/PillarReportGenerator";
 import { PillarPartAnalysis } from "@/components/PillarPartAnalysis";
 import { MenteeAnswersSummary } from "@/components/MenteeAnswersSummary";
+import { ExpenseAnalysis } from "@/components/ExpenseAnalysis";
+import { IvmpAnalysis } from "@/components/IvmpAnalysis";
 
 // ============================================================
 // TIPOS DE IA
@@ -764,6 +766,51 @@ export default function MentorPillarView() {
             </div>
           )}
         </div>
+
+        {/* SEÇÃO 3b: Dados Diagnósticos — apenas Pilar 3 */}
+        {pillarId === 3 && (
+          <div className="border rounded-xl mb-3 overflow-hidden border-teal-200">
+            <button
+              className="w-full flex items-center justify-between p-4 hover:bg-teal-50/50 transition-colors"
+              onClick={() => toggle("diagnosticTools")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-teal-600" />
+                </div>
+                <div className="text-left">
+                  <p className="font-semibold text-foreground">Dados Financeiros e iVMP do Mentorado</p>
+                  <p className="text-xs text-muted-foreground">Análise detalhada de despesas, custo/hora e maturidade profissional</p>
+                </div>
+              </div>
+              {openSection === "diagnosticTools" ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+            </button>
+
+            {openSection === "diagnosticTools" && (
+              <div className="px-4 pb-4 border-t pt-4 space-y-6">
+                {/* Despesas / Expense Analysis */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-teal-500" />
+                    Análise de Despesas
+                  </h3>
+                  <ExpenseAnalysis menteeId={menteeIdNum} />
+                </div>
+
+                <hr className="border-dashed" />
+
+                {/* iVMP Analysis */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-teal-500" />
+                    Índice de Maturidade Profissional (iVMP)
+                  </h3>
+                  <IvmpAnalysis menteeId={menteeIdNum} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* SEÇÃO 4b: Análises por Parte — IA (PillarPartAnalysis) */}
         <div className="border rounded-xl mb-3 overflow-hidden border-violet-200">
