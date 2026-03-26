@@ -308,12 +308,20 @@ export function PricingTableMentee({ isReleased, onComplete }: Props) {
                 Liste seus serviços e procedimentos. Seu mentor usará esses dados para montar a planilha completa de precificação.
               </p>
             </div>
-            <button
-              onClick={() => setShowGuide(!showGuide)}
-              className="text-muted-foreground hover:text-primary"
-            >
-              <HelpCircle className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {lastSaved && !saving && (
+                <div className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Salvo às {lastSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                </div>
+              )}
+              <button
+                onClick={() => setShowGuide(!showGuide)}
+                className="text-muted-foreground hover:text-primary"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           {showGuide && (
             <div className="mt-3 p-3 bg-white rounded-lg border border-violet-100 text-xs text-muted-foreground space-y-1">

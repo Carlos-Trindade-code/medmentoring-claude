@@ -104,6 +104,7 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
   const [expenses, setExpenses] = useState<ExpenseValues>({});
   const [mapaSala, setMapaSala] = useState<MapaSala>(DEFAULT_MAPA_SALA);
   const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState("despesas");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -133,6 +134,7 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
           expenses,
           mapaSala,
         });
+        setLastSaved(new Date());
         toast.success("Salvo automaticamente", {
           duration: 2000,
           id: "expense-autosave",
@@ -205,12 +207,20 @@ export function ExpenseTool({ pillarId, onComplete }: ExpenseToolProps) {
   return (
       <div className="space-y-4">
         {/* Indicador de salvamento */}
-        {saving && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            Salvando...
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {saving && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Salvando...
+            </div>
+          )}
+          {lastSaved && !saving && (
+            <div className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Salvo às {lastSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+            </div>
+          )}
+        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full">
