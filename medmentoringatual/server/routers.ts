@@ -581,6 +581,47 @@ const mentorRouter = router({
       };
     }),
 
+  getPricingAnalysis: adminProcedure
+    .input(z.object({ menteeId: z.number() }))
+    .query(async ({ input }) => {
+      const simData = await getSimulationData(input.menteeId);
+      if (!simData || !simData.servicos || simData.servicos.length === 0) return null;
+
+      const expData = await getExpenseData(input.menteeId);
+      const expenses = (expData?.expenses || {}) as Record<string, number>;
+      const totalExpenses = Object.values(expenses).reduce((a, b) => a + (Number(b) || 0), 0);
+
+      const mapaSala = expData?.mapaSala;
+      let horasDisponiveis = 0;
+      let taxaSalaHora = 0;
+      if (mapaSala) {
+        const diasPorSemana = mapaSala.diasSemana?.length || 0;
+        const horasPorDia = (mapaSala.turnoManha || 0) + (mapaSala.turnoTarde || 0);
+        horasDisponiveis = diasPorSemana * horasPorDia * (mapaSala.semanasMes || 4);
+        taxaSalaHora = horasDisponiveis > 0 ? totalExpenses / horasDisponiveis : 0;
+      }
+
+      const simulation = calculateSimulation({
+        custoFixoTotal: totalExpenses,
+        custosVariaveisPercent: 20,
+        taxaSalaHora,
+        horasDisponiveisMes: horasDisponiveis || 160,
+        horasOcupadasMes: mapaSala?.horasOcupadas || 80,
+        faturamentoMensal: simData.params?.faturamentoMensal || 0,
+        servicos: simData.servicos,
+        mixAtendimentos: simData.mixAtendimentos || {},
+      });
+
+      return {
+        servicos: simData.servicos,
+        mixAtendimentos: simData.mixAtendimentos || {},
+        simulation,
+        custoFixoTotal: totalExpenses,
+        taxaSalaHora,
+        horasDisponiveis,
+      };
+    }),
+
   // Leads / Onboarding
   getLeads: adminProcedure.query(async () => getAllOnboardingForms()),
 

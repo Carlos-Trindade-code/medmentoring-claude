@@ -33,6 +33,8 @@ import { PillarPartAnalysis } from "@/components/PillarPartAnalysis";
 import { MenteeAnswersSummary } from "@/components/MenteeAnswersSummary";
 import { ExpenseAnalysis } from "@/components/ExpenseAnalysis";
 import { IvmpAnalysis } from "@/components/IvmpAnalysis";
+import { PricingAnalysis } from "@/components/PricingAnalysis";
+import { SimulationSummary } from "@/components/SimulationSummary";
 
 // ============================================================
 // TIPOS DE IA
@@ -767,8 +769,8 @@ export default function MentorPillarView() {
           )}
         </div>
 
-        {/* SEÇÃO 3b: Dados Diagnósticos — apenas Pilar 3 */}
-        {pillarId === 3 && (
+        {/* SEÇÃO 3b: Dados Diagnósticos — Pilar 3 e 5 */}
+        {(pillarId === 3 || pillarId === 5) && (
           <div className="border rounded-xl mb-3 overflow-hidden border-teal-200">
             <button
               className="w-full flex items-center justify-between p-4 hover:bg-teal-50/50 transition-colors"
@@ -779,8 +781,14 @@ export default function MentorPillarView() {
                   <TrendingUp className="w-4 h-4 text-teal-600" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-foreground">Dados Financeiros e iVMP do Mentorado</p>
-                  <p className="text-xs text-muted-foreground">Análise detalhada de despesas, custo/hora e maturidade profissional</p>
+                  <p className="font-semibold text-foreground">
+                    {pillarId === 3 ? "Dados Financeiros e iVMP do Mentorado" : "Análise de Precificação do Mentorado"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {pillarId === 3
+                      ? "Análise detalhada de despesas, custo/hora e maturidade profissional"
+                      : "Tabela de serviços com margens, custos e projeções"}
+                  </p>
                 </div>
               </div>
               {openSection === "diagnosticTools" ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -788,25 +796,44 @@ export default function MentorPillarView() {
 
             {openSection === "diagnosticTools" && (
               <div className="px-4 pb-4 border-t pt-4 space-y-6">
-                {/* Despesas / Expense Analysis */}
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-teal-500" />
-                    Análise de Despesas
-                  </h3>
-                  <ExpenseAnalysis menteeId={menteeIdNum} />
-                </div>
+                {pillarId === 3 && (
+                  <>
+                    {/* Despesas / Expense Analysis */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-teal-500" />
+                        Análise de Despesas
+                      </h3>
+                      <ExpenseAnalysis menteeId={menteeIdNum} />
+                    </div>
 
-                <hr className="border-dashed" />
+                    <hr className="border-dashed" />
 
-                {/* iVMP Analysis */}
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-teal-500" />
-                    Índice de Maturidade Profissional (iVMP)
-                  </h3>
-                  <IvmpAnalysis menteeId={menteeIdNum} />
-                </div>
+                    {/* iVMP Analysis */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-teal-500" />
+                        Índice de Maturidade Profissional (iVMP)
+                      </h3>
+                      <IvmpAnalysis menteeId={menteeIdNum} />
+                    </div>
+
+                    <hr className="border-dashed" />
+
+                    {/* Simulation Summary */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-teal-500" />
+                        Simulador de Cenários
+                      </h3>
+                      <SimulationSummary menteeId={menteeIdNum} />
+                    </div>
+                  </>
+                )}
+
+                {pillarId === 5 && (
+                  <PricingAnalysis menteeId={menteeIdNum} />
+                )}
               </div>
             )}
           </div>
@@ -1658,19 +1685,9 @@ function PillarTools({ pillarId, menteeId, answers }: {
   }
 
   if (pillarId === 5) {
-    const faturamento = Number(getAnswer("precificacao_atual", "p5_valor_consulta_particular") ?? 0);
-    const ultimoReajuste = getAnswer("precificacao_atual", "p5_ultima_vez_reajustou") as string;
-
     return (
-      <div className="mt-4 space-y-4">
-        <p className="text-xs text-muted-foreground">Dados de precificação do mentorado.</p>
-        <div className="grid grid-cols-2 gap-3">
-          <MetricCard label="Consulta Particular" value={faturamento > 0 ? `R$ ${faturamento.toLocaleString("pt-BR")}` : "Não informado"} color="emerald" />
-          <MetricCard label="Último Reajuste" value={ultimoReajuste ?? "Não informado"} color="amber" />
-        </div>
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
-          <strong>Dica:</strong> Use a Calculadora de Dinheiro Invisível na Sala de Trabalho do Pilar 5 para mostrar o impacto de um reajuste de preços.
-        </div>
+      <div className="mt-4">
+        <PricingAnalysis menteeId={menteeId} />
       </div>
     );
   }
