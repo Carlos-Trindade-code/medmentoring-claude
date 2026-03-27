@@ -99,6 +99,13 @@
       "when": 1774221277394,
       "tag": "0013_mute_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1774552429098,
+      "tag": "0014_square_sentinel",
+      "breakpoints": true
     }
   ]
 }
