@@ -2293,6 +2293,34 @@ Retorne um JSON com:
       return result;
     }),
 
+  saveDiagnosis: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      pillarId: z.number(),
+      diagnosis: z.object({
+        resumo: z.string(),
+        pontos_fortes: z.array(z.string()),
+        lacunas_criticas: z.array(z.object({
+          lacuna: z.string(),
+          impacto: z.string(),
+          urgencia: z.string(),
+        })),
+        recomendacoes: z.array(z.object({
+          acao: z.string(),
+          prazo: z.string(),
+          resultado_esperado: z.string(),
+        })),
+        frase_chave: z.string(),
+        nivel_maturidade: z.string(),
+      }),
+    }))
+    .mutation(async ({ input }) => {
+      await upsertPillarFeedback(input.menteeId, input.pillarId, {
+        aiDiagnosis: input.diagnosis,
+      });
+      return { success: true };
+    }),
+
   // Pilar 2 — Gera frase de posicionamento personalizada
   generatePositioningStatement: protectedProcedure
     .input(z.object({

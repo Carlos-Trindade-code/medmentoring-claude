@@ -290,6 +290,7 @@ export default function MentorPillarView() {
   const [aiRoadmapResult, setAiRoadmapResult] = useState<AiRoadmapResult | null>(null);
   const [generatingDiagnosis, setGeneratingDiagnosis] = useState(false);
   const [aiDiagnosisResult, setAiDiagnosisResult] = useState<AiDiagnosisResult | null>(null);
+  const [savingDiagnosis, setSavingDiagnosis] = useState(false);
   const [generatingFeedbackDraft, setGeneratingFeedbackDraft] = useState(false);
   const [feedbackDraftGenerated, setFeedbackDraftGenerated] = useState(false);
   const [generatingConclusions, setGeneratingConclusions] = useState(false);
@@ -324,6 +325,7 @@ export default function MentorPillarView() {
   const suggestSpecMutation = trpc.pillarTools.suggestSpecializations.useMutation();
   const generateRoadmapMutation = trpc.pillarTools.generatePillarRoadmap.useMutation();
   const generateDiagnosisMutation = trpc.pillarTools.generatePillarDiagnosis.useMutation();
+  const saveDiagnosisMutation = trpc.pillarTools.saveDiagnosis.useMutation();
   const generateFeedbackDraftMutation = trpc.pillarTools.generateFeedbackDraft.useMutation();
   const generateConclusionsMutation = trpc.pillarTools.generatePillarConclusions.useMutation();
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
@@ -460,6 +462,24 @@ export default function MentorPillarView() {
       toast.error(msg);
     } finally {
       setGeneratingDiagnosis(false);
+    }
+  };
+
+  const handleSaveDiagnosis = async () => {
+    if (!aiDiagnosisResult) return;
+    setSavingDiagnosis(true);
+    try {
+      await saveDiagnosisMutation.mutateAsync({
+        menteeId: menteeIdNum,
+        pillarId,
+        diagnosis: aiDiagnosisResult,
+      });
+      toast.success("Diagnóstico salvo com sucesso!");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erro ao salvar diagnóstico.";
+      toast.error(msg);
+    } finally {
+      setSavingDiagnosis(false);
     }
   };
 
@@ -869,86 +889,160 @@ export default function MentorPillarView() {
 
                 {!generatingDiagnosis && aiDiagnosisResult && (
                   <div className="space-y-4">
-                    <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Diagnostico Geral</p>
-                        <Badge className={`text-xs ${
-                          aiDiagnosisResult.nivel_maturidade === "expert" ? "bg-emerald-100 text-emerald-700" :
-                          aiDiagnosisResult.nivel_maturidade === "avançado" ? "bg-blue-100 text-blue-700" :
-                          aiDiagnosisResult.nivel_maturidade === "em_desenvolvimento" ? "bg-amber-100 text-amber-700" :
-                          "bg-red-100 text-red-700"
-                        }`}>
-                          {aiDiagnosisResult.nivel_maturidade === "expert" ? "Expert" :
-                           aiDiagnosisResult.nivel_maturidade === "avançado" ? "Avancado" :
-                           aiDiagnosisResult.nivel_maturidade === "em_desenvolvimento" ? "Em Desenvolvimento" :
-                           "Iniciante"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm font-medium text-indigo-900 italic mb-2">"{aiDiagnosisResult.frase_chave}"</p>
-                      <p className="text-sm text-indigo-800 leading-relaxed">{aiDiagnosisResult.resumo}</p>
+                    {/* Frase-chave editavel */}
+                    <div>
+                      <label className="text-xs font-semibold text-indigo-700 uppercase tracking-wide block mb-1.5">Frase-chave</label>
+                      <Textarea
+                        value={aiDiagnosisResult.frase_chave}
+                        onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, frase_chave: e.target.value } : prev)}
+                        rows={2}
+                        className="text-sm border-indigo-200 bg-indigo-50/50"
+                      />
                     </div>
 
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-1">
+                    {/* Resumo editavel */}
+                    <div>
+                      <label className="text-xs font-semibold text-indigo-700 uppercase tracking-wide block mb-1.5">Resumo do Diagnostico</label>
+                      <Textarea
+                        value={aiDiagnosisResult.resumo}
+                        onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, resumo: e.target.value } : prev)}
+                        rows={4}
+                        className="text-sm border-indigo-200 bg-indigo-50/50"
+                      />
+                    </div>
+
+                    {/* Nivel de maturidade */}
+                    <div>
+                      <label className="text-xs font-semibold text-indigo-700 uppercase tracking-wide block mb-1.5">Nivel de Maturidade</label>
+                      <select
+                        value={aiDiagnosisResult.nivel_maturidade}
+                        onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, nivel_maturidade: e.target.value } : prev)}
+                        className="w-full rounded-md border border-indigo-200 bg-indigo-50/50 px-3 py-2 text-sm"
+                      >
+                        <option value="iniciante">Iniciante</option>
+                        <option value="em_desenvolvimento">Em Desenvolvimento</option>
+                        <option value="avançado">Avancado</option>
+                        <option value="expert">Expert</option>
+                      </select>
+                    </div>
+
+                    {/* Pontos fortes editaveis */}
+                    <div>
+                      <label className="text-xs font-semibold text-emerald-700 uppercase tracking-wide flex items-center gap-1 mb-1.5">
                         <Star className="w-3 h-3" /> Pontos Fortes
-                      </p>
-                      <div className="space-y-1.5">
-                        {aiDiagnosisResult.pontos_fortes.map((ponto, i) => (
-                          <div key={i} className="flex gap-2">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                            <p className="text-sm text-emerald-900">{ponto}</p>
-                          </div>
-                        ))}
-                      </div>
+                      </label>
+                      <Textarea
+                        value={aiDiagnosisResult.pontos_fortes.join("\n")}
+                        onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, pontos_fortes: e.target.value.split("\n") } : prev)}
+                        rows={Math.max(3, aiDiagnosisResult.pontos_fortes.length + 1)}
+                        className="text-sm border-emerald-200 bg-emerald-50/50"
+                        placeholder="Um ponto forte por linha"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Um item por linha</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                    {/* Lacunas criticas editaveis */}
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-1.5">
                         <AlertTriangle className="w-3 h-3" /> Lacunas Criticas
-                      </p>
-                      {aiDiagnosisResult.lacunas_criticas.map((lacuna, i) => {
-                        const urgConfig = {
-                          alta: { bg: "bg-red-50 border-red-200", badge: "bg-red-100 text-red-700", label: "Alta" },
-                          media: { bg: "bg-amber-50 border-amber-200", badge: "bg-amber-100 text-amber-700", label: "Media" },
-                          baixa: { bg: "bg-blue-50 border-blue-200", badge: "bg-blue-100 text-blue-700", label: "Baixa" },
-                        }[lacuna.urgencia];
-                        return (
-                          <div key={i} className={`border rounded-lg p-3 ${urgConfig.bg}`}>
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-semibold text-foreground">{lacuna.lacuna}</p>
-                              <Badge className={`text-xs ${urgConfig.badge}`}>{urgConfig.label}</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground">{lacuna.impacto}</p>
+                      </label>
+                      {aiDiagnosisResult.lacunas_criticas.map((lacuna, i) => (
+                        <div key={i} className="border rounded-lg p-3 mb-2 bg-muted/20">
+                          <div className="grid grid-cols-1 gap-2">
+                            <Input
+                              value={lacuna.lacuna}
+                              onChange={e => {
+                                const updated = [...aiDiagnosisResult.lacunas_criticas];
+                                updated[i] = { ...updated[i], lacuna: e.target.value };
+                                setAiDiagnosisResult(prev => prev ? { ...prev, lacunas_criticas: updated } : prev);
+                              }}
+                              placeholder="Lacuna"
+                              className="text-sm"
+                            />
+                            <Input
+                              value={lacuna.impacto}
+                              onChange={e => {
+                                const updated = [...aiDiagnosisResult.lacunas_criticas];
+                                updated[i] = { ...updated[i], impacto: e.target.value };
+                                setAiDiagnosisResult(prev => prev ? { ...prev, lacunas_criticas: updated } : prev);
+                              }}
+                              placeholder="Impacto"
+                              className="text-sm"
+                            />
+                            <select
+                              value={lacuna.urgencia}
+                              onChange={e => {
+                                const updated = [...aiDiagnosisResult.lacunas_criticas];
+                                updated[i] = { ...updated[i], urgencia: e.target.value as "alta" | "media" | "baixa" };
+                                setAiDiagnosisResult(prev => prev ? { ...prev, lacunas_criticas: updated } : prev);
+                              }}
+                              className="rounded-md border px-3 py-2 text-sm"
+                            >
+                              <option value="alta">Alta</option>
+                              <option value="media">Media</option>
+                              <option value="baixa">Baixa</option>
+                            </select>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3 flex items-center gap-1">
+                    {/* Recomendacoes editaveis */}
+                    <div>
+                      <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide flex items-center gap-1 mb-1.5">
                         <Target className="w-3 h-3" /> Recomendacoes
-                      </p>
-                      <div className="space-y-3">
-                        {aiDiagnosisResult.recomendacoes.map((rec, i) => {
-                          const prazoConfig = {
-                            imediato: { label: "Imediato", color: "text-red-600 bg-red-50 border-red-200" },
-                            curto_prazo: { label: "Curto Prazo", color: "text-amber-600 bg-amber-50 border-amber-200" },
-                            medio_prazo: { label: "Medio Prazo", color: "text-blue-600 bg-blue-50 border-blue-200" },
-                          }[rec.prazo] ?? { label: rec.prazo, color: "text-muted-foreground bg-muted border-border" };
-                          return (
-                            <div key={i} className="flex gap-3">
-                              <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-sm font-medium text-foreground">{rec.acao}</p>
-                                  <Badge className={`text-xs border ${prazoConfig.color}`}>{prazoConfig.label}</Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground">{rec.resultado_esperado}</p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      </label>
+                      {aiDiagnosisResult.recomendacoes.map((rec, i) => (
+                        <div key={i} className="border rounded-lg p-3 mb-2 bg-muted/20">
+                          <div className="grid grid-cols-1 gap-2">
+                            <Input
+                              value={rec.acao}
+                              onChange={e => {
+                                const updated = [...aiDiagnosisResult.recomendacoes];
+                                updated[i] = { ...updated[i], acao: e.target.value };
+                                setAiDiagnosisResult(prev => prev ? { ...prev, recomendacoes: updated } : prev);
+                              }}
+                              placeholder="Acao"
+                              className="text-sm"
+                            />
+                            <Input
+                              value={rec.resultado_esperado}
+                              onChange={e => {
+                                const updated = [...aiDiagnosisResult.recomendacoes];
+                                updated[i] = { ...updated[i], resultado_esperado: e.target.value };
+                                setAiDiagnosisResult(prev => prev ? { ...prev, recomendacoes: updated } : prev);
+                              }}
+                              placeholder="Resultado esperado"
+                              className="text-sm"
+                            />
+                            <select
+                              value={rec.prazo}
+                              onChange={e => {
+                                const updated = [...aiDiagnosisResult.recomendacoes];
+                                updated[i] = { ...updated[i], prazo: e.target.value as "imediato" | "curto_prazo" | "medio_prazo" };
+                                setAiDiagnosisResult(prev => prev ? { ...prev, recomendacoes: updated } : prev);
+                              }}
+                              className="rounded-md border px-3 py-2 text-sm"
+                            >
+                              <option value="imediato">Imediato</option>
+                              <option value="curto_prazo">Curto Prazo</option>
+                              <option value="medio_prazo">Medio Prazo</option>
+                            </select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Botao Salvar */}
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        onClick={handleSaveDiagnosis}
+                        disabled={savingDiagnosis}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5"
+                      >
+                        {savingDiagnosis ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                        Salvar Diagnostico
+                      </Button>
                     </div>
                   </div>
                 )}
