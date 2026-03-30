@@ -9,7 +9,7 @@
  *  2. Tabela de despesas agrupada por categoria + grafico de barras horizontais
  *  3. Alertas e custos ocultos identificados
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import {
   Card,
@@ -132,6 +132,7 @@ function formatPercent(value: number): string {
 // COMPONENTE PRINCIPAL
 // ============================================================
 export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
+  const [impactoRevealed, setImpactoRevealed] = useState(false);
   const { data: analysisData, isLoading } = trpc.mentor.getExpenseAnalysis.useQuery({ menteeId });
 
   // Extrair dados da query
@@ -666,11 +667,23 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
               ))}
             </div>
 
-            {/* Resumo de impacto total */}
+            {/* Resumo de impacto total — só aparece após o mentor liberar */}
             {(() => {
               const totalImpacto = alerts.reduce((sum, a) => sum + (a.estimatedImpact ?? 0), 0);
-              return totalImpacto > 0 ? (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              if (totalImpacto <= 0) return null;
+              return !impactoRevealed ? (
+                <div className="mt-4 text-center">
+                  <Button
+                    onClick={() => setImpactoRevealed(true)}
+                    className="bg-red-600 hover:bg-red-700 text-white gap-2"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    Revelar Impacto Total para o Mentorado
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-1.5">Clique quando quiser mostrar o numero WOW na sessao</p>
+                </div>
+              ) : (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg animate-in fade-in duration-500">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold text-red-800">Impacto total estimado dos custos ocultos</p>
@@ -682,7 +695,7 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
                     Isso representa {kpis.custoFixoTotal > 0 ? formatPercent((totalImpacto / kpis.custoFixoTotal) * 100) : "—"} sobre o custo fixo declarado de {formatBRL(kpis.custoFixoTotal)}
                   </p>
                 </div>
-              ) : null;
+              );
             })()}
           </CardContent>
         </Card>
