@@ -9,7 +9,7 @@
  * 3. Ferramentas interativas do pilar (calculadoras, construtores, etc.)
  * 4. Feedback do mentor + liberação da conclusão
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -341,11 +341,10 @@ export default function MentorPillarView() {
   );
 
   // Inicializa conclusões existentes
-  useState(() => {
+  useEffect(() => {
     if (existingConclusions?.conclusoesJson) {
       const data = existingConclusions.conclusoesJson as Record<string, unknown>;
       setConclusionsData(data);
-      // Pré-preenche os campos editáveis
       const edited: Record<string, string> = {};
       for (const [key, val] of Object.entries(data)) {
         if (typeof val === "string") edited[key] = val;
@@ -353,7 +352,7 @@ export default function MentorPillarView() {
       }
       setEditedConclusions(edited);
     }
-  });
+  }, [existingConclusions]);
 
   const handleGenerateConclusions = async () => {
     setGeneratingConclusions(true);
@@ -409,8 +408,8 @@ export default function MentorPillarView() {
     }
   };
 
-  // Inicializa feedback existente
-  useState(() => {
+  // Inicializa feedback existente quando dados chegam do servidor
+  useEffect(() => {
     if (existingFeedback) {
       setFeedback(existingFeedback.feedback ?? "");
       setPlanoAcao(existingFeedback.planoAcao ?? "");
@@ -421,7 +420,7 @@ export default function MentorPillarView() {
       if (existingFeedback.aiPillarRoadmap) setAiRoadmapResult(existingFeedback.aiPillarRoadmap as AiRoadmapResult);
       if (existingFeedback.aiDiagnosis) setAiDiagnosisResult(existingFeedback.aiDiagnosis as AiDiagnosisResult);
     }
-  });
+  }, [existingFeedback]);
 
   const handleGenerateSpecializations = async () => {
     setGeneratingSpec(true);
