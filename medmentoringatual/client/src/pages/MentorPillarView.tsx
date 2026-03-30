@@ -326,6 +326,8 @@ export default function MentorPillarView() {
   const generateRoadmapMutation = trpc.pillarTools.generatePillarRoadmap.useMutation();
   const generateDiagnosisMutation = trpc.pillarTools.generatePillarDiagnosis.useMutation();
   const saveDiagnosisMutation = trpc.pillarTools.saveDiagnosis.useMutation();
+  const saveSpecMutation = trpc.pillarTools.saveSpecializations.useMutation();
+  const saveRoadmapMutation = trpc.pillarTools.saveRoadmap.useMutation();
   const generateFeedbackDraftMutation = trpc.pillarTools.generateFeedbackDraft.useMutation();
   const generateConclusionsMutation = trpc.pillarTools.generatePillarConclusions.useMutation();
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
@@ -480,6 +482,28 @@ export default function MentorPillarView() {
     } finally {
       setSavingDiagnosis(false);
     }
+  };
+
+  const [savingSpec, setSavingSpec] = useState(false);
+  const handleSaveSpecializations = async () => {
+    if (!aiSpecResult) return;
+    setSavingSpec(true);
+    try {
+      await saveSpecMutation.mutateAsync({ menteeId: menteeIdNum, specializations: aiSpecResult });
+      toast.success("Especializacoes salvas!");
+    } catch { toast.error("Erro ao salvar especializacoes."); }
+    finally { setSavingSpec(false); }
+  };
+
+  const [savingRoadmap, setSavingRoadmap] = useState(false);
+  const handleSaveRoadmap = async () => {
+    if (!aiRoadmapResult) return;
+    setSavingRoadmap(true);
+    try {
+      await saveRoadmapMutation.mutateAsync({ menteeId: menteeIdNum, roadmap: aiRoadmapResult });
+      toast.success("Roteiro salvo!");
+    } catch { toast.error("Erro ao salvar roteiro."); }
+    finally { setSavingRoadmap(false); }
   };
 
   const handleSaveFeedback = async () => {
@@ -1126,6 +1150,10 @@ export default function MentorPillarView() {
                             <p className="text-xs text-amber-800">{aiSpecResult.aviso_importante}</p>
                           </div>
                         </div>
+                        <Button onClick={handleSaveSpecializations} disabled={savingSpec} size="sm" className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5">
+                          {savingSpec ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                          Salvar Especializacoes
+                        </Button>
                       </div>
                     )}
 
@@ -1223,6 +1251,10 @@ export default function MentorPillarView() {
                             ))}
                           </div>
                         </div>
+                        <Button onClick={handleSaveRoadmap} disabled={savingRoadmap} size="sm" className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 mt-3">
+                          {savingRoadmap ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                          Salvar Roteiro
+                        </Button>
                       </div>
                     )}
                   </div>

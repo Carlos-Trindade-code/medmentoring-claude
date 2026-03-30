@@ -2321,6 +2321,30 @@ Retorne um JSON com:
       return { success: true };
     }),
 
+  saveSpecializations: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      specializations: z.any(),
+    }))
+    .mutation(async ({ input }) => {
+      await upsertPillarFeedback(input.menteeId, 1, {
+        aiSpecializationSuggestions: input.specializations,
+      });
+      return { success: true };
+    }),
+
+  saveRoadmap: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      roadmap: z.any(),
+    }))
+    .mutation(async ({ input }) => {
+      await upsertPillarFeedback(input.menteeId, 1, {
+        aiPillarRoadmap: input.roadmap,
+      });
+      return { success: true };
+    }),
+
   // Pilar 2 — Gera frase de posicionamento personalizada
   generatePositioningStatement: protectedProcedure
     .input(z.object({
