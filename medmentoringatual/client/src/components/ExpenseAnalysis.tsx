@@ -252,24 +252,79 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
       });
     }
 
-    // 3. Depreciacao de equipamentos ausente
-    const depreciacao = expenses["equipamentos.depreciacao"] ?? 0;
-    const temEquipamentos =
-      (expenses["equipamentos.leasing"] ?? 0) > 0 ||
-      (expenses["equipamentos.manutencao_aparelhos"] ?? 0) > 0 ||
-      (expenses["equipamentos.calibracao"] ?? 0) > 0;
-
-    if (depreciacao === 0 && temEquipamentos) {
+    // 3. Encargos trabalhistas ausentes
+    const encargos = expenses["pessoal.encargos"] ?? 0;
+    const salarioBase = (expenses["pessoal.salarios"] ?? 0) + (expenses["pessoal.secretarias"] ?? 0);
+    if (encargos === 0 && salarioBase > 0) {
+      const impactoEncargos = Math.round(salarioBase * 0.35);
       result.push({
-        icon: <TrendingDown className="w-4 h-4 text-amber-600" />,
-        title: "Depreciacao de equipamentos nao contabilizada",
-        description:
-          "Ha custos com equipamentos mas nenhuma depreciacao registrada. Um equipamento de R$ 100.000 tem ~R$ 1.600/mes de depreciacao em 5 anos.",
+        icon: <AlertTriangle className="w-4 h-4 text-amber-600" />,
+        title: "Encargos trabalhistas ausentes",
+        description: `Com folha de ${formatBRL(salarioBase)}, os encargos (INSS, FGTS, etc.) representam 30-40% do valor. Custo estimado: ${formatBRL(impactoEncargos)}/mes.`,
+        estimatedImpact: impactoEncargos,
+      });
+    }
+
+    // 4. Seguro profissional ausente
+    const seguroProfissional = expenses["seguros_taxas.seguro_profissional"] ?? 0;
+    if (seguroProfissional === 0) {
+      result.push({
+        icon: <AlertTriangle className="w-4 h-4 text-amber-600" />,
+        title: "Seguro profissional ausente",
+        description: "Mentorado nao tem seguro de responsabilidade civil profissional. Custo medio: R$ 200 a R$ 500/mes. Risco alto sem protecao.",
+        estimatedImpact: 350,
+      });
+    }
+
+    // 5. Contabilidade ausente
+    const contabilidade = expenses["administrativo.contabilidade"] ?? 0;
+    if (contabilidade === 0) {
+      result.push({
+        icon: <AlertTriangle className="w-4 h-4 text-amber-600" />,
+        title: "Custo contabil ausente",
+        description: "Todo medico PJ precisa de contador. Custo medio: R$ 500 a R$ 1.500/mes dependendo da complexidade.",
+        estimatedImpact: 800,
+      });
+    }
+
+    // 6. Software de gestao ausente
+    const software = expenses["administrativo.software_gestao"] ?? 0;
+    if (software === 0) {
+      result.push({
+        icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+        title: "Sem custo com software de gestao",
+        description: "Agenda, prontuario eletronico, sistema financeiro — geralmente R$ 200 a R$ 800/mes. Mesmo ferramentas gratuitas tem custo de tempo.",
+        estimatedImpact: 400,
+      });
+    }
+
+    // 7. Formacao e educacao continuada ausente
+    const formacaoTotal =
+      (expenses["formacao.cursos"] ?? 0) +
+      (expenses["formacao.congressos"] ?? 0) +
+      (expenses["formacao.assinaturas"] ?? 0);
+    if (formacaoTotal === 0) {
+      result.push({
+        icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+        title: "Sem investimento em educacao continuada",
+        description: "Congressos, cursos de atualizacao e assinaturas cientificas sao custos reais. Media: R$ 500 a R$ 2.000/mes quando diluido ao longo do ano.",
+        estimatedImpact: 1000,
+      });
+    }
+
+    // 8. Custo de oportunidade do espaco proprio
+    const aluguel = expenses["espaco.aluguel"] ?? 0;
+    const temEspaco = kpis.horasDisponiveis > 0;
+    if (aluguel === 0 && temEspaco) {
+      result.push({
+        icon: <DollarSign className="w-4 h-4 text-amber-600" />,
+        title: "Custo de oportunidade do espaco",
+        description: "Aluguel zerado indica espaco proprio. Mas ha custo de oportunidade: quanto voce receberia se alugasse esse espaco? Esse valor e um custo real do negocio.",
         estimatedImpact: null,
       });
     }
 
-    // 4. Custo de ociosidade
+    // 9. Custo de ociosidade
     if (kpis.custoOciosidade > 0 && kpis.horasDisponiveis > 0) {
       const horasOciosas = Math.max(0, kpis.horasDisponiveis - (mapaSala?.horasOcupadas ?? 0));
       result.push({
@@ -578,10 +633,10 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-amber-600" />
-              Custos Ocultos Identificados
+              Custos Ocultos Identificados ({alerts.length})
             </CardTitle>
             <CardDescription>
-              Pontos de atencao detectados automaticamente com base nos dados informados
+              Arsenal do mentor: custos que o mentorado provavelmente esqueceu. Use para criar o momento WOW.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -610,6 +665,25 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
                 </div>
               ))}
             </div>
+
+            {/* Resumo de impacto total */}
+            {(() => {
+              const totalImpacto = alerts.reduce((sum, a) => sum + (a.estimatedImpact ?? 0), 0);
+              return totalImpacto > 0 ? (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-red-800">Impacto total estimado dos custos ocultos</p>
+                      <p className="text-xs text-red-600 mt-0.5">Valor que o mentorado pode estar deixando de contabilizar por mes</p>
+                    </div>
+                    <p className="text-xl font-bold text-red-700">{formatBRL(totalImpacto)}/mes</p>
+                  </div>
+                  <p className="text-xs text-red-500 mt-2">
+                    Isso representa {kpis.custoFixoTotal > 0 ? formatPercent((totalImpacto / kpis.custoFixoTotal) * 100) : "—"} sobre o custo fixo declarado de {formatBRL(kpis.custoFixoTotal)}
+                  </p>
+                </div>
+              ) : null;
+            })()}
           </CardContent>
         </Card>
       )}
