@@ -410,61 +410,6 @@ export default function MenteeDetail() {
           </div>
         </div>
 
-        {/* Ferramentas de Diagnóstico */}
-        <div>
-          <h2 className="font-display text-lg font-bold text-foreground mb-3">Ferramentas de Diagnóstico</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-            <button
-              onClick={() => navigate(`/mentor/mentorado/${menteeId}/ivmp`)}
-              className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-[#1B3A5C] hover:bg-[#1B3A5C]/5 transition-all text-left group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 font-bold text-sm">iVMP</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground group-hover:text-[#1B3A5C]">iVMP</p>
-                <p className="text-xs text-muted-foreground">Índice de Valor Médico Percebido</p>
-              </div>
-            </button>
-            <button
-              onClick={() => navigate(`/mentor/mentorado/${menteeId}/financeiro`)}
-              className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-[#1B3A5C] hover:bg-[#1B3A5C]/5 transition-all text-left group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-green-600 text-lg">R$</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground group-hover:text-[#1B3A5C]">Financeiro</p>
-                <p className="text-xs text-muted-foreground">Despesas, mapa de sala e precificação</p>
-              </div>
-            </button>
-            <button
-              onClick={() => navigate(`/mentor/mentorado/${menteeId}/vendas`)}
-              className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-[#1B3A5C] hover:bg-[#1B3A5C]/5 transition-all text-left group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-amber-600 text-lg">🎯</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground group-hover:text-[#1B3A5C]">Vendas</p>
-                <p className="text-xs text-muted-foreground">Objeções, scripts e gatilhos mentais</p>
-              </div>
-            </button>
-            <button
-              onClick={() => navigate(`/mentor/mentorado/${menteeId}/precificacao`)}
-              className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-[#1B3A5C] hover:bg-[#1B3A5C]/5 transition-all text-left group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-600 text-lg">💰</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground group-hover:text-[#1B3A5C]">Precificação</p>
-                <p className="text-xs text-muted-foreground">Custo variável e dinheiro invisível</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
         {/* Salas de Trabalho por Pilar */}
         <div>
           <h2 className="font-display text-lg font-bold text-foreground mb-3">Salas de Trabalho por Pilar</h2>
