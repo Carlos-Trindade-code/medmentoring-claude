@@ -1,13 +1,13 @@
 /**
- * MenteePillarPage — Página do portal do mentorado para um pilar específico
+ * MenteePillarPage — Pagina do portal do mentorado para um pilar especifico
  *
  * Acessada via /portal/pilar/:id
- * Mostra o questionário guiado do pilar e o feedback do mentor quando liberado.
+ * Mostra as partes do pilar (A, B, C, D) com questionarios e ferramentas.
  */
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { MenteePillarQuestionnaire } from "@/components/MenteePillarQuestionnaire";
-import { PILLAR_SECTIONS, PILLAR_TITLES, PILLAR_ICONS } from "@/lib/pillar-questions";
+import { PillarPartsView } from "@/components/PillarPartsView";
+import { PILLAR_TITLES, PILLAR_ICONS } from "@/lib/pillar-questions";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Lock } from "lucide-react";
 import { Link } from "wouter";
@@ -17,6 +17,7 @@ export default function MenteePillarPage() {
   const pillarId = parseInt(id ?? "1");
 
   const { data: mentee, isLoading } = trpc.portal.myData.useQuery();
+  const { data: partReleases } = trpc.portal.getMyPartReleases.useQuery();
 
   if (isLoading) {
     return (
@@ -29,25 +30,22 @@ export default function MenteePillarPage() {
   if (!mentee) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Sessão expirada. <Link href="/acesso" className="text-primary underline">Fazer login</Link></p>
+        <p className="text-muted-foreground">Sessao expirada. <Link href="/acesso" className="text-primary underline">Fazer login</Link></p>
       </div>
     );
   }
 
-  const sections = PILLAR_SECTIONS[pillarId];
   const title = PILLAR_TITLES[pillarId];
   const icon = PILLAR_ICONS[pillarId];
 
-  if (!sections || !title) {
+  if (!title) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Pilar não encontrado.</p>
+        <p className="text-muted-foreground">Pilar nao encontrado.</p>
       </div>
     );
   }
 
-  // Pilar 1 sempre liberado. Demais pilares: liberados quando o mentor libera a conclusão do pilar anterior.
-  // Para simplificar, todos os pilares ficam acessíveis (o mentor controla via feedback/liberação).
   const isPillarUnlocked = true;
 
   if (!isPillarUnlocked) {
@@ -67,7 +65,7 @@ export default function MenteePillarPage() {
               {icon} Pilar {pillarId} — {title}
             </h2>
             <p className="text-muted-foreground max-w-sm mx-auto">
-              Este pilar ainda não foi liberado pelo seu mentor. Conclua o Pilar anterior e aguarde a liberação.
+              Este pilar ainda nao foi liberado pelo seu mentor. Conclua o Pilar anterior e aguarde a liberacao.
             </p>
           </div>
         </div>
@@ -93,20 +91,18 @@ export default function MenteePillarPage() {
             </div>
           </div>
           <p className="text-muted-foreground text-sm mt-2">
-            Responda as perguntas abaixo com calma e honestidade. Você pode salvar o progresso e continuar depois.
-            Se tiver dúvida em alguma pergunta, clique no ícone <strong>?</strong> para ver uma orientação.
+            Responda as perguntas e preencha as ferramentas abaixo. Seus dados sao salvos automaticamente.
           </p>
         </div>
 
-        {/* Questionário */}
-        <MenteePillarQuestionnaire
+        {/* Partes do pilar com questionarios e ferramentas */}
+        <PillarPartsView
           pillarId={pillarId}
-          pillarTitle={title}
-          sections={sections}
+          menteeId={mentee.mentee.id}
+          partReleases={(partReleases ?? []) as Array<{ pillarId: number; partId: string; partLabel: string; released: boolean }>}
           onComplete={() => {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          allowReview={true}
         />
       </div>
     </div>
