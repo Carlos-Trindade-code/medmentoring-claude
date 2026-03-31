@@ -21,7 +21,7 @@ export async function createContext(
   }
 
   // Dev bypass: simulate admin user when OAuth is not configured
-  if (!user && process.env.NODE_ENV === "development" && !process.env.OAUTH_SERVER_URL) {
+  if (!user && process.env.NODE_ENV === "development" && !process.env.GOOGLE_CLIENT_ID) {
     user = {
       id: 1,
       openId: "dev-admin",

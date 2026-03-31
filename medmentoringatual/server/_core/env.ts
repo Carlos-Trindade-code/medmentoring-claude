@@ -1,10 +1,16 @@
 export const ENV = {
-  appId: process.env.VITE_APP_ID ?? "",
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? "",
+  adminEmail: process.env.ADMIN_EMAIL ?? "",
   cookieSecret: process.env.JWT_SECRET ?? "",
   databaseUrl: process.env.DATABASE_URL ?? "",
-  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
-  ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  // Legacy compatibility aliases
+  get appId() { return "medmentoring"; },
+  get ownerOpenId() { return ""; },
+  get oAuthServerUrl() { return ""; },
+  get forgeApiUrl() { return "https://generativelanguage.googleapis.com"; },
+  get forgeApiKey() { return this.geminiApiKey; },
 };

@@ -63,7 +63,7 @@ export function useAuth(options?: UseAuthOptions) {
   useEffect(() => {
     try {
       localStorage.setItem(
-        "manus-runtime-user-info",
+        "app-user-info",
         JSON.stringify(meQuery.data)
       );
     } catch {

@@ -2,11 +2,10 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 const RETURN_PATH_KEY = "auth_return_path";
 
-// Generate login URL at runtime so redirect URI reflects the current origin.
+// Generate Google OAuth login URL at runtime so redirect URI reflects the current origin.
 // Saves the current path to localStorage so we can restore it after OAuth redirect.
 export const getLoginUrl = (returnPath?: string) => {
-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
 
   // Determine the path we want to return to after login
@@ -30,12 +29,16 @@ export const getLoginUrl = (returnPath?: string) => {
   const statePayload = JSON.stringify({ redirectUri, returnPath: path });
   const state = btoa(statePayload);
 
-  if (!oauthPortalUrl) return "#";
-  const url = new URL(`${oauthPortalUrl}/app-auth`);
-  url.searchParams.set("appId", appId);
-  url.searchParams.set("redirectUri", redirectUri);
+  if (!clientId) return "#";
+
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  url.searchParams.set("client_id", clientId);
+  url.searchParams.set("redirect_uri", redirectUri);
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("scope", "openid email profile");
   url.searchParams.set("state", state);
-  url.searchParams.set("type", "signIn");
+  url.searchParams.set("access_type", "offline");
+  url.searchParams.set("prompt", "consent");
 
   return url.toString();
 };
