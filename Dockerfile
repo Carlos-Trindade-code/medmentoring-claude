@@ -5,6 +5,7 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 COPY medmentoringatual/package.json medmentoringatual/pnpm-lock.yaml ./
+COPY medmentoringatual/patches/ ./patches/
 RUN pnpm install --no-frozen-lockfile
 
 COPY medmentoringatual/ .
