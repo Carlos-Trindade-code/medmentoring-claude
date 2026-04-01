@@ -10,8 +10,8 @@ RUN pnpm install --no-frozen-lockfile
 
 COPY medmentoringatual/ .
 
-ARG VITE_GOOGLE_CLIENT_ID
-ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+# Vite needs VITE_* vars at build time. Client ID is public (not a secret).
+ENV VITE_GOOGLE_CLIENT_ID=287693490427-2oij2b8m6o146nd73epllv5ncpru0m2d.apps.googleusercontent.com
 
 RUN pnpm run build
 
