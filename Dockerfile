@@ -19,4 +19,4 @@ ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["sh", "-c", "pnpm drizzle-kit push --force && node dist/index.js"]
+CMD ["sh", "-c", "echo 'Running migrations...' && npx drizzle-kit push --force 2>&1 && echo 'Migrations done. Starting server...' && node dist/index.js"]
