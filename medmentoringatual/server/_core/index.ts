@@ -13,6 +13,7 @@ import { importRouter } from "../importRouter";
 import { pdfRouter } from "../pdfRouter";
 import { excelRouter } from "../excelRouter";
 import { reportPdfRouter } from "../reportPdfRouter";
+import { exportRouter } from "../exportRouter";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -57,6 +58,8 @@ async function startServer() {
   app.use(excelRouter);
   // Relatório Final Premium — download PDF via Puppeteer
   app.use(reportPdfRouter);
+  // Data export for migration
+  app.use(exportRouter);
   // tRPC API
   app.use(
     "/api/trpc",
