@@ -36,6 +36,10 @@ import { IvmpAnalysis } from "@/components/IvmpAnalysis";
 import { PricingAnalysis } from "@/components/PricingAnalysis";
 import { SimulationSummary } from "@/components/SimulationSummary";
 import { PILLAR_PARTS } from "../../../shared/pillar-parts";
+import { ExpenseTool } from "@/components/ExpenseTool";
+import { IvmpQuestionnaire } from "@/components/IvmpQuestionnaire";
+import { PricingTableMentee } from "@/components/PricingTableMentee";
+import { ScenarioSimulator } from "@/components/ScenarioSimulator";
 
 // ============================================================
 // TIPOS DE IA
@@ -815,39 +819,75 @@ export default function MentorPillarView() {
                 </div>
               )}
 
+              {/* Pilar 3 Part B — Despesas: Ferramenta editável + Análise */}
               {pillarId === 3 && activePartTab === "b" && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                    <Wrench className="w-3.5 h-3.5" /> Ferramentas de Análise
-                  </h3>
-                  <ExpenseAnalysis menteeId={menteeIdNum} />
+                <div className="space-y-6">
+                  <div className="border rounded-xl p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <Wrench className="w-3.5 h-3.5" /> Ferramenta de Despesas (editavel)
+                    </h3>
+                    <ExpenseTool pillarId={3} />
+                  </div>
+                  <div className="border rounded-xl p-4 border-teal-200">
+                    <h3 className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5" /> Analise de Despesas
+                    </h3>
+                    <ExpenseAnalysis menteeId={menteeIdNum} />
+                  </div>
                 </div>
               )}
 
+              {/* Pilar 3 Part C — iVMP: Ferramenta editável + Análise */}
               {pillarId === 3 && activePartTab === "c" && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                    <Wrench className="w-3.5 h-3.5" /> iVMP - Maturidade Profissional
-                  </h3>
-                  <IvmpAnalysis menteeId={menteeIdNum} />
+                <div className="space-y-6">
+                  <div className="border rounded-xl p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <Wrench className="w-3.5 h-3.5" /> iVMP - Questionario (editavel)
+                    </h3>
+                    <IvmpQuestionnaire onComplete={() => {}} />
+                  </div>
+                  <div className="border rounded-xl p-4 border-teal-200">
+                    <h3 className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5" /> Analise iVMP
+                    </h3>
+                    <IvmpAnalysis menteeId={menteeIdNum} />
+                  </div>
                 </div>
               )}
 
+              {/* Pilar 3 Part D — Simulador: Ferramenta editável + Resumo */}
               {pillarId === 3 && activePartTab === "d" && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                    <Wrench className="w-3.5 h-3.5" /> Simulador de Cenarios
-                  </h3>
-                  <SimulationSummary menteeId={menteeIdNum} />
+                <div className="space-y-6">
+                  <div className="border rounded-xl p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <Wrench className="w-3.5 h-3.5" /> Simulador de Cenarios (editavel)
+                    </h3>
+                    <ScenarioSimulator menteeId={menteeIdNum} mode="mentor" />
+                  </div>
+                  <div className="border rounded-xl p-4 border-teal-200">
+                    <h3 className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5" /> Resumo da Simulacao
+                    </h3>
+                    <SimulationSummary menteeId={menteeIdNum} />
+                  </div>
                 </div>
               )}
 
+              {/* Pilar 5 Part B — Precificação: Ferramenta editável + Análise */}
               {pillarId === 5 && activePartTab === "b" && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                    <Wrench className="w-3.5 h-3.5" /> Engenharia de Precos
-                  </h3>
-                  <PricingAnalysis menteeId={menteeIdNum} />
+                <div className="space-y-6">
+                  <div className="border rounded-xl p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <Wrench className="w-3.5 h-3.5" /> Tabela de Precos (editavel)
+                    </h3>
+                    <PricingTableMentee isReleased={true} />
+                  </div>
+                  <div className="border rounded-xl p-4 border-teal-200">
+                    <h3 className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5" /> Analise de Precificacao
+                    </h3>
+                    <PricingAnalysis menteeId={menteeIdNum} />
+                  </div>
                 </div>
               )}
 
