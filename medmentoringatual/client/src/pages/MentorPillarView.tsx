@@ -731,24 +731,24 @@ export default function MentorPillarView() {
         {/* ============================================================ */}
         <div className="border rounded-xl overflow-hidden">
           {/* Tab buttons */}
-          <div className="flex border-b overflow-x-auto">
+          <div className="flex border-b overflow-x-auto scrollbar-hide gap-0">
             {parts.map((part) => (
               <button
                 key={part.id}
                 onClick={() => setActivePartTab(part.id)}
-                className={`flex-1 min-w-0 py-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                className={`shrink-0 py-3 px-3 sm:px-4 text-center font-medium transition-colors ${
                   activePartTab === part.id
                     ? "text-primary border-b-2 border-primary bg-primary/5"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
-                <span className="uppercase text-xs font-bold">{part.id.toUpperCase()}</span>
-                <span className="hidden sm:inline ml-1 text-xs">{part.label}</span>
+                <span className="text-xs font-bold">{part.id.toUpperCase()}</span>
+                <span className="hidden md:inline ml-1 text-xs">{part.label}</span>
               </button>
             ))}
             <button
               onClick={() => setActivePartTab("entrega")}
-              className={`flex-1 min-w-0 py-3 px-2 text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`shrink-0 py-3 px-3 sm:px-4 font-medium transition-colors ${
                 activePartTab === "entrega"
                   ? "text-emerald-700 border-b-2 border-emerald-600 bg-emerald-50"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
