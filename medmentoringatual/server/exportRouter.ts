@@ -35,21 +35,6 @@ import { sql } from "drizzle-orm";
 
 export const exportRouter = Router();
 
-// Increase body size limit for import
-exportRouter.use("/api/import/all", (req, res, next) => {
-  const contentType = req.headers["content-type"] || "";
-  if (contentType.includes("application/json")) {
-    let body = "";
-    req.on("data", chunk => { body += chunk.toString(); });
-    req.on("end", () => {
-      try { (req as any).body = JSON.parse(body); } catch { (req as any).body = {}; }
-      next();
-    });
-  } else {
-    next();
-  }
-});
-
 exportRouter.post("/api/import/all", async (req, res) => {
   const secret = req.query.secret as string;
   if (!secret || secret !== process.env.JWT_SECRET) {
@@ -59,7 +44,7 @@ exportRouter.post("/api/import/all", async (req, res) => {
 
   try {
     const db = drizzle(process.env.DATABASE_URL!);
-    const data = (req as any).body;
+    const data = req.body;
     const results: Record<string, number> = {};
 
     // Order matters for foreign keys - insert parents first
