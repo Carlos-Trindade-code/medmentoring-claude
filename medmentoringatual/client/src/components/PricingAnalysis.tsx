@@ -186,6 +186,7 @@ export function PricingAnalysis({ menteeId }: PricingAnalysisProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -246,6 +247,7 @@ export function PricingAnalysis({ menteeId }: PricingAnalysisProps) {
                 </TableRow>
               </TableFooter>
             </Table>
+            </div>
           </CardContent>
         </Card>
 

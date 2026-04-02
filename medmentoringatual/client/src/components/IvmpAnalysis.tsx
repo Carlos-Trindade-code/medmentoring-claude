@@ -550,6 +550,7 @@ export function IvmpAnalysis({ menteeId }: IvmpAnalysisProps) {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
+                    <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -618,6 +619,7 @@ export function IvmpAnalysis({ menteeId }: IvmpAnalysisProps) {
                         })}
                       </TableBody>
                     </Table>
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
               );

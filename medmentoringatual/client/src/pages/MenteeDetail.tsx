@@ -7,13 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import React from "react";
 import {
-  ArrowLeft, Copy, CheckCircle, Circle, Lock, Unlock, FileText,
-  StickyNote, Save, ChevronDown, ChevronUp, Download, Trash2,
-  Phone, Mail, Building, Clock, Plus, ExternalLink, AlertCircle, Loader2
+  ArrowLeft, Copy, CheckCircle,
+  Phone, Mail, Building, Clock, AlertCircle, Loader2
 } from "lucide-react";
-import { PILLARS } from "@/lib/pillars";
-import MaterialUpload from "@/components/MaterialUpload";
-import MentorPartControls from "@/components/MentorPartControls";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function MenteeDetail() {

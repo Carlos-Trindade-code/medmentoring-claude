@@ -603,7 +603,7 @@ export default function MentorPillarView() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link href={`/mentor/mentorado/${menteeIdNum}`}>
@@ -767,21 +767,11 @@ export default function MentorPillarView() {
           {/* ============================================================ */}
           {activePartTab !== "entrega" && (
             <div className="p-4 space-y-6">
-              {/* Part description */}
-              {parts.find(p => p.id === activePartTab) && (
-                <div className="bg-muted/30 rounded-lg p-3">
-                  <p className="text-sm font-semibold text-foreground">
-                    Parte {activePartTab.toUpperCase()} — {parts.find(p => p.id === activePartTab)!.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {parts.find(p => p.id === activePartTab)!.description}
-                  </p>
-                </div>
-              )}
+              {/* Part description removed — tab already shows which part is active */}
 
               {/* Mentee answers filtered by currentPartSections */}
               <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 mt-2 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" /> Respostas do Mentorado
                 </h3>
                 {loadingAnswers ? (

@@ -484,6 +484,7 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -562,6 +563,7 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
                 </TableRow>
               </TableFooter>
             </Table>
+            </div>
           </CardContent>
         </Card>
 
