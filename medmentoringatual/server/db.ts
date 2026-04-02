@@ -1147,8 +1147,58 @@ export async function getIvmpAnswers(menteeId: number) {
   const data = await db.select().from(ivmpData)
     .where(eq(ivmpData.menteeId, menteeId));
   if (data.length === 0) return null;
+
+  const raw = data[0].categoriesJson;
+
+  // Handle both formats:
+  // New format: Record<string, number> e.g. { "prof_01": 9, "prof_02": 8 }
+  // Old format (Manus): Array of dimensions e.g. [{ "short": "Profissional", "questions": [{ "score": 0.5 }] }]
+  let answers: Record<string, number> | null = null;
+
+  if (raw && Array.isArray(raw)) {
+    // Old Manus format — convert to new format
+    // Import dimension IDs to map scores to question IDs
+    const DIMENSION_MAP: Record<string, string> = {
+      "Profissional": "profissional",
+      "Equipe": "equipe",
+      "Infraestrutura": "infraestrutura",
+      "Marketing": "marketing",
+      "Paciente": "paciente",
+      "Jornada": "jornada",
+      "Gestão": "gestao",
+      "Gestao": "gestao",
+    };
+    const DIMENSION_PREFIXES: Record<string, string> = {
+      "profissional": "prof",
+      "equipe": "equi",
+      "infraestrutura": "infra",
+      "marketing": "mkt",
+      "paciente": "pac",
+      "jornada": "jorn",
+      "gestao": "gest",
+    };
+
+    answers = {};
+    for (const dim of raw as Array<{ short?: string; name?: string; questions?: Array<{ score?: number }> }>) {
+      const dimKey = dim.short || dim.name || "";
+      const dimId = DIMENSION_MAP[dimKey] || dimKey.toLowerCase();
+      const prefix = DIMENSION_PREFIXES[dimId] || dimId.substring(0, 4);
+
+      if (dim.questions) {
+        dim.questions.forEach((q, idx) => {
+          const questionId = `${prefix}_${String(idx + 1).padStart(2, "0")}`;
+          // Old format stores 0-1 scale, new format is 0-10
+          const score = (q.score ?? 0) <= 1 ? (q.score ?? 0) * 10 : (q.score ?? 0);
+          answers![questionId] = Math.round(score * 10) / 10;
+        });
+      }
+    }
+  } else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    answers = raw as Record<string, number>;
+  }
+
   return {
-    answers: data[0].categoriesJson as Record<string, number> | null,
+    answers,
     ivmpFinal: data[0].ivmpFinal ? Number(data[0].ivmpFinal) : null,
   };
 }
