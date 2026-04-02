@@ -31,7 +31,107 @@ import {
   pillarDiagnostics,
 } from "../drizzle/schema";
 
+import { sql } from "drizzle-orm";
+
 export const exportRouter = Router();
+
+// Increase body size limit for import
+exportRouter.use("/api/import/all", (req, res, next) => {
+  const contentType = req.headers["content-type"] || "";
+  if (contentType.includes("application/json")) {
+    let body = "";
+    req.on("data", chunk => { body += chunk.toString(); });
+    req.on("end", () => {
+      try { (req as any).body = JSON.parse(body); } catch { (req as any).body = {}; }
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
+exportRouter.post("/api/import/all", async (req, res) => {
+  const secret = req.query.secret as string;
+  if (!secret || secret !== process.env.JWT_SECRET) {
+    res.status(403).json({ error: "Unauthorized" });
+    return;
+  }
+
+  try {
+    const db = drizzle(process.env.DATABASE_URL!);
+    const data = (req as any).body;
+    const results: Record<string, number> = {};
+
+    // Order matters for foreign keys - insert parents first
+    const tableMap: [string, any][] = [
+      ["users", users],
+      ["mentees", mentees],
+      ["onboardingForms", onboardingForms],
+      ["pillarAnswers", pillarAnswers],
+      ["pillarFeedback", pillarFeedback],
+      ["financialData", financialData],
+      ["ivmpData", ivmpData],
+      ["pillarReleases", pillarReleases],
+      ["checklistItems", checklistItems],
+      ["materials", materials],
+      ["mentorNotes", mentorNotes],
+      ["npsResponses", npsResponses],
+      ["sessionRequests", sessionRequests],
+      ["menteeQuestionnaire", menteeQuestionnaire],
+      ["menteeDocuments", menteeDocuments],
+      ["pillarConclusions", pillarConclusions],
+      ["mentorAiChat", mentorAiChat],
+      ["mentorSuggestions", mentorSuggestions],
+      ["chatConclusions", chatConclusions],
+      ["partReleases", partReleases],
+      ["pillarPartContent", pillarPartContent],
+      ["pillarReports", pillarReports],
+      ["pillarDiagnostics", pillarDiagnostics],
+    ];
+
+    // Disable foreign key checks during import
+    await db.execute(sql`SET FOREIGN_KEY_CHECKS = 0`);
+
+    for (const [key, table] of tableMap) {
+      const rows = data[key];
+      if (!rows || !Array.isArray(rows) || rows.length === 0) {
+        results[key] = 0;
+        continue;
+      }
+
+      try {
+        // Convert date strings back to Date objects
+        const processedRows = rows.map((row: any) => {
+          const processed: any = { ...row };
+          for (const [k, v] of Object.entries(processed)) {
+            if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v)) {
+              processed[k] = new Date(v);
+            }
+          }
+          return processed;
+        });
+
+        // Insert in batches of 50
+        for (let i = 0; i < processedRows.length; i += 50) {
+          const batch = processedRows.slice(i, i + 50);
+          await db.insert(table).values(batch);
+        }
+        results[key] = rows.length;
+      } catch (err: any) {
+        results[key] = -1;
+        console.error(`[Import] Failed for ${key}:`, err.message);
+      }
+    }
+
+    // Re-enable foreign key checks
+    await db.execute(sql`SET FOREIGN_KEY_CHECKS = 1`);
+
+    res.json({ success: true, results });
+  } catch (error) {
+    console.error("[Import] Failed:", error);
+    res.status(500).json({ error: "Import failed", details: String(error) });
+  }
+});
 
 exportRouter.get("/api/export/all", async (req, res) => {
   const secret = req.query.secret as string;
