@@ -209,16 +209,12 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () => {
-  const apiKey = ENV.geminiApiKey || ENV.forgeApiKey;
-  if (!apiKey) return "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-  return "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-};
+const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
+const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
 const assertApiKey = () => {
-  const apiKey = ENV.geminiApiKey || ENV.forgeApiKey;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!ENV.claudeApiKey) {
+    throw new Error("CLAUDE_API_KEY is not configured");
   }
 };
 
@@ -275,47 +271,71 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     tools,
     toolChoice,
     tool_choice,
-    outputSchema,
-    output_schema,
-    responseFormat,
-    response_format,
+    maxTokens,
+    max_tokens,
   } = params;
 
+  // Convert messages to Claude format
+  // Claude requires system message separate from messages array
+  let systemPrompt = "";
+  const claudeMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
+
+  for (const msg of messages.map(normalizeMessage)) {
+    if (msg.role === "system") {
+      systemPrompt += (typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)) + "\n";
+    } else if (msg.role === "user" || msg.role === "assistant") {
+      const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
+      claudeMessages.push({ role: msg.role, content });
+    } else if (msg.role === "tool" || msg.role === "function") {
+      // Convert tool results to user messages for Claude
+      const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
+      claudeMessages.push({ role: "user", content: `[Tool result]: ${content}` });
+    }
+  }
+
+  // Ensure messages alternate user/assistant (Claude requirement)
+  // Merge consecutive same-role messages
+  const mergedMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
+  for (const msg of claudeMessages) {
+    const last = mergedMessages[mergedMessages.length - 1];
+    if (last && last.role === msg.role) {
+      last.content += "\n" + msg.content;
+    } else {
+      mergedMessages.push({ ...msg });
+    }
+  }
+
+  // Claude needs at least one user message
+  if (mergedMessages.length === 0) {
+    mergedMessages.push({ role: "user", content: systemPrompt || "Hello" });
+    systemPrompt = "";
+  }
+
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
-    messages: messages.map(normalizeMessage),
+    model: CLAUDE_MODEL,
+    max_tokens: maxTokens || max_tokens || 8192,
+    messages: mergedMessages,
   };
 
+  if (systemPrompt.trim()) {
+    payload.system = systemPrompt.trim();
+  }
+
+  // Convert tools to Claude format
   if (tools && tools.length > 0) {
-    payload.tools = tools;
+    payload.tools = tools.map(t => ({
+      name: t.function.name,
+      description: t.function.description || "",
+      input_schema: t.function.parameters || { type: "object", properties: {} },
+    }));
   }
 
-  const normalizedToolChoice = normalizeToolChoice(
-    toolChoice || tool_choice,
-    tools
-  );
-  if (normalizedToolChoice) {
-    payload.tool_choice = normalizedToolChoice;
-  }
-
-  payload.max_tokens = 32768;
-
-  const normalizedResponseFormat = normalizeResponseFormat({
-    responseFormat,
-    response_format,
-    outputSchema,
-    output_schema,
-  });
-
-  if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
-  }
-
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(CLAUDE_API_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.geminiApiKey || ENV.forgeApiKey}`,
+      "x-api-key": ENV.claudeApiKey,
+      "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify(payload),
   });
@@ -323,9 +343,54 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+      `Claude API failed: ${response.status} ${response.statusText} – ${errorText}`
     );
   }
 
-  return (await response.json()) as InvokeResult;
+  const claudeResult = await response.json() as {
+    id: string;
+    model: string;
+    content: Array<{ type: "text"; text: string } | { type: "tool_use"; id: string; name: string; input: unknown }>;
+    stop_reason: string;
+    usage: { input_tokens: number; output_tokens: number };
+  };
+
+  // Convert Claude response to InvokeResult format (OpenAI-compatible)
+  let textContent = "";
+  const toolCalls: ToolCall[] = [];
+
+  for (const block of claudeResult.content) {
+    if (block.type === "text") {
+      textContent += block.text;
+    } else if (block.type === "tool_use") {
+      toolCalls.push({
+        id: block.id,
+        type: "function",
+        function: {
+          name: block.name,
+          arguments: JSON.stringify(block.input),
+        },
+      });
+    }
+  }
+
+  return {
+    id: claudeResult.id,
+    created: Date.now(),
+    model: claudeResult.model,
+    choices: [{
+      index: 0,
+      message: {
+        role: "assistant",
+        content: textContent,
+        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
+      },
+      finish_reason: claudeResult.stop_reason === "end_turn" ? "stop" : claudeResult.stop_reason,
+    }],
+    usage: {
+      prompt_tokens: claudeResult.usage.input_tokens,
+      completion_tokens: claudeResult.usage.output_tokens,
+      total_tokens: claudeResult.usage.input_tokens + claudeResult.usage.output_tokens,
+    },
+  };
 }

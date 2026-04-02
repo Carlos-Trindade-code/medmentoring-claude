@@ -7,6 +7,7 @@ export const ENV = {
   databaseUrl: process.env.DATABASE_URL ?? "",
   isProduction: process.env.NODE_ENV === "production",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  claudeApiKey: process.env.CLAUDE_API_KEY ?? "",
   // Legacy compatibility aliases
   get appId() { return "medmentoring"; },
   get ownerOpenId() { return ""; },
