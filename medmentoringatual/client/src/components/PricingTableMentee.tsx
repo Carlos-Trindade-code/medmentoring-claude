@@ -92,9 +92,11 @@ function marginBg(pct: number) {
 interface Props {
   isReleased: boolean;
   onComplete?: () => void;
+  mode?: "mentee" | "mentor";
 }
 
-export function PricingTableMentee({ isReleased, onComplete }: Props) {
+export function PricingTableMentee({ isReleased, onComplete, mode = "mentee" }: Props) {
+  const isMentor = mode === "mentor";
   const [services, setServices] = useState<ServiceRow[]>([]);
   const [originalServices, setOriginalServices] = useState<ServiceRow[]>([]); // snapshot dos dados salvos
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -398,28 +400,32 @@ export function PricingTableMentee({ isReleased, onComplete }: Props) {
                           placeholder="0.5"
                         />
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Imposto (%)</label>
-                        <Input
-                          type="number"
-                          step="0.5"
-                          value={s.impostoPercent || ""}
-                          onChange={e => updateService(s.id, "impostoPercent", parseFloat(e.target.value) || 0)}
-                          className="h-8 text-sm"
-                          placeholder="12.5"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Taxa cartão (%)</label>
-                        <Input
-                          type="number"
-                          step="0.5"
-                          value={s.taxaCartaoPercent || ""}
-                          onChange={e => updateService(s.id, "taxaCartaoPercent", parseFloat(e.target.value) || 0)}
-                          className="h-8 text-sm"
-                          placeholder="5"
-                        />
-                      </div>
+                      {isMentor && (
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Imposto (%)</label>
+                          <Input
+                            type="number"
+                            step="0.5"
+                            value={s.impostoPercent || ""}
+                            onChange={e => updateService(s.id, "impostoPercent", parseFloat(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                            placeholder="12.5"
+                          />
+                        </div>
+                      )}
+                      {isMentor && (
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Taxa cartão (%)</label>
+                          <Input
+                            type="number"
+                            step="0.5"
+                            value={s.taxaCartaoPercent || ""}
+                            onChange={e => updateService(s.id, "taxaCartaoPercent", parseFloat(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                            placeholder="5"
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Materiais (R$/proc.)</label>
                         <Input
@@ -430,38 +436,44 @@ export function PricingTableMentee({ isReleased, onComplete }: Props) {
                           placeholder="0,00"
                         />
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Taxa equipamento (R$)</label>
-                        <Input
-                          type="number"
-                          value={s.taxaEquipamento || ""}
-                          onChange={e => updateService(s.id, "taxaEquipamento", parseFloat(e.target.value) || 0)}
-                          className="h-8 text-sm"
-                          placeholder="0,00"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Rateio médico (%)</label>
-                        <Input
-                          type="number"
-                          min="1"
-                          max="100"
-                          value={s.rateioPercent || ""}
-                          onChange={e => updateService(s.id, "rateioPercent", parseFloat(e.target.value) || 100)}
-                          className="h-8 text-sm"
-                          placeholder="100"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Qtd. por mês</label>
-                        <Input
-                          type="number"
-                          value={s.quantidadeMes || ""}
-                          onChange={e => updateService(s.id, "quantidadeMes", parseInt(e.target.value) || 0)}
-                          className="h-8 text-sm"
-                          placeholder="0"
-                        />
-                      </div>
+                      {isMentor && (
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Taxa equipamento (R$)</label>
+                          <Input
+                            type="number"
+                            value={s.taxaEquipamento || ""}
+                            onChange={e => updateService(s.id, "taxaEquipamento", parseFloat(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                            placeholder="0,00"
+                          />
+                        </div>
+                      )}
+                      {isMentor && (
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Rateio médico (%)</label>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={s.rateioPercent || ""}
+                            onChange={e => updateService(s.id, "rateioPercent", parseFloat(e.target.value) || 100)}
+                            className="h-8 text-sm"
+                            placeholder="100"
+                          />
+                        </div>
+                      )}
+                      {isMentor && (
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Qtd. por mês</label>
+                          <Input
+                            type="number"
+                            value={s.quantidadeMes || ""}
+                            onChange={e => updateService(s.id, "quantidadeMes", parseInt(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                            placeholder="0"
+                          />
+                        </div>
+                      )}
                     </div>
                     {/* Preview dos cálculos */}
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t">
