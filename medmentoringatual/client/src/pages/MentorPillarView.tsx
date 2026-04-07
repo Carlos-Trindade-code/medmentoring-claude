@@ -37,6 +37,7 @@ import { PricingAnalysis } from "@/components/PricingAnalysis";
 import { SimulationSummary } from "@/components/SimulationSummary";
 import { PILLAR_PARTS } from "../../../shared/pillar-parts";
 import { ScenarioSimulator } from "@/components/ScenarioSimulator";
+import { PricingEditor } from "@/components/PricingEditor";
 
 // ============================================================
 // TIPOS DE IA
@@ -854,9 +855,15 @@ export default function MentorPillarView() {
                 </div>
               )}
 
-              {/* Pilar 5 Part B — Precificação: Análise completa */}
+              {/* Pilar 5 Part B — Precificação: Editor + Análise */}
               {pillarId === 5 && activePartTab === "b" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  <div className="border rounded-xl p-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                      Tabela de Servicos (editavel)
+                    </h3>
+                    <PricingEditor menteeId={menteeIdNum} />
+                  </div>
                   <PricingAnalysis menteeId={menteeIdNum} />
                 </div>
               )}
