@@ -2701,6 +2701,35 @@ const pillarAnswersRouter = router({
       return { success: true };
     }),
 
+  // Mentor edita uma resposta individual do mentorado
+  adminUpdateAnswer: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      pillarId: z.number().min(1).max(7),
+      secao: z.string(),
+      questionId: z.string(),
+      pergunta: z.string(),
+      resposta: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+    }))
+    .mutation(async ({ input }) => {
+      // Get existing answers for this section
+      const existing = await getPillarAnswers(input.menteeId, input.pillarId);
+      const sectionRow = existing?.find((r: any) => r.secao === input.secao);
+      const respostas = (sectionRow?.respostas as any[]) || [];
+
+      // Update or add the specific answer
+      const idx = respostas.findIndex((r: any) => r.id === input.questionId);
+      const updated = { id: input.questionId, pergunta: input.pergunta, resposta: input.resposta, naoSabe: false };
+      if (idx >= 0) {
+        respostas[idx] = updated;
+      } else {
+        respostas.push(updated);
+      }
+
+      await upsertPillarAnswers(input.menteeId, input.pillarId, input.secao, respostas, sectionRow?.status || "em_progresso");
+      return { success: true };
+    }),
+
   // Mentorado busca respostas de um pilar (para retomar)
   getByPillar: menteeProcedure
     .input(z.object({ pillarId: z.number().min(1).max(7) }))

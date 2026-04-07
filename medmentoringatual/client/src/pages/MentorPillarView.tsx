@@ -310,7 +310,7 @@ export default function MentorPillarView() {
   const { data: mentee } = trpc.mentor.getMentee.useQuery({ id: menteeIdNum });
 
   // Respostas do mentorado
-  const { data: answers, isLoading: loadingAnswers, error: answersError } = trpc.pillarFeedback.getAnswers.useQuery({
+  const { data: answers, isLoading: loadingAnswers, error: answersError, refetch: refetchAnswers } = trpc.pillarFeedback.getAnswers.useQuery({
     menteeId: menteeIdNum,
     pillarId,
   }, { retry: false });
@@ -329,6 +329,9 @@ export default function MentorPillarView() {
   const saveDiagnosisMutation = trpc.pillarTools.saveDiagnosis.useMutation();
   const saveSpecMutation = trpc.pillarTools.saveSpecializations.useMutation();
   const saveRoadmapMutation = trpc.pillarTools.saveRoadmap.useMutation();
+  const updateAnswerMutation = trpc.pillarAnswers.adminUpdateAnswer.useMutation({
+    onSuccess: () => refetchAnswers(),
+  });
   const generateFeedbackDraftMutation = trpc.pillarTools.generateFeedbackDraft.useMutation();
   const generateConclusionsMutation = trpc.pillarTools.generatePillarConclusions.useMutation();
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
@@ -804,6 +807,19 @@ export default function MentorPillarView() {
                     <MenteeAnswersSummary
                       sections={filteredSections}
                       answers={filteredAnswerRows as any}
+                      editable={true}
+                      onSave={async (sectionId, questionId, value) => {
+                        const section = filteredSections.find(s => s.perguntas.some(p => p.id === questionId));
+                        const question = section?.perguntas.find(p => p.id === questionId);
+                        await updateAnswerMutation.mutateAsync({
+                          menteeId: menteeIdNum,
+                          pillarId,
+                          secao: sectionId,
+                          questionId,
+                          pergunta: question?.pergunta ?? "",
+                          resposta: value,
+                        });
+                      }}
                     />
                   );
                 })()}
