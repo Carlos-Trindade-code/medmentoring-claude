@@ -19,9 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   ChevronLeft, CheckCircle2,
-  MessageSquare, Send, Lock, Unlock,
-  User, AlertCircle, Loader2, Eye,
-  Sparkles, RefreshCw, TrendingUp, FileDown
+  Send, Lock, Unlock,
+  User, AlertCircle, Loader2,
+  Sparkles, TrendingUp, FileDown
 } from "lucide-react";
 import { Link } from "wouter";
 import { PILLAR_SECTIONS, PILLAR_TITLES, PILLAR_ICONS } from "@/lib/pillar-questions";
@@ -34,31 +34,6 @@ import { ScenarioSimulator } from "@/components/ScenarioSimulator";
 import { PricingEditor } from "@/components/PricingEditor";
 
 // ============================================================
-// TIPOS DE IA
-// ============================================================
-type AiDiagnosisLacuna = {
-  lacuna: string;
-  impacto: string;
-  urgencia: "alta" | "media" | "baixa";
-};
-
-type AiDiagnosisRecomendacao = {
-  acao: string;
-  prazo: "imediato" | "curto_prazo" | "medio_prazo";
-  resultado_esperado: string;
-};
-
-type AiDiagnosisResult = {
-  resumo: string;
-  pontos_fortes: string[];
-  lacunas_criticas: AiDiagnosisLacuna[];
-  recomendacoes: AiDiagnosisRecomendacao[];
-  frase_chave: string;
-  nivel_maturidade: string;
-};
-
-
-// ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
 export default function MentorPillarView() {
@@ -68,18 +43,13 @@ export default function MentorPillarView() {
   const { user, loading: authLoading } = useAuth();
   const [, navigate] = useLocation();
 
-  const [activeTab, setActiveTab] = useState<"dados" | "insights" | "relatorio">("dados");
+  const [activeTab, setActiveTab] = useState<"dados" | "mentor">("dados");
   const [feedback, setFeedback] = useState("");
   const [planoAcao, setPlanoAcao] = useState("");
   const [pontosFortes, setPontosFortes] = useState<string[]>([""]);
   const [pontosMelhoria, setPontosMelhoria] = useState<string[]>([""]);
   const [savingFeedback, setSavingFeedback] = useState(false);
 
-  const [generatingDiagnosis, setGeneratingDiagnosis] = useState(false);
-  const [aiDiagnosisResult, setAiDiagnosisResult] = useState<AiDiagnosisResult | null>(null);
-  const [savingDiagnosis, setSavingDiagnosis] = useState(false);
-  const [generatingFeedbackDraft, setGeneratingFeedbackDraft] = useState(false);
-  const [feedbackDraftGenerated, setFeedbackDraftGenerated] = useState(false);
   const [generatingConclusions, setGeneratingConclusions] = useState(false);
   const [conclusionsData, setConclusionsData] = useState<Record<string, unknown> | null>(null);
   const [editedConclusions, setEditedConclusions] = useState<Record<string, string>>({});
@@ -105,12 +75,9 @@ export default function MentorPillarView() {
 
   const saveFeedbackMutation = trpc.pillarFeedback.saveFeedback.useMutation();
   const releaseMutation = trpc.pillarFeedback.releaseConclusion.useMutation();
-  const generateDiagnosisMutation = trpc.pillarTools.generatePillarDiagnosis.useMutation();
-  const saveDiagnosisMutation = trpc.pillarTools.saveDiagnosis.useMutation();
   const updateAnswerMutation = trpc.pillarAnswers.adminUpdateAnswer.useMutation({
     onSuccess: () => refetchAnswers(),
   });
-  const generateFeedbackDraftMutation = trpc.pillarTools.generateFeedbackDraft.useMutation();
   const generateConclusionsMutation = trpc.pillarTools.generatePillarConclusions.useMutation();
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
   const { data: existingConclusions, refetch: refetchConclusions } = trpc.pillarTools.getPillarConclusions.useQuery({
@@ -199,42 +166,8 @@ export default function MentorPillarView() {
       setPlanoAcao(existingFeedback.planoAcao ?? "");
       if (existingFeedback.pontosFortesJson) setPontosFortes(existingFeedback.pontosFortesJson as string[]);
       if (existingFeedback.pontosMelhoriaJson) setPontosMelhoria(existingFeedback.pontosMelhoriaJson as string[]);
-      // Carrega resultados de IA salvos anteriormente
-      if (existingFeedback.aiDiagnosis) setAiDiagnosisResult(existingFeedback.aiDiagnosis as AiDiagnosisResult);
     }
   }, [existingFeedback]);
-
-  const handleGenerateDiagnosis = async () => {
-    setGeneratingDiagnosis(true);
-    try {
-      const result = await generateDiagnosisMutation.mutateAsync({ menteeId: menteeIdNum, pillarId });
-      setAiDiagnosisResult(result as AiDiagnosisResult);
-      toast.success("Diagnóstico gerado com sucesso!");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Erro ao gerar diagnóstico.";
-      toast.error(msg);
-    } finally {
-      setGeneratingDiagnosis(false);
-    }
-  };
-
-  const handleSaveDiagnosis = async () => {
-    if (!aiDiagnosisResult) return;
-    setSavingDiagnosis(true);
-    try {
-      await saveDiagnosisMutation.mutateAsync({
-        menteeId: menteeIdNum,
-        pillarId,
-        diagnosis: aiDiagnosisResult,
-      });
-      toast.success("Diagnóstico salvo com sucesso!");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Erro ao salvar diagnóstico.";
-      toast.error(msg);
-    } finally {
-      setSavingDiagnosis(false);
-    }
-  };
 
   const handleSaveFeedback = async () => {
     setSavingFeedback(true);
@@ -267,33 +200,6 @@ export default function MentorPillarView() {
       toast.error("Erro ao liberar conclusão.");
     }
   };
-
-  const handleGenerateFeedbackDraft = async () => {
-    setGeneratingFeedbackDraft(true);
-    try {
-      const draft = await generateFeedbackDraftMutation.mutateAsync({
-        menteeId: menteeIdNum,
-        pillarId,
-      });
-      // Preenche os campos com o rascunho gerado (sem sobrescrever se já houver conteúdo)
-      if (draft.pontos_fortes?.length) setPontosFortes(draft.pontos_fortes);
-      if (draft.pontos_melhoria?.length) setPontosMelhoria(draft.pontos_melhoria);
-      if (draft.feedback_geral) setFeedback(draft.feedback_geral);
-      if (draft.plano_acao) setPlanoAcao(draft.plano_acao);
-      setFeedbackDraftGenerated(true);
-      toast.success("Rascunho gerado! Revise e ajuste antes de liberar ao mentorado.");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("ainda não respondeu")) {
-        toast.error("O mentorado ainda não respondeu este pilar.");
-      } else {
-        toast.error("Erro ao gerar rascunho. Tente novamente.");
-      }
-    } finally {
-      setGeneratingFeedbackDraft(false);
-    }
-  };
-
 
   // Auth guard: se sessão expirou, mostrar botão de login
   if (authLoading) {
@@ -374,7 +280,6 @@ export default function MentorPillarView() {
           </div>
         )}
 
-        {/* Tab bar: 3 tabs */}
         <div className="border-b mb-6">
           <div className="flex">
             <button
@@ -388,24 +293,14 @@ export default function MentorPillarView() {
               Dados
             </button>
             <button
-              onClick={() => setActiveTab("insights")}
+              onClick={() => setActiveTab("mentor")}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                activeTab === "insights"
+                activeTab === "mentor"
                   ? "text-violet-700 border-b-2 border-violet-600"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Insights
-            </button>
-            <button
-              onClick={() => setActiveTab("relatorio")}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                activeTab === "relatorio"
-                  ? "text-emerald-700 border-b-2 border-emerald-600"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Relatório
+              Mentor
             </button>
           </div>
         </div>
@@ -486,133 +381,20 @@ export default function MentorPillarView() {
           </div>
         )}
 
-        {/* ========== ABA INSIGHTS ========== */}
-        {activeTab === "insights" && (
+        {activeTab === "mentor" && (
           <div className="space-y-6">
-            {/* Diagnóstico IA */}
-            <div className="border rounded-xl p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-violet-600" /> Diagnóstico do Pilar
-                </h3>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleGenerateDiagnosis}
-                  disabled={generatingDiagnosis}
-                  className="gap-2 border-violet-300 text-violet-700 hover:bg-violet-50"
-                >
-                  {generatingDiagnosis ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                  {aiDiagnosisResult ? "Regerar" : "Analisar com IA"}
-                </Button>
-              </div>
-
-              {generatingDiagnosis && (
-                <div className="py-8 flex flex-col items-center gap-3">
-                  <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
-                  <p className="text-sm text-muted-foreground">Analisando respostas...</p>
-                </div>
-              )}
-
-              {!generatingDiagnosis && !aiDiagnosisResult && (
-                <div className="py-6 text-center">
-                  <Sparkles className="w-8 h-8 text-violet-300 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Clique em "Analisar com IA" para gerar o diagnóstico.</p>
-                </div>
-              )}
-
-              {!generatingDiagnosis && aiDiagnosisResult && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-violet-700 uppercase tracking-wide block mb-1.5">Frase-chave</label>
-                    <Textarea
-                      value={aiDiagnosisResult.frase_chave}
-                      onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, frase_chave: e.target.value } : prev)}
-                      rows={2}
-                      className="text-sm border-violet-200 bg-violet-50/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-violet-700 uppercase tracking-wide block mb-1.5">Resumo</label>
-                    <Textarea
-                      value={aiDiagnosisResult.resumo}
-                      onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, resumo: e.target.value } : prev)}
-                      rows={4}
-                      className="text-sm border-violet-200 bg-violet-50/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-emerald-700 uppercase tracking-wide block mb-1.5">Pontos Fortes</label>
-                    <Textarea
-                      value={aiDiagnosisResult.pontos_fortes.join("\n")}
-                      onChange={e => setAiDiagnosisResult(prev => prev ? { ...prev, pontos_fortes: e.target.value.split("\n") } : prev)}
-                      rows={3}
-                      className="text-sm border-emerald-200 bg-emerald-50/50"
-                      placeholder="Um por linha"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-amber-700 uppercase tracking-wide block mb-1.5">Lacunas</label>
-                    <Textarea
-                      value={aiDiagnosisResult.lacunas_criticas.map(l => `${l.lacuna} — ${l.impacto}`).join("\n")}
-                      onChange={e => {
-                        const lines = e.target.value.split("\n");
-                        setAiDiagnosisResult(prev => prev ? {
-                          ...prev,
-                          lacunas_criticas: lines.map(line => {
-                            const [lacuna, impacto] = line.split(" — ");
-                            return { lacuna: lacuna || line, impacto: impacto || "", urgencia: "media" as const };
-                          })
-                        } : prev);
-                      }}
-                      rows={3}
-                      className="text-sm border-amber-200 bg-amber-50/50"
-                      placeholder="Lacuna — Impacto (um por linha)"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide block mb-1.5">Recomendações</label>
-                    <Textarea
-                      value={aiDiagnosisResult.recomendacoes.map(r => r.acao).join("\n")}
-                      onChange={e => {
-                        const lines = e.target.value.split("\n");
-                        setAiDiagnosisResult(prev => prev ? {
-                          ...prev,
-                          recomendacoes: lines.map(line => ({ acao: line, prazo: "curto_prazo" as const, resultado_esperado: "" }))
-                        } : prev);
-                      }}
-                      rows={3}
-                      className="text-sm border-blue-200 bg-blue-50/50"
-                      placeholder="Uma recomendação por linha"
-                    />
-                  </div>
-                  <Button onClick={handleSaveDiagnosis} disabled={savingDiagnosis} size="sm" className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white">
-                    {savingDiagnosis ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                    Salvar Diagnóstico
-                  </Button>
-                </div>
-              )}
-            </div>
-
             {/* Chat IA */}
-            <div>
-              <MentorAIChat
-                menteeId={menteeIdNum}
-                pillarId={pillarId}
-                pillarTitle={title || `Pilar ${pillarId}`}
-              />
-            </div>
-          </div>
-        )}
+            <MentorAIChat
+              menteeId={menteeIdNum}
+              pillarId={pillarId}
+              pillarTitle={title || `Pilar ${pillarId}`}
+            />
 
-        {/* ========== ABA RELATÓRIO ========== */}
-        {activeTab === "relatorio" && (
-          <div className="space-y-6">
-            {/* Conclusões */}
+            {/* Relatório do Pilar */}
             <div className="border-2 border-emerald-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-600" /> Conclusões do Pilar
+                  <Sparkles className="w-4 h-4 text-emerald-600" /> Relatório do Pilar
                   {existingConclusions?.liberadoParaMentorado && (
                     <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">Liberado</Badge>
                   )}
@@ -636,101 +418,77 @@ export default function MentorPillarView() {
                   {Object.entries(conclusionsData).map(([key, val]) => {
                     const label = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
                     const isArray = Array.isArray(val);
-                    const isRecomendacao = key === "recomendacao_mentor";
                     return (
                       <div key={key}>
-                        <label className={`text-xs font-semibold uppercase tracking-wide flex items-center gap-1 mb-1.5 ${isRecomendacao ? "text-violet-700" : "text-emerald-700"}`}>
-                          {isRecomendacao ? <Eye className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-                          {label}
-                        </label>
+                        <label className="text-xs font-semibold text-emerald-700 uppercase tracking-wide block mb-1.5">{label}</label>
                         <Textarea
                           value={editedConclusions[key] ?? (isArray ? (val as string[]).join("\n") : String(val ?? ""))}
                           onChange={e => setEditedConclusions(prev => ({ ...prev, [key]: e.target.value }))}
                           rows={isArray ? Math.max(3, (val as string[]).length + 1) : 3}
-                          className={`text-sm ${isRecomendacao ? "border-violet-200 bg-violet-50/50" : "border-emerald-200 bg-emerald-50/50"}`}
+                          className="text-sm border-emerald-200 bg-emerald-50/50"
                           placeholder={isArray ? "Um item por linha" : `Escreva ${label.toLowerCase()}...`}
                         />
                       </div>
                     );
                   })}
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Button onClick={() => handleSaveConclusions(false)} disabled={savingConclusions} variant="outline" size="sm" className="gap-1.5">
-                      {savingConclusions ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                      Salvar Rascunho
-                    </Button>
-                    <Button onClick={() => handleSaveConclusions(true)} disabled={savingConclusions} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5">
-                      {savingConclusions ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                      Salvar e Liberar
-                    </Button>
-                    {!!existingConclusions?.conclusoesJson && (
-                      <Button onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/${pillarId}`, "_blank")} variant="outline" size="sm" className="gap-1.5">
-                        <FileDown className="w-3.5 h-3.5" /> PDF
-                      </Button>
-                    )}
-                  </div>
                 </div>
               )}
 
-              {!conclusionsData && (
-                <p className="text-sm text-muted-foreground text-center py-4">Clique em "Gerar com IA" para criar as conclusões.</p>
+              {!conclusionsData && !generatingConclusions && (
+                <p className="text-sm text-muted-foreground text-center py-4">Clique em "Gerar com IA" para criar o relatório.</p>
               )}
-            </div>
 
-            {/* Feedback */}
-            <div className="border rounded-xl p-4">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-orange-600" /> Feedback
-              </h3>
-
-              <div className="bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-xl p-3 mb-4">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-xs text-violet-700">A IA gera um rascunho. Você revisa e ajusta.</p>
-                  <Button onClick={handleGenerateFeedbackDraft} disabled={generatingFeedbackDraft} size="sm" className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 shrink-0">
-                    {generatingFeedbackDraft ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</> : <><Sparkles className="w-3.5 h-3.5" /> {feedbackDraftGenerated ? "Regerar" : "Gerar Rascunho"}</>}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
+              {/* Feedback inline */}
+              <div className="mt-6 pt-4 border-t space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-emerald-700 uppercase tracking-wide block mb-1.5">Pontos Fortes</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Pontos Fortes</label>
                   <Textarea value={pontosFortes.join("\n")} onChange={e => setPontosFortes(e.target.value.split("\n"))} rows={3} className="text-sm" placeholder="Um por linha" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-amber-700 uppercase tracking-wide block mb-1.5">Pontos de Melhoria</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Melhorias</label>
                   <Textarea value={pontosMelhoria.join("\n")} onChange={e => setPontosMelhoria(e.target.value.split("\n"))} rows={3} className="text-sm" placeholder="Um por linha" />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Feedback Geral</label>
-                  <Textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={4} className="text-sm resize-none" placeholder="Feedback personalizado..." />
+                  <Textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Feedback personalizado..." />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Plano de Ação</label>
-                  <Textarea value={planoAcao} onChange={e => setPlanoAcao(e.target.value)} rows={4} className="text-sm resize-none" placeholder="Próximos passos..." />
+                  <Textarea value={planoAcao} onChange={e => setPlanoAcao(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Próximos passos..." />
                 </div>
-                <div className="flex gap-3 pt-2">
-                  <Button variant="outline" onClick={handleSaveFeedback} disabled={savingFeedback} className="gap-2">
-                    {savingFeedback ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    Salvar
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+                <Button variant="outline" onClick={handleSaveFeedback} disabled={savingFeedback} size="sm" className="gap-1.5">
+                  {savingFeedback ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Salvar
+                </Button>
+                {conclusionsData && (
+                  <Button onClick={() => handleSaveConclusions(false)} disabled={savingConclusions} variant="outline" size="sm" className="gap-1.5">
+                    Salvar Conclusões
                   </Button>
-                  {!existingFeedback?.conclusaoLiberada ? (
-                    <Button onClick={handleRelease} disabled={savingFeedback} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-                      <Unlock className="w-4 h-4" /> Liberar
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
-                      <CheckCircle2 className="w-4 h-4" /> Liberado
-                    </div>
-                  )}
-                </div>
+                )}
+                {!existingFeedback?.conclusaoLiberada ? (
+                  <Button onClick={handleRelease} disabled={savingFeedback} size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Unlock className="w-3.5 h-3.5" /> Liberar para Mentorado
+                  </Button>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-emerald-600 text-sm font-medium">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Liberado
+                  </span>
+                )}
+                {!!existingConclusions?.conclusoesJson && (
+                  <Button onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/${pillarId}`, "_blank")} variant="outline" size="sm" className="gap-1.5">
+                    <FileDown className="w-3.5 h-3.5" /> PDF
+                  </Button>
+                )}
               </div>
             </div>
 
-            {/* Relatório Final */}
+            {/* Relatório Final Premium */}
             <div className="border rounded-xl p-4">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-600" /> Relatório Final
-              </h3>
+              <h3 className="font-semibold mb-4">Relatório Final</h3>
               <PillarReportGenerator
                 menteeId={menteeIdNum}
                 menteeName={mentee?.nome ?? "Mentorado"}
