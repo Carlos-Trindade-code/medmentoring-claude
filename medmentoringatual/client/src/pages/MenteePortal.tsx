@@ -306,6 +306,44 @@ function ProgressTab({ menteeId: _menteeId }: { menteeId: number }) {
         ))}
       </div>
 
+      {/* Transformação */}
+      {overallPct > 40 && (
+        <div className="bg-gradient-to-br from-primary/5 via-background to-emerald-50/30 border border-primary/10 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" /> Sua Transformação
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 border">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Progresso</p>
+              <p className="text-2xl font-bold text-primary">{overallPct}%</p>
+              <p className="text-xs text-muted-foreground mt-1">{completedPillars} de 7 pilares concluídos</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Seções Concluídas</p>
+              <p className="text-2xl font-bold text-emerald-600">{completedSectionsAll}</p>
+              <p className="text-xs text-muted-foreground mt-1">de {totalSectionsAll} seções no total</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Próxima Etapa</p>
+              {(() => {
+                const next = pillarProgress.find(p => !p.isComplete);
+                return next ? (
+                  <>
+                    <p className="text-sm font-medium text-foreground">Pilar {next.pillar.id}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{next.pillar.title}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-foreground">Concluído!</p>
+                    <p className="text-xs text-muted-foreground mt-1">Parabéns pela jornada!</p>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* NPS */}
       <NpsSection />
     </div>

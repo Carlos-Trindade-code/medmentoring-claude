@@ -2669,6 +2669,31 @@ Retorne um JSON com:
     .query(async ({ input }) => {
       return await getPillarConclusion(input.menteeId, input.pillarId);
     }),
+
+  // Gerar plano de ação via IA
+  generateActionPlan: adminProcedure
+    .input(z.object({ menteeId: z.number(), pillarId: z.number() }))
+    .mutation(async ({ input }) => {
+      const answers = await getPillarAnswers(input.menteeId, input.pillarId);
+      const feedback = await getPillarFeedback(input.menteeId, input.pillarId);
+
+      const answersText = (answers ?? []).map((a: any) =>
+        (a.respostas as any[])?.map((r: any) => `${r.pergunta}: ${r.resposta}`).join("\n")
+      ).join("\n") || "Sem respostas";
+
+      const diagText = feedback?.aiDiagnosis ? JSON.stringify(feedback.aiDiagnosis) : "";
+
+      const result = await invokeLLM({
+        messages: [
+          { role: "system", content: "Voce e um consultor de negocios para medicos. Gere um plano de acao pratico e estruturado em formato de timeline (Semana 1-2, Semana 3-4, Mes 2, Mes 3) com acoes concretas. Maximo 500 palavras. Seja direto e pratico." },
+          { role: "user", content: `Baseado nestas respostas do mentorado:\n${answersText}\n\nE neste diagnostico:\n${diagText}\n\nGere um plano de acao para o Pilar ${input.pillarId}.` }
+        ],
+      });
+
+      const rawContent = result?.choices?.[0]?.message?.content;
+      const plano = typeof rawContent === "string" ? rawContent : "";
+      return { plano };
+    }),
 });
 // ============================================================
 // ============================================================
@@ -2742,7 +2767,11 @@ const pillarAnswersRouter = router({
     .input(z.object({ pillarId: z.number().min(1).max(7) }))
     .query(async ({ ctx, input }) => {
       const feedback = await getPillarFeedback(ctx.menteeId, input.pillarId);
-      return { released: feedback?.conclusaoLiberada ?? false };
+      return {
+        released: feedback?.conclusaoLiberada ?? false,
+        mentorMessage: feedback?.conclusaoLiberada ? (feedback?.feedback || null) : null,
+        mentorName: "Carlos Trindade",
+      };
     }),
 
   // Mentorado busca feedback do mentor (só se liberado)

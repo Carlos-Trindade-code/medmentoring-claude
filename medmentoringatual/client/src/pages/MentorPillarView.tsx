@@ -79,6 +79,7 @@ export default function MentorPillarView() {
     onSuccess: () => refetchAnswers(),
   });
   const generateConclusionsMutation = trpc.pillarTools.generatePillarConclusions.useMutation();
+  const generatePlanMutation = trpc.pillarTools.generateActionPlan.useMutation();
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
   const { data: existingConclusions, refetch: refetchConclusions } = trpc.pillarTools.getPillarConclusions.useQuery({
     menteeId: menteeIdNum,
@@ -467,7 +468,25 @@ export default function MentorPillarView() {
                   <Textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Feedback personalizado..." />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Plano de Ação</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Plano de Ação</label>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        try {
+                          toast.info("Gerando plano de ação...");
+                          const result = await generatePlanMutation.mutateAsync({ menteeId: menteeIdNum, pillarId });
+                          setPlanoAcao(result.plano || "");
+                          toast.success("Plano de ação gerado!");
+                        } catch { toast.error("Erro ao gerar plano."); }
+                      }}
+                      disabled={generatePlanMutation.isPending}
+                      className="text-xs text-violet-600 hover:text-violet-700 gap-1"
+                    >
+                      {generatePlanMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Gerar com IA
+                    </Button>
+                  </div>
                   <Textarea value={planoAcao} onChange={e => setPlanoAcao(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Próximos passos..." />
                 </div>
               </div>

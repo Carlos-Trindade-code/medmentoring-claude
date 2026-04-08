@@ -18,6 +18,7 @@ export default function MenteePillarPage() {
 
   const { data: mentee, isLoading } = trpc.portal.myData.useQuery();
   const { data: partReleases } = trpc.portal.getMyPartReleases.useQuery();
+  const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId });
 
   if (isLoading) {
     return (
@@ -94,6 +95,22 @@ export default function MenteePillarPage() {
             Responda as perguntas e preencha as ferramentas abaixo. Seus dados sao salvos automaticamente.
           </p>
         </div>
+
+        {/* Mensagem pessoal do mentor */}
+        {conclusionData?.mentorMessage && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                <span className="text-blue-700 font-bold text-sm">CT</span>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Mensagem do seu Mentor</p>
+                <p className="text-sm text-blue-900 mt-2 leading-relaxed whitespace-pre-line">{conclusionData.mentorMessage}</p>
+                <p className="text-xs text-blue-500 mt-2">— {conclusionData.mentorName}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Partes do pilar com questionarios e ferramentas */}
         <PillarPartsView
