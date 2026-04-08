@@ -286,10 +286,14 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
     horasDisponiveis, horasOcupadas, servicos, mixAtendimentos,
   ]);
 
-  // Trigger auto-save on param changes (only mentor)
+  // Trigger auto-save on param changes (only mentor, skip if no valid services)
   useEffect(() => {
     if (mode === "mentor" && isLoaded) {
-      debouncedSave();
+      // Only auto-save if there are services with prices filled
+      const hasValidServices = servicos.some(s => s.precoVenda > 0);
+      if (hasValidServices) {
+        debouncedSave();
+      }
     }
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
