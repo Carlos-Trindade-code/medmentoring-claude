@@ -1231,11 +1231,47 @@ export async function getSimulationData(menteeId: number) {
   const data = await db.select().from(financialData)
     .where(eq(financialData.menteeId, menteeId));
   if (data.length === 0) return null;
-  return {
-    servicos: (data[0].precificacaoJson as any)?.servicos || [],
-    mixAtendimentos: (data[0].precificacaoJson as any)?.mixAtendimentos || {},
-    params: (data[0].precificacaoJson as any)?.params || null,
-  };
+
+  const raw = data[0].precificacaoJson as any;
+  let servicos = raw?.servicos || [];
+  const mixAtendimentos = raw?.mixAtendimentos || {};
+  let params = raw?.params || null;
+
+  // Convert legacy Manus format (name/preco/horas) to new format (nome/precoVenda/duracaoHoras)
+  if (servicos.length > 0 && servicos[0].name !== undefined && servicos[0].nome === undefined) {
+    const mix: Record<string, number> = {};
+    servicos = servicos.map((s: any, i: number) => {
+      const id = s.id || `svc_legacy_${i}`;
+      if (s.qtdMes) mix[id] = s.qtdMes;
+      return {
+        id,
+        nome: s.name || s.nome || "",
+        duracaoHoras: s.horas || s.duracaoHoras || 0.5,
+        precoVenda: s.preco || s.precoVenda || 0,
+        impostoPercent: (s.imposto || 0) * 100 || 12.5,
+        taxaCartaoPercent: (s.cartao || 0) * 100 || 5,
+        mod: s.mod || 0,
+        matMed: s.matmed || s.matMed || 0,
+        bonusPercent: s.comissao ? (s.comissao / (s.preco || 1)) * 100 : 1,
+        taxaEquipamento: s.equip || s.taxaEquipamento || 0,
+      };
+    });
+    // Convert legacy params
+    if (raw?.params && raw.params.custoFixoMes !== undefined) {
+      params = {
+        custoFixoTotal: raw.params.custoFixoMes || 0,
+        custosVariaveisPercent: 20,
+        taxaSalaHora: raw.params.taxaSala || 0,
+        horasDisponiveisMes: raw.params.horasMes || 160,
+        horasOcupadasMes: 80,
+        faturamentoMensal: 0,
+      };
+    }
+    // Merge legacy mix
+    Object.assign(mixAtendimentos, mix);
+  }
+
+  return { servicos, mixAtendimentos, params };
 }
 
 export async function saveSimulationData(menteeId: number, simulationData: { servicos: any[]; mixAtendimentos: Record<string, number>; params: any }) {
