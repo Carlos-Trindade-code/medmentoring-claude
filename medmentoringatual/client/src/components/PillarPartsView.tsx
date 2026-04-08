@@ -17,6 +17,7 @@ import { trpc } from "@/lib/trpc";
 import {
   ChevronDown,
   ChevronUp,
+  CheckCircle,
   CheckCircle2,
   Circle,
   FileText,
@@ -131,78 +132,82 @@ function ReleasedPartContent({ pillarId, partId }: { pillarId: number; partId: s
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header da análise */}
-      <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0">
-          <Sparkles className="w-4 h-4 text-emerald-600" />
+    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+          <CheckCircle className="w-4 h-4 text-emerald-600" />
         </div>
         <div>
-          <h4 className="font-bold text-emerald-800 text-sm">
-            {part.titulo || "Análise do Mentor"}
-          </h4>
-          <p className="text-xs text-emerald-600 mt-0.5">
-            Análise personalizada liberada pelo seu mentor
-          </p>
+          <p className="text-sm font-semibold text-emerald-800">Análise do seu Mentor</p>
+          <p className="text-xs text-emerald-600">Diagnóstico personalizado baseado nas suas respostas</p>
         </div>
       </div>
 
-      {/* Conteúdo principal */}
-      {part.conteudo && (
-        <div className="prose prose-sm max-w-none">
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-            {part.conteudo}
-          </p>
-        </div>
-      )}
+      <div className="space-y-4">
+        {/* Header da análise */}
+        {part.titulo && (
+          <h4 className="font-bold text-emerald-800 text-base">
+            {part.titulo}
+          </h4>
+        )}
 
-      {/* Destaques */}
-      {Array.isArray(part.destaques) && part.destaques.length > 0 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-2">
-          <h5 className="text-xs font-semibold text-blue-700 uppercase tracking-wide flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5" /> Destaques
-          </h5>
-          <ul className="space-y-1">
-            {(part.destaques as string[]).map((d: string, i: number) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-blue-800">
-                <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
-                {d}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* Conteúdo principal */}
+        {part.conteudo && (
+          <div className="prose prose-sm max-w-none">
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+              {part.conteudo}
+            </p>
+          </div>
+        )}
 
-      {/* Próximos passos */}
-      {Array.isArray(part.proximosPassos) && part.proximosPassos.length > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 space-y-2">
-          <h5 className="text-xs font-semibold text-amber-700 uppercase tracking-wide flex items-center gap-1.5">
-            <ChevronRight className="w-3.5 h-3.5" /> Próximos Passos
-          </h5>
-          <ul className="space-y-1">
-            {(part.proximosPassos as string[]).map((p: string, i: number) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
-                <span className="w-4 h-4 bg-amber-200 rounded-full flex items-center justify-center text-xs font-bold text-amber-700 shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
-                {p}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* Destaques */}
+        {Array.isArray(part.destaques) && part.destaques.length > 0 && (
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-2">
+            <h5 className="text-xs font-semibold text-blue-700 uppercase tracking-wide flex items-center gap-1.5">
+              <Star className="w-3.5 h-3.5" /> Destaques
+            </h5>
+            <ul className="space-y-1">
+              {(part.destaques as string[]).map((d: string, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-blue-800">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {/* Guia de uso */}
-      {part.guiaUso && (
-        <div className="border border-dashed border-muted-foreground/30 rounded-lg p-3">
-          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-            Como aplicar
-          </h5>
-          <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
-            {part.guiaUso}
-          </p>
-        </div>
-      )}
+        {/* Próximos passos */}
+        {Array.isArray(part.proximosPassos) && part.proximosPassos.length > 0 && (
+          <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 space-y-2">
+            <h5 className="text-xs font-semibold text-amber-700 uppercase tracking-wide flex items-center gap-1.5">
+              <ChevronRight className="w-3.5 h-3.5" /> Próximos Passos
+            </h5>
+            <ul className="space-y-1">
+              {(part.proximosPassos as string[]).map((p: string, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                  <span className="w-4 h-4 bg-amber-200 rounded-full flex items-center justify-center text-xs font-bold text-amber-700 shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Guia de uso */}
+        {part.guiaUso && (
+          <div className="border border-dashed border-muted-foreground/30 rounded-lg p-3">
+            <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+              Como aplicar
+            </h5>
+            <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
+              {part.guiaUso}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -17,6 +17,16 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+const PILLAR_TIME_ESTIMATES: Record<number, string> = {
+  1: "~30 min",
+  2: "~25 min",
+  3: "~45 min",
+  4: "~20 min",
+  5: "~35 min",
+  6: "~25 min",
+  7: "~30 min",
+};
+
 // ============================================================
 // PILLAR CARD — Clickable premium card with progress ring
 // ============================================================
@@ -65,6 +75,9 @@ function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId:
               </h3>
               <p className="text-xs text-muted-foreground">
                 {completedCount}/{totalSections} seções
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {PILLAR_TIME_ESTIMATES[pillar.id] || "~30 min"}
               </p>
             </div>
           </div>
@@ -401,6 +414,8 @@ export default function MenteePortal() {
     onSuccess: () => toast.success("Obrigado pelo seu feedback!"),
   });
 
+  const { data: partReleases } = trpc.portal.getMyPartReleases.useQuery();
+
   const [activeTab, setActiveTab] = useState<"home" | "sessions" | "progress">("home");
   const [npsScore, setNpsScore] = useState<number | null>(null);
   const [npsComment, setNpsComment] = useState("");
@@ -467,8 +482,31 @@ export default function MenteePortal() {
           <p className="text-primary-foreground/60 text-xs mt-2">
             Responda os questionários de cada pilar. Um assistente de orientação está disponível em cada pergunta.
           </p>
+          {/* Seu Mentor */}
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 mt-4">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+              CT
+            </div>
+            <div>
+              <p className="text-white/60 text-xs">Seu Mentor</p>
+              <p className="text-white font-medium text-sm">Carlos Trindade</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Released analysis notification */}
+      {partReleases && partReleases.some((r: any) => r.released) && (
+        <div className="mx-4 -mt-2 mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+            <CheckCircle className="w-4 h-4 text-emerald-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-emerald-800">Seu mentor liberou análises!</p>
+            <p className="text-xs text-emerald-600">Abra os pilares para ver o diagnóstico personalizado.</p>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-b bg-white sticky top-14 z-10">
@@ -505,6 +543,21 @@ export default function MenteePortal() {
               {PILLARS.map((p) => (
                 <PillarCard key={p.id} pillar={p} menteeId={mentee.id} />
               ))}
+            </div>
+            {/* Atividades Recentes */}
+            <div className="mt-6 p-4 bg-muted/30 rounded-xl">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Atividades Recentes</h3>
+              <div className="space-y-2">
+                {partReleases?.filter((r: any) => r.released).slice(0, 5).map((r: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>Mentor liberou análise: Pilar {r.pillarId} — Parte {r.partId?.toUpperCase()}</span>
+                  </div>
+                ))}
+                {(!partReleases || partReleases.filter((r: any) => r.released).length === 0) && (
+                  <p className="text-xs text-muted-foreground">Nenhuma atividade recente.</p>
+                )}
+              </div>
             </div>
           </div>
         )}
