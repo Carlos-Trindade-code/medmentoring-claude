@@ -55,9 +55,10 @@ function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId:
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: (pillar.id - 1) * 0.08 }}
       className={cn(
-        "group relative bg-card rounded-2xl border overflow-hidden cursor-pointer",
+        "group relative bg-card rounded-2xl border overflow-hidden cursor-pointer border-l-4",
         "hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
-        allDone && isFeedbackReleased ? "border-secondary/50" : "border-border"
+        allDone ? "border-l-emerald-500" : progressPct > 0 ? "border-l-blue-500" : "border-l-gray-200",
+        allDone && isFeedbackReleased ? "border-secondary/50 border-l-emerald-500" : "border-border"
       )}
       onClick={() => navigate(`/portal/pilar/${pillar.id}`)}
     >
@@ -416,9 +417,42 @@ export default function MenteePortal() {
 
   const { data: partReleases } = trpc.portal.getMyPartReleases.useQuery();
 
+  const { data: allAnswers } = trpc.pillarAnswers.getAllAnswers.useQuery();
+
   const [activeTab, setActiveTab] = useState<"home" | "sessions" | "progress">("home");
   const [npsScore, setNpsScore] = useState<number | null>(null);
   const [npsComment, setNpsComment] = useState("");
+
+  // Calculate overall progress
+  const overallProgress = (() => {
+    const totalSections = PILLARS.reduce((sum, p) => sum + (PILLAR_SECTIONS[p.id] ?? []).length, 0);
+    if (totalSections === 0) return 0;
+    const completedSections = PILLARS.reduce((sum, p) => {
+      const sections = PILLAR_SECTIONS[p.id] ?? [];
+      const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === p.id);
+      const completedIds = new Set(
+        pillarAnswerRows.filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
+      );
+      return sum + sections.filter(s => completedIds.has(s.id)).length;
+    }, 0);
+    return Math.round((completedSections / totalSections) * 100);
+  })();
+
+  // Next incomplete pillar for "Próximo Passo" card
+  const nextPillar = (() => {
+    for (const p of PILLARS) {
+      const sections = PILLAR_SECTIONS[p.id] ?? [];
+      const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === p.id);
+      const completedIds = new Set(
+        pillarAnswerRows.filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
+      );
+      const completedCount = sections.filter(s => completedIds.has(s.id)).length;
+      if (sections.length === 0 || completedCount < sections.length) {
+        return p;
+      }
+    }
+    return null;
+  })();
 
   const logout = () => {
     localStorage.removeItem("mentee_token");
@@ -434,8 +468,20 @@ export default function MenteePortal() {
 
   if (myData.isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-background">
+        <div className="bg-gradient-to-br from-primary to-primary/80 px-4 py-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="h-8 bg-white/20 rounded w-48 mb-2 animate-pulse" />
+            <div className="h-4 bg-white/10 rounded w-64 animate-pulse" />
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="h-32 bg-muted/50 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -475,9 +521,17 @@ export default function MenteePortal() {
       {/* Welcome banner */}
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-4 py-5">
         <div className="container">
-          <h1 className="font-display text-xl font-bold">Olá, {mentee.nome.split(" ")[0]}!</h1>
-          <p className="text-primary-foreground/70 text-sm mt-0.5">
-            {mentee.especialidade || "Bem-vindo à sua jornada de mentoria"}
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
+            Olá, {mentee.nome?.split(" ")[0] || "Mentorado"} 👋
+          </h1>
+          <p className="text-white/70 text-sm">
+            {overallProgress === 100
+              ? "Parabéns! Você completou todos os pilares. Aguarde o relatório final do seu mentor."
+              : overallProgress > 50
+                ? `Você já completou ${overallProgress}% da mentoria. Continue assim!`
+                : overallProgress > 0
+                  ? `Sua jornada está começando. ${overallProgress}% concluído.`
+                  : "Bem-vindo à sua jornada de transformação profissional."}
           </p>
           <p className="text-primary-foreground/60 text-xs mt-2">
             Responda os questionários de cada pilar. Um assistente de orientação está disponível em cada pergunta.
@@ -539,6 +593,20 @@ export default function MenteePortal() {
             <IncompleteBanner
               onNavigateToPillar={(pillarId) => navigate(`/portal/pilar/${pillarId}`)}
             />
+            {/* Próximo Passo */}
+            {nextPillar && overallProgress < 100 && (
+              <div className="mb-6 mt-4 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-primary uppercase tracking-wide">Próximo Passo</p>
+                  <p className="text-sm text-foreground mt-1">
+                    Continue preenchendo o <strong>Pilar {nextPillar.id} — {nextPillar.title}</strong>
+                  </p>
+                </div>
+                <Button size="sm" onClick={() => navigate(`/portal/pilar/${nextPillar.id}`)} className="shrink-0">
+                  Continuar →
+                </Button>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               {PILLARS.map((p) => (
                 <PillarCard key={p.id} pillar={p} menteeId={mentee.id} />

@@ -21,7 +21,7 @@ import {
   ChevronLeft, CheckCircle2,
   Send, Lock, Unlock,
   User, AlertCircle, Loader2,
-  Sparkles, TrendingUp, FileDown
+  Sparkles, TrendingUp, FileDown, Eye
 } from "lucide-react";
 import { Link } from "wouter";
 import { PILLAR_SECTIONS, PILLAR_TITLES, PILLAR_ICONS } from "@/lib/pillar-questions";
@@ -255,6 +255,14 @@ export default function MentorPillarView() {
                   <Lock className="w-3 h-3 mr-1" /> Aguardando liberação
                 </Badge>
               )}
+              <a
+                href={`/portal/pilar/${pillarId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 mt-1 justify-end"
+              >
+                <Eye className="w-3 h-3" /> Ver como mentorado
+              </a>
             </div>
           </div>
         </div>
@@ -316,6 +324,12 @@ export default function MentorPillarView() {
               {loadingAnswers ? (
                 <div className="py-8 flex justify-center">
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : !answers || (answers as any[]).length === 0 ? (
+                <div className="text-center py-8 bg-muted/20 rounded-xl">
+                  <User className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground font-medium">O mentorado ainda não respondeu este pilar.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Quando ele preencher, os dados aparecem aqui automaticamente.</p>
                 </div>
               ) : (
                 <MenteeAnswersSummary
