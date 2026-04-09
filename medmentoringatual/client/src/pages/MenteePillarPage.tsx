@@ -7,7 +7,7 @@
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { PillarPartsView } from "@/components/PillarPartsView";
-import { PILLAR_TITLES, PILLAR_ICONS } from "@/lib/pillar-questions";
+import { PILLAR_TITLES, PILLAR_ICONS, PILLAR_SECTIONS } from "@/lib/pillar-questions";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Lock } from "lucide-react";
 import { Link } from "wouter";
@@ -19,6 +19,12 @@ export default function MenteePillarPage() {
   const { data: mentee, isLoading } = trpc.portal.myData.useQuery();
   const { data: partReleases } = trpc.portal.getMyPartReleases.useQuery();
   const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId });
+  const { data: savedAnswers } = trpc.pillarAnswers.getByPillar.useQuery({ pillarId });
+
+  const pillarSections = PILLAR_SECTIONS[pillarId] ?? [];
+  const completedCount = new Set((savedAnswers ?? []).filter((r: any) => r.status === "concluida").map((r: any) => r.secao)).size;
+  const totalCount = pillarSections.length;
+  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   if (isLoading) {
     return (
@@ -118,6 +124,17 @@ export default function MenteePillarPage() {
                 <p className="text-sm text-blue-900 mt-2 leading-relaxed whitespace-pre-line">{conclusionData.mentorMessage}</p>
                 <p className="text-xs text-blue-500 mt-2">— {conclusionData.mentorName}</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Incentivo quando falta pouco */}
+        {progressPct >= 70 && progressPct < 100 && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
+            <div className="text-2xl">💪</div>
+            <div>
+              <p className="text-sm font-semibold text-blue-800">Falta pouco!</p>
+              <p className="text-xs text-blue-600">{completedCount} de {totalCount} secoes concluidas. Complete as restantes e seu mentor vai analisar.</p>
             </div>
           </div>
         )}

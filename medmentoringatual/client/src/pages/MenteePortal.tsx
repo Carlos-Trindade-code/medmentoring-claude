@@ -43,9 +43,13 @@ function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId:
   const completedSections = new Set<string>(
     (savedAnswers ?? []).filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
   );
+  const inProgressSections = new Set<string>(
+    (savedAnswers ?? []).filter((r: any) => r.status === "em_progresso" && !completedSections.has(r.secao)).map((r: any) => r.secao)
+  );
   const totalSections = sections.length;
   const completedCount = sections.filter(s => completedSections.has(s.id)).length;
-  const progressPct = totalSections > 0 ? Math.round((completedCount / totalSections) * 100) : 0;
+  const inProgressCount = sections.filter(s => inProgressSections.has(s.id)).length;
+  const progressPct = totalSections > 0 ? Math.round(((completedCount + inProgressCount * 0.5) / totalSections) * 100) : 0;
   const allDone = completedCount === totalSections && totalSections > 0;
   const isFeedbackReleased = conclusionData?.released && feedbackData;
 
@@ -75,7 +79,7 @@ function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId:
                 {pillar.title}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {completedCount}/{totalSections} seções
+                {completedCount + inProgressCount}/{totalSections} seções
               </p>
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {PILLAR_TIME_ESTIMATES[pillar.id] || "~30 min"}
@@ -118,7 +122,7 @@ function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId:
             {!allDone && completedCount === 0 && "Comece agora"}
             {!allDone && completedCount > 0 && "Continue de onde parou"}
             {allDone && isFeedbackReleased && "Veja o que seu mentor preparou"}
-            {allDone && !isFeedbackReleased && "Seu mentor está analisando"}
+            {allDone && !isFeedbackReleased && "Completo! Seu mentor vai analisar em breve."}
           </div>
           <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
