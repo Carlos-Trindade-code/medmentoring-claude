@@ -226,15 +226,13 @@ export function PillarReportGenerator({
                 A IA vai consolidar automaticamente <strong>todas</strong> as informações do pilar:
               </p>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
-                <li>Todas as respostas do mentorado neste pilar</li>
-                <li><strong>Diagnóstico de IA</strong> (gerado na seção acima)</li>
-                <li><strong>Análises por Parte</strong> (A, B, C, D — geradas e salvas acima)</li>
-                <li><strong>Conclusões do Pilar</strong> (geradas e salvas acima)</li>
-                <li>Histórico do chat de orientação com IA</li>
-                <li>Sugestões e checklist registrados</li>
+                <li>Respostas do mentorado neste pilar</li>
+                <li>Conclusões e feedback do mentor</li>
+                <li>Historico do chat com IA</li>
+                {(pillarId === 3 || pillarId === 5) && <li>Dados financeiros e ferramentas diagnosticas</li>}
               </ul>
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <strong>💡 Dica:</strong> Para um relatório mais completo, gere e salve primeiro o Diagnóstico de IA, as Análises por Parte e as Conclusões do Pilar antes de gerar o relatório final.
+                <strong>Dica:</strong> Preencha as conclusoes e o feedback na aba Mentor antes de gerar o relatorio final.
               </div>
               {hasReport && (
                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
