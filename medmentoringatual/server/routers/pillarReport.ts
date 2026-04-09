@@ -190,8 +190,9 @@ export const pillarReportRouter = router({
       const chatHistory = await getMentorAiChatHistory(input.menteeId, input.pillarId);
       const feedback = await getPillarFeedback(input.menteeId, input.pillarId);
       const partContents = await getPillarPartContent(input.menteeId, input.pillarId);
-      const financialDataRow = await getFinancialData(input.menteeId);
-      const ivmpDataRow = await getIvmpData(input.menteeId);
+      // Only fetch financial/ivmp data for relevant pillars
+      const financialDataRow = (input.pillarId === 3 || input.pillarId === 5) ? await getFinancialData(input.menteeId) : null;
+      const ivmpDataRow = (input.pillarId === 3) ? await getIvmpData(input.menteeId) : null;
       const chatConclusions = await getChatConclusionsForReport(input.menteeId, input.pillarId);
 
       const answersContext = answers
@@ -415,8 +416,8 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
       const partContents = await getPillarPartContent(menteeId, pillarId);
       const conclusion = await getPillarConclusion(menteeId, pillarId);
       const answers = await getPillarAnswers(menteeId, pillarId);
-      const financialDataRow = await getFinancialData(menteeId);
-      const ivmpDataRow = await getIvmpData(menteeId);
+      const financialDataRow = (pillarId === 3 || pillarId === 5) ? await getFinancialData(menteeId) : null;
+      const ivmpDataRow = (pillarId === 3) ? await getIvmpData(menteeId) : null;
       const chatConclusions = await getChatConclusionsForReport(menteeId, pillarId);
 
       const partAnalyses: PartAnalysis[] = (partContents as any[])
@@ -547,8 +548,8 @@ IMPORTANTE: Escreva sempre em primeira pessoa, como se você fosse o mentor fala
       // Fetch extra data for new PDF sections
       const answers = await getPillarAnswers(menteeId, pillarId);
       const feedback = await getPillarFeedback(menteeId, pillarId);
-      const financialDataRow = await getFinancialData(menteeId);
-      const ivmpDataRow = await getIvmpData(menteeId);
+      const financialDataRow = (pillarId === 3 || pillarId === 5) ? await getFinancialData(menteeId) : null;
+      const ivmpDataRow = (pillarId === 3) ? await getIvmpData(menteeId) : null;
       const chatConclusions = await getChatConclusionsForReport(menteeId, pillarId);
 
       const pdfBuffer = await generateReportPdf({
