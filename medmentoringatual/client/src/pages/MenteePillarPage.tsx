@@ -96,6 +96,16 @@ export default function MenteePillarPage() {
           </p>
         </div>
 
+        {/* Celebração de pilar concluído */}
+        {conclusionData?.released && (
+          <div className="mb-6 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border border-amber-200 rounded-xl p-5 text-center">
+            <div className="text-3xl mb-2">🏆</div>
+            <h3 className="text-lg font-bold text-amber-800">Pilar Concluido!</h3>
+            <p className="text-sm text-amber-700 mt-1">Parabens! Seu mentor analisou suas respostas e liberou o diagnostico deste pilar.</p>
+            <p className="text-xs text-amber-500 mt-2">Veja a analise personalizada abaixo.</p>
+          </div>
+        )}
+
         {/* Mensagem pessoal do mentor */}
         {conclusionData?.mentorMessage && (
           <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5">

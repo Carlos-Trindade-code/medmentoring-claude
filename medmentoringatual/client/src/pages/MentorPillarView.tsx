@@ -49,6 +49,7 @@ export default function MentorPillarView() {
   const [pontosFortes, setPontosFortes] = useState<string[]>([""]);
   const [pontosMelhoria, setPontosMelhoria] = useState<string[]>([""]);
   const [savingFeedback, setSavingFeedback] = useState(false);
+  const [lastFeedbackSaved, setLastFeedbackSaved] = useState<Date | null>(null);
 
   const [generatingConclusions, setGeneratingConclusions] = useState(false);
   const [conclusionsData, setConclusionsData] = useState<Record<string, unknown> | null>(null);
@@ -182,6 +183,7 @@ export default function MentorPillarView() {
         pontosMelhoriaJson: pontosMelhoria.filter(Boolean),
       });
       toast.success("Feedback salvo com sucesso!");
+      setLastFeedbackSaved(new Date());
       refetchFeedback();
     } catch {
       toast.error("Erro ao salvar feedback.");
@@ -266,6 +268,25 @@ export default function MentorPillarView() {
               </a>
             </div>
           </div>
+        </div>
+
+        {/* Pillar navigation */}
+        <div className="flex items-center gap-2 mb-4">
+          {pillarId > 1 && (
+            <Link href={`/mentor/mentorado/${menteeIdNum}/pilar/${pillarId - 1}`}>
+              <Button variant="ghost" size="sm" className="text-xs gap-1">
+                ← Pilar {pillarId - 1}
+              </Button>
+            </Link>
+          )}
+          <span className="text-xs text-muted-foreground flex-1 text-center">Pilar {pillarId} de 7</span>
+          {pillarId < 7 && (
+            <Link href={`/mentor/mentorado/${menteeIdNum}/pilar/${pillarId + 1}`}>
+              <Button variant="ghost" size="sm" className="text-xs gap-1">
+                Pilar {pillarId + 1} →
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Auto-summary IA */}
@@ -450,7 +471,13 @@ export default function MentorPillarView() {
               )}
 
               {!conclusionsData && !generatingConclusions && (
-                <p className="text-sm text-muted-foreground text-center py-4">Clique em "Gerar com IA" para criar o relatório.</p>
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Sparkles className="w-8 h-8 text-emerald-300" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Nenhum relatorio gerado ainda</p>
+                  <p className="text-xs text-muted-foreground mt-1">Clique em "Gerar com IA" para criar o relatorio baseado nas respostas do mentorado.</p>
+                </div>
               )}
 
               {/* Feedback inline */}
@@ -515,6 +542,12 @@ export default function MentorPillarView() {
                   <Button onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/${pillarId}`, "_blank")} variant="outline" size="sm" className="gap-1.5">
                     <FileDown className="w-3.5 h-3.5" /> PDF
                   </Button>
+                )}
+                {lastFeedbackSaved && (
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    Salvo as {lastFeedbackSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
                 )}
               </div>
             </div>
