@@ -1535,15 +1535,14 @@ export const PILLAR_SECTIONS: Record<number, Section[]> = {
 };
 
 export const PILLAR_TITLES: Record<number, string> = {
-  1: "Identidade e Propósito",
-  2: "Posicionamento",
-  3: "Diagnóstico do Negócio",
-  4: "Gestão e Processos",
-  5: "Precificação",
-  6: "Marketing Digital",
-  7: "Vendas e Comunicação",
+  1: "Mapa Estrategico",
+  2: "Produto Profissional",
+  3: "Diagnostico",
+  4: "Estrategia",
+  5: "Comunicacao",
+  6: "Vendas",
 };
 
 export const PILLAR_ICONS: Record<number, string> = {
-  1: "🎯", 2: "📌", 3: "📊", 4: "⚙️", 5: "💰", 6: "📱", 7: "🤝",
+  1: "🎯", 2: "💡", 3: "📊", 4: "🗺️", 5: "📱", 6: "🤝",
 };

@@ -9,18 +9,17 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { toast } from "sonner";
 import {
-  Target, TrendingUp, Users, BarChart3, Settings, Megaphone, ShoppingBag,
+  Target, TrendingUp, Users, BarChart3, Megaphone, ShoppingBag,
   ChevronRight, Star, CheckCircle, ArrowRight, Menu, X, Award, Clock, BookOpen
 } from "lucide-react";
 
 const PILLARS = [
-  { id: 1, icon: Target, title: "Identidade & Propósito", desc: "Defina quem você é, o que te diferencia e por que os melhores pacientes devem escolher você.", color: "from-blue-900 to-blue-700" },
-  { id: 2, icon: Star, title: "Posicionamento Premium", desc: "Ocupe o lugar certo no mercado. Seja reconhecido como referência na sua especialidade.", color: "from-indigo-900 to-indigo-700" },
-  { id: 3, icon: BarChart3, title: "Diagnóstico do Negócio", desc: "Mapeie a saúde financeira e operacional da sua clínica com dados reais e precisos.", color: "from-slate-800 to-slate-600" },
-  { id: 4, icon: Settings, title: "Estrutura Operacional", desc: "Construa processos, equipe e sistemas que funcionam sem depender exclusivamente de você.", color: "from-blue-800 to-blue-600" },
-  { id: 5, icon: TrendingUp, title: "Precificação & Financeiro", desc: "Precifique corretamente, elimine desperdícios e construa uma clínica financeiramente sólida.", color: "from-amber-800 to-amber-600" },
-  { id: 6, icon: Megaphone, title: "Marketing & Digital", desc: "Atraia os pacientes certos com uma presença digital autêntica e estratégica.", color: "from-teal-800 to-teal-600" },
-  { id: 7, icon: ShoppingBag, title: "Vendas & Valor Percebido", desc: "Aprenda a apresentar seus tratamentos de forma que o paciente perceba o real valor.", color: "from-rose-900 to-rose-700" },
+  { id: 1, icon: Target, title: "Mapa Estrategico", desc: "Defina quem voce e, seu proposito e aonde quer chegar.", color: "from-blue-900 to-blue-700" },
+  { id: 2, icon: Star, title: "Produto Profissional", desc: "Crie seu cardapio de servicos alinhado com seus valores.", color: "from-indigo-900 to-indigo-700" },
+  { id: 3, icon: BarChart3, title: "Diagnostico", desc: "Mapeie custos reais, iVMP e entenda sua realidade financeira.", color: "from-slate-800 to-slate-600" },
+  { id: 4, icon: TrendingUp, title: "Estrategia", desc: "Simule cenarios, defina precos e trace seu plano de acao.", color: "from-amber-800 to-amber-600" },
+  { id: 5, icon: Megaphone, title: "Comunicacao", desc: "Crie sua estrategia de comunicacao com IA personalizada.", color: "from-teal-800 to-teal-600" },
+  { id: 6, icon: ShoppingBag, title: "Vendas", desc: "Aprenda a vender com valor e construa seu protocolo de consulta.", color: "from-rose-900 to-rose-700" },
 ];
 
 const PAINS = [
@@ -307,14 +306,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7 PILARES */}
+      {/* 6 PILARES */}
       <section id="pilares" className="py-20 bg-background">
         <div className="container">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               O Método
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">Os 7 Pilares da Mentoria Médica</h2>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">Os 6 Pilares da Mentoria Médica</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Um sistema estruturado e progressivo que abrange todas as dimensões do seu negócio médico.
             </p>

@@ -12,6 +12,7 @@ import {
 import { PILLARS } from "@/lib/pillars";
 import { PillarPartsView } from "@/components/PillarPartsView";
 import { PILLAR_SECTIONS, PILLAR_TITLES } from "@/lib/pillar-questions";
+import { NEW_TO_OLD_PILLAR } from "../../../shared/pillar-parts";
 import { IncompleteBanner } from "@/components/IncompleteBanner";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -21,10 +22,9 @@ const PILLAR_TIME_ESTIMATES: Record<number, string> = {
   1: "~30 min",
   2: "~25 min",
   3: "~45 min",
-  4: "~20 min",
-  5: "~35 min",
-  6: "~25 min",
-  7: "~30 min",
+  4: "~35 min",
+  5: "~25 min",
+  6: "~30 min",
 };
 
 // ============================================================
@@ -32,14 +32,15 @@ const PILLAR_TIME_ESTIMATES: Record<number, string> = {
 // ============================================================
 function PillarCard({ pillar, menteeId }: { pillar: typeof PILLARS[0]; menteeId: number }) {
   const [, navigate] = useLocation();
+  const dbPillarId = NEW_TO_OLD_PILLAR[pillar.id] ?? pillar.id;
   const myDataQuery = trpc.portal.myData.useQuery();
   const releases = myDataQuery.data?.releases || [];
 
-  const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId: pillar.id });
-  const { data: feedbackData } = trpc.pillarAnswers.getFeedback.useQuery({ pillarId: pillar.id });
-  const { data: savedAnswers } = trpc.pillarAnswers.getByPillar.useQuery({ pillarId: pillar.id });
+  const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId: dbPillarId });
+  const { data: feedbackData } = trpc.pillarAnswers.getFeedback.useQuery({ pillarId: dbPillarId });
+  const { data: savedAnswers } = trpc.pillarAnswers.getByPillar.useQuery({ pillarId: dbPillarId });
 
-  const sections = PILLAR_SECTIONS[pillar.id] ?? [];
+  const sections = PILLAR_SECTIONS[dbPillarId] ?? [];
   const completedSections = new Set<string>(
     (savedAnswers ?? []).filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
   );
@@ -147,8 +148,9 @@ function ProgressTab({ menteeId: _menteeId }: { menteeId: number }) {
 
   // Calcula progresso por pilar
   const pillarProgress = PILLARS.map((pillar) => {
-    const sections = PILLAR_SECTIONS[pillar.id] ?? [];
-    const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === pillar.id);
+    const dbPillarId = NEW_TO_OLD_PILLAR[pillar.id] ?? pillar.id;
+    const sections = PILLAR_SECTIONS[dbPillarId] ?? [];
+    const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === dbPillarId);
     const completedSectionIds = new Set(
       pillarAnswerRows.filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
     );
@@ -205,7 +207,7 @@ function ProgressTab({ menteeId: _menteeId }: { menteeId: number }) {
           </div>
           <div className="flex items-center gap-1.5">
             <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <span className="text-muted-foreground">{7 - completedPillars} pendentes</span>
+            <span className="text-muted-foreground">{6 - completedPillars} pendentes</span>
           </div>
         </div>
       </div>
@@ -320,7 +322,7 @@ function ProgressTab({ menteeId: _menteeId }: { menteeId: number }) {
             <div className="bg-white rounded-lg p-4 border">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Progresso</p>
               <p className="text-2xl font-bold text-primary">{overallPct}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{completedPillars} de 7 pilares concluídos</p>
+              <p className="text-xs text-muted-foreground mt-1">{completedPillars} de 6 pilares concluídos</p>
             </div>
             <div className="bg-white rounded-lg p-4 border">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Seções Concluídas</p>
@@ -421,7 +423,7 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
       </h1>
       <p className="text-muted-foreground mb-8 leading-relaxed">
         Sua jornada de transformação profissional começa agora. Vamos trabalhar juntos em
-        {" "}<strong>7 pilares</strong> que vão estruturar sua carreira médica.
+        {" "}<strong>6 pilares</strong> que vão estruturar sua carreira médica.
       </p>
       <div className="space-y-3 text-left mb-8">
         {[
@@ -467,11 +469,12 @@ export default function MenteePortal() {
 
   // Calculate overall progress
   const overallProgress = (() => {
-    const totalSections = PILLARS.reduce((sum, p) => sum + (PILLAR_SECTIONS[p.id] ?? []).length, 0);
+    const totalSections = PILLARS.reduce((sum, p) => sum + (PILLAR_SECTIONS[NEW_TO_OLD_PILLAR[p.id] ?? p.id] ?? []).length, 0);
     if (totalSections === 0) return 0;
     const completedSections = PILLARS.reduce((sum, p) => {
-      const sections = PILLAR_SECTIONS[p.id] ?? [];
-      const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === p.id);
+      const dbId = NEW_TO_OLD_PILLAR[p.id] ?? p.id;
+      const sections = PILLAR_SECTIONS[dbId] ?? [];
+      const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === dbId);
       const completedIds = new Set(
         pillarAnswerRows.filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
       );
@@ -483,8 +486,9 @@ export default function MenteePortal() {
   // Next incomplete pillar for "Próximo Passo" card
   const nextPillar = (() => {
     for (const p of PILLARS) {
-      const sections = PILLAR_SECTIONS[p.id] ?? [];
-      const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === p.id);
+      const dbId = NEW_TO_OLD_PILLAR[p.id] ?? p.id;
+      const sections = PILLAR_SECTIONS[dbId] ?? [];
+      const pillarAnswerRows = (allAnswers ?? []).filter((r: any) => r.pillarId === dbId);
       const completedIds = new Set(
         pillarAnswerRows.filter((r: any) => r.status === "concluida").map((r: any) => r.secao)
       );

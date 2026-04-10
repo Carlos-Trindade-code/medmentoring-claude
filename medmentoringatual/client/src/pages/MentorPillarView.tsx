@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { PILLAR_SECTIONS, PILLAR_TITLES, PILLAR_ICONS } from "@/lib/pillar-questions";
+import { NEW_TO_OLD_PILLAR } from "../../../shared/pillar-parts";
 import { MentorAIChat } from "@/components/MentorAIChat";
 import { PillarReportGenerator } from "@/components/PillarReportGenerator";
 import { MenteeAnswersSummary } from "@/components/MenteeAnswersSummary";
@@ -40,6 +41,7 @@ export default function MentorPillarView() {
   const { menteeId, pillarId: pillarIdStr } = useParams<{ menteeId: string; pillarId: string }>();
   const menteeIdNum = parseInt(menteeId ?? "0");
   const pillarId = parseInt(pillarIdStr ?? "1");
+  const dbPillarId = NEW_TO_OLD_PILLAR[pillarId] ?? pillarId;
   const { user, loading: authLoading } = useAuth();
   const [, navigate] = useLocation();
 
@@ -65,13 +67,13 @@ export default function MentorPillarView() {
   // Respostas do mentorado
   const { data: answers, isLoading: loadingAnswers, refetch: refetchAnswers } = trpc.pillarFeedback.getAnswers.useQuery({
     menteeId: menteeIdNum,
-    pillarId,
+    pillarId: dbPillarId,
   }, { retry: false });
 
   // Feedback existente
   const { data: existingFeedback, refetch: refetchFeedback } = trpc.pillarFeedback.getFeedback.useQuery({
     menteeId: menteeIdNum,
-    pillarId,
+    pillarId: dbPillarId,
   });
 
   const saveFeedbackMutation = trpc.pillarFeedback.saveFeedback.useMutation();
@@ -84,12 +86,12 @@ export default function MentorPillarView() {
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
   const { data: existingConclusions, refetch: refetchConclusions } = trpc.pillarTools.getPillarConclusions.useQuery({
     menteeId: menteeIdNum,
-    pillarId,
+    pillarId: dbPillarId,
   });
 
   // Auto-summary IA ao abrir pilar
   const { data: autoSummary, isLoading: summaryLoading } = trpc.mentorAI.autoSummary.useQuery(
-    { menteeId: Number(menteeId), pillarId: Number(pillarId) },
+    { menteeId: Number(menteeId), pillarId: dbPillarId },
     { staleTime: 5 * 60 * 1000 }
   );
 
@@ -110,7 +112,7 @@ export default function MentorPillarView() {
   const handleGenerateConclusions = async () => {
     setGeneratingConclusions(true);
     try {
-      const result = await generateConclusionsMutation.mutateAsync({ menteeId: menteeIdNum, pillarId });
+      const result = await generateConclusionsMutation.mutateAsync({ menteeId: menteeIdNum, pillarId: dbPillarId });
       setConclusionsData(result as Record<string, unknown>);
       const edited: Record<string, string> = {};
       for (const [key, val] of Object.entries(result as Record<string, unknown>)) {
@@ -148,7 +150,7 @@ export default function MentorPillarView() {
       }
       await saveConclusionsMutation.mutateAsync({
         menteeId: menteeIdNum,
-        pillarId,
+        pillarId: dbPillarId,
         conclusoesJson,
         liberarParaMentorado: liberar,
       });
@@ -176,7 +178,7 @@ export default function MentorPillarView() {
     try {
       await saveFeedbackMutation.mutateAsync({
         menteeId: menteeIdNum,
-        pillarId,
+        pillarId: dbPillarId,
         feedback,
         planoAcao,
         pontosFortesJson: pontosFortes.filter(Boolean),
@@ -196,7 +198,7 @@ export default function MentorPillarView() {
     // Salva o feedback primeiro
     await handleSaveFeedback();
     try {
-      await releaseMutation.mutateAsync({ menteeId: menteeIdNum, pillarId });
+      await releaseMutation.mutateAsync({ menteeId: menteeIdNum, pillarId: dbPillarId });
       toast.success(`Conclusão do Pilar ${pillarId} liberada para ${mentee?.nome}!`);
       refetchFeedback();
     } catch {
@@ -279,8 +281,8 @@ export default function MentorPillarView() {
               </Button>
             </Link>
           )}
-          <span className="text-xs text-muted-foreground flex-1 text-center">Pilar {pillarId} de 7</span>
-          {pillarId < 7 && (
+          <span className="text-xs text-muted-foreground flex-1 text-center">Pilar {pillarId} de 6</span>
+          {pillarId < 6 && (
             <Link href={`/mentor/mentorado/${menteeIdNum}/pilar/${pillarId + 1}`}>
               <Button variant="ghost" size="sm" className="text-xs gap-1">
                 Pilar {pillarId + 1} →
@@ -355,15 +357,15 @@ export default function MentorPillarView() {
                 </div>
               ) : (
                 <MenteeAnswersSummary
-                  sections={PILLAR_SECTIONS[pillarId] ?? []}
+                  sections={PILLAR_SECTIONS[dbPillarId] ?? []}
                   answers={(answers ?? []) as any}
                   editable={true}
                   onSave={async (sectionId, questionId, value) => {
-                    const section = (PILLAR_SECTIONS[pillarId] ?? []).find((s: any) => s.perguntas?.some((p: any) => p.id === questionId));
+                    const section = (PILLAR_SECTIONS[dbPillarId] ?? []).find((s: any) => s.perguntas?.some((p: any) => p.id === questionId));
                     const question = section?.perguntas?.find((p: any) => p.id === questionId);
                     await updateAnswerMutation.mutateAsync({
                       menteeId: menteeIdNum,
-                      pillarId,
+                      pillarId: dbPillarId,
                       secao: sectionId,
                       questionId,
                       pergunta: question?.pergunta ?? "",
@@ -375,7 +377,7 @@ export default function MentorPillarView() {
             </div>
 
             {/* Ferramentas — conforme pilar */}
-            {pillarId === 3 && (
+            {dbPillarId === 3 && (
               <>
                 <hr className="border-dashed" />
                 <div>
@@ -403,7 +405,7 @@ export default function MentorPillarView() {
               </>
             )}
 
-            {pillarId === 5 && (
+            {dbPillarId === 5 && (
               <>
                 <hr className="border-dashed" />
                 <div>
@@ -422,7 +424,7 @@ export default function MentorPillarView() {
             {/* Chat IA */}
             <MentorAIChat
               menteeId={menteeIdNum}
-              pillarId={pillarId}
+              pillarId={dbPillarId}
               pillarTitle={title || `Pilar ${pillarId}`}
             />
 
@@ -503,7 +505,7 @@ export default function MentorPillarView() {
                       onClick={async () => {
                         try {
                           toast.info("Gerando plano de ação...");
-                          const result = await generatePlanMutation.mutateAsync({ menteeId: menteeIdNum, pillarId });
+                          const result = await generatePlanMutation.mutateAsync({ menteeId: menteeIdNum, pillarId: dbPillarId });
                           setPlanoAcao(result.plano || "");
                           toast.success("Plano de ação gerado!");
                         } catch { toast.error("Erro ao gerar plano."); }
@@ -539,7 +541,7 @@ export default function MentorPillarView() {
                   </span>
                 )}
                 {!!existingConclusions?.conclusoesJson && (
-                  <Button onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/${pillarId}`, "_blank")} variant="outline" size="sm" className="gap-1.5">
+                  <Button onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/${dbPillarId}`, "_blank")} variant="outline" size="sm" className="gap-1.5">
                     <FileDown className="w-3.5 h-3.5" /> PDF
                   </Button>
                 )}
@@ -558,7 +560,7 @@ export default function MentorPillarView() {
               <PillarReportGenerator
                 menteeId={menteeIdNum}
                 menteeName={mentee?.nome ?? "Mentorado"}
-                pillarId={pillarId}
+                pillarId={dbPillarId}
                 pillarName={title ?? `Pilar ${pillarId}`}
               />
             </div>

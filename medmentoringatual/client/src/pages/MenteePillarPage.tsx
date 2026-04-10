@@ -8,6 +8,7 @@ import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { PillarPartsView } from "@/components/PillarPartsView";
 import { PILLAR_TITLES, PILLAR_ICONS, PILLAR_SECTIONS } from "@/lib/pillar-questions";
+import { NEW_TO_OLD_PILLAR } from "../../../shared/pillar-parts";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Lock } from "lucide-react";
 import { Link } from "wouter";
@@ -15,13 +16,14 @@ import { Link } from "wouter";
 export default function MenteePillarPage() {
   const { id } = useParams<{ id: string }>();
   const pillarId = parseInt(id ?? "1");
+  const dbPillarId = NEW_TO_OLD_PILLAR[pillarId] ?? pillarId;
 
   const { data: mentee, isLoading } = trpc.portal.myData.useQuery();
   const { data: partReleases } = trpc.portal.getMyPartReleases.useQuery();
-  const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId });
-  const { data: savedAnswers } = trpc.pillarAnswers.getByPillar.useQuery({ pillarId });
+  const { data: conclusionData } = trpc.pillarAnswers.isConclusionReleased.useQuery({ pillarId: dbPillarId });
+  const { data: savedAnswers } = trpc.pillarAnswers.getByPillar.useQuery({ pillarId: dbPillarId });
 
-  const pillarSections = PILLAR_SECTIONS[pillarId] ?? [];
+  const pillarSections = PILLAR_SECTIONS[dbPillarId] ?? [];
   const completedCount = new Set((savedAnswers ?? []).filter((r: any) => r.status === "concluida").map((r: any) => r.secao)).size;
   const totalCount = pillarSections.length;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -141,7 +143,7 @@ export default function MenteePillarPage() {
 
         {/* Partes do pilar com questionarios e ferramentas */}
         <PillarPartsView
-          pillarId={pillarId}
+          pillarId={dbPillarId}
           menteeId={mentee.mentee.id}
           partReleases={(partReleases ?? []) as Array<{ pillarId: number; partId: string; partLabel: string; released: boolean }>}
           onComplete={() => {
