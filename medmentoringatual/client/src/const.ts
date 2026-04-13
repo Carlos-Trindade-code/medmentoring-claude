@@ -6,7 +6,9 @@ const RETURN_PATH_KEY = "auth_return_path";
 // Saves the current path to localStorage so we can restore it after OAuth redirect.
 export const getLoginUrl = (returnPath?: string) => {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const redirectUri = `${window.location.origin}/api/oauth/callback`;
+  // Always use the canonical origin for OAuth redirect to avoid www/non-www mismatch
+  const origin = window.location.origin.replace("://www.", "://");
+  const redirectUri = `${origin}/api/oauth/callback`;
 
   // Determine the path we want to return to after login
   const path = returnPath ?? window.location.pathname;

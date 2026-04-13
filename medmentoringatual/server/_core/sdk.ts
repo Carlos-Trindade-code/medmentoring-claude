@@ -61,7 +61,7 @@ class SDKServer {
       code,
       client_id: ENV.googleClientId,
       client_secret: ENV.googleClientSecret,
-      redirect_uri: redirectUri || ENV.googleRedirectUri,
+      redirect_uri: ENV.googleRedirectUri || redirectUri,
       grant_type: "authorization_code",
     });
 

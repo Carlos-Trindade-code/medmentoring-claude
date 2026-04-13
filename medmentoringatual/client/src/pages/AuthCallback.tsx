@@ -30,13 +30,18 @@ export default function AuthCallback() {
       credentials: "include",
       body: JSON.stringify({ token }),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("set-session failed");
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          console.error("[AuthCallback] set-session failed:", res.status, text);
+          throw new Error(`set-session failed: ${res.status}`);
+        }
         // Navigate to the intended destination
         const safe = returnPath.startsWith("/") ? returnPath : "/";
         window.location.href = safe; // hard redirect to flush React state
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("[AuthCallback] Error:", err);
         setStatus("error");
       });
   }, [navigate]);
