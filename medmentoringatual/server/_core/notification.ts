@@ -68,22 +68,9 @@ export async function notifyOwner(
 ): Promise<boolean> {
   const { title, content } = validatePayload(payload);
 
-  if (!ENV.forgeApiUrl) {
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[Notification] (dev skip) ${title}: ${content.substring(0, 100)}`);
-      return true;
-    }
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Notification service URL is not configured.",
-    });
-  }
-
-  if (!ENV.forgeApiKey) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Notification service API key is not configured.",
-    });
+  if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
+    console.log(`[Notification] (skip - no service configured) ${title}: ${content.substring(0, 100)}`);
+    return true;
   }
 
   const endpoint = buildEndpointUrl(ENV.forgeApiUrl);
