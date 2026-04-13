@@ -232,7 +232,7 @@ export default function Home() {
       </nav>
 
       {/* HERO */}
-      <section className="pt-24 pb-20 relative overflow-hidden">
+      <section className="pt-20 pb-12 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5"
           style={{ backgroundImage: "radial-gradient(circle at 20% 50%, oklch(0.28 0.07 250) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.72 0.12 75) 0%, transparent 50%)" }}
