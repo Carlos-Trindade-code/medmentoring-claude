@@ -14,11 +14,11 @@ import {
 } from "lucide-react";
 
 const PILLARS = [
-  { id: 1, icon: Target, title: "Mapa Estrategico", desc: "Defina quem voce e, seu proposito e aonde quer chegar.", color: "from-blue-900 to-blue-700" },
-  { id: 2, icon: Star, title: "Produto Profissional", desc: "Crie seu cardapio de servicos alinhado com seus valores.", color: "from-indigo-900 to-indigo-700" },
-  { id: 3, icon: BarChart3, title: "Diagnostico", desc: "Mapeie custos reais, iVMP e entenda sua realidade financeira.", color: "from-slate-800 to-slate-600" },
-  { id: 4, icon: TrendingUp, title: "Estrategia", desc: "Simule cenarios, defina precos e trace seu plano de acao.", color: "from-amber-800 to-amber-600" },
-  { id: 5, icon: Megaphone, title: "Comunicacao", desc: "Crie sua estrategia de comunicacao com IA personalizada.", color: "from-teal-800 to-teal-600" },
+  { id: 1, icon: Target, title: "Mapa Estratégico", desc: "Defina quem você é, seu propósito e aonde quer chegar.", color: "from-blue-900 to-blue-700" },
+  { id: 2, icon: Star, title: "Produto Profissional", desc: "Crie seu cardápio de serviços alinhado com seus valores.", color: "from-indigo-900 to-indigo-700" },
+  { id: 3, icon: BarChart3, title: "Diagnóstico", desc: "Mapeie custos reais, iVMP e entenda sua realidade financeira.", color: "from-slate-800 to-slate-600" },
+  { id: 4, icon: TrendingUp, title: "Estratégia", desc: "Simule cenários, defina preços e trace seu plano de ação.", color: "from-amber-800 to-amber-600" },
+  { id: 5, icon: Megaphone, title: "Comunicação", desc: "Crie sua estratégia de comunicação com IA personalizada.", color: "from-teal-800 to-teal-600" },
   { id: 6, icon: ShoppingBag, title: "Vendas", desc: "Aprenda a vender com valor e construa seu protocolo de consulta.", color: "from-rose-900 to-rose-700" },
 ];
 

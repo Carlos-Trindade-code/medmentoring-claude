@@ -1535,11 +1535,11 @@ export const PILLAR_SECTIONS: Record<number, Section[]> = {
 };
 
 export const PILLAR_TITLES: Record<number, string> = {
-  1: "Mapa Estrategico",
+  1: "Mapa Estratégico",
   2: "Produto Profissional",
-  3: "Diagnostico",
-  4: "Estrategia",
-  5: "Comunicacao",
+  3: "Diagnóstico",
+  4: "Estratégia",
+  5: "Comunicação",
   6: "Vendas",
 };
 
