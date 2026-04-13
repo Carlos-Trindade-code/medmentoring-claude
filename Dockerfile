@@ -8,7 +8,6 @@ COPY medmentoringatual/package.json medmentoringatual/pnpm-lock.yaml ./
 COPY medmentoringatual/patches/ ./patches/
 RUN pnpm install --no-frozen-lockfile
 
-# Force fresh copy every build by including all source files
 COPY medmentoringatual/shared/ ./shared/
 COPY medmentoringatual/client/ ./client/
 COPY medmentoringatual/server/ ./server/
@@ -16,7 +15,8 @@ COPY medmentoringatual/drizzle/ ./drizzle/
 COPY medmentoringatual/drizzle.config.ts ./
 COPY medmentoringatual/tsconfig.json ./
 COPY medmentoringatual/vite.config.ts ./
-COPY medmentoringatual/attached_assets/ ./attached_assets/
+COPY medmentoringatual/vitest.config.ts ./
+COPY medmentoringatual/components.json ./
 
 ENV VITE_GOOGLE_CLIENT_ID=287693490427-2oij2b8m6o146nd73epllv5ncpru0m2d.apps.googleusercontent.com
 
