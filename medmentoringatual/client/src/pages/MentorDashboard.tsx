@@ -516,15 +516,32 @@ export default function MentorDashboard() {
                   <div key={lead.id} className="bg-card rounded-xl border border-border p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-medium text-foreground">{lead.nome}</p>
-                        <p className="text-sm text-muted-foreground">{lead.especialidade} · {lead.email}</p>
+                        <p className="font-semibold text-foreground text-base">{lead.nome}</p>
+                        <p className="text-sm text-muted-foreground">{lead.especialidade || "Especialidade não informada"}</p>
+                        <div className="flex flex-wrap gap-3 mt-2 text-sm">
+                          {lead.email && (
+                            <a href={`mailto:${lead.email}`} className="text-primary hover:underline flex items-center gap-1">
+                              📧 {lead.email}
+                            </a>
+                          )}
+                          {lead.telefone && (
+                            <a href={`https://wa.me/55${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline flex items-center gap-1">
+                              📱 {lead.telefone}
+                            </a>
+                          )}
+                        </div>
                         {lead.principalDor && (
                           <p className="text-sm text-foreground/70 mt-2 bg-muted/50 rounded-lg p-2 italic">
                             "{lead.principalDor}"
                           </p>
                         )}
+                        {lead.tentouResolver && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            <strong>Já tentou:</strong> {lead.tentouResolver}
+                          </p>
+                        )}
                       </div>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
                         lead.status === "new" ? "bg-amber-100 text-amber-800" :
                         lead.status === "contacted" ? "bg-blue-100 text-blue-800" :
                         lead.status === "converted" ? "bg-green-100 text-green-800" :
@@ -533,10 +550,28 @@ export default function MentorDashboard() {
                         {lead.status === "new" ? "Novo" : lead.status === "contacted" ? "Contatado" : lead.status === "converted" ? "Convertido" : "Perdido"}
                       </span>
                     </div>
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t">
                       <p className="text-xs text-muted-foreground flex-1">
-                        {new Date(lead.createdAt).toLocaleDateString("pt-BR")} · {lead.faturamentoFaixa || "Faturamento não informado"}
+                        {new Date(lead.createdAt).toLocaleDateString("pt-BR")} · {lead.faturamentoFaixa || "Faturamento não informado"} · {lead.estruturaAtual || ""} · {lead.disponibilidade ? `Disponível: ${lead.disponibilidade}` : ""}
                       </p>
+                      {lead.telefone && (
+                        <a
+                          href={`https://wa.me/55${lead.telefone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${lead.nome?.split(" ")[0]}, tudo bem? Sou Carlos Trindade, mentor do MedMentoring. Vi que você solicitou uma sessão de diagnóstico. Podemos conversar?`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-colors shrink-0"
+                        >
+                          WhatsApp
+                        </a>
+                      )}
+                      {lead.email && (
+                        <a
+                          href={`mailto:${lead.email}?subject=MedMentoring - Sessão de Diagnóstico&body=Olá ${lead.nome?.split(" ")[0]}, tudo bem?%0A%0ASou Carlos Trindade, mentor do MedMentoring.%0A%0AVi que você solicitou uma sessão de diagnóstico gratuita. Gostaria de agendar um horário para conversarmos.%0A%0AAbraço!`}
+                          className="text-xs bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors shrink-0"
+                        >
+                          Email
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
