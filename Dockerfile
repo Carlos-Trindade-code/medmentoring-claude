@@ -8,6 +8,8 @@ COPY medmentoringatual/package.json medmentoringatual/pnpm-lock.yaml ./
 COPY medmentoringatual/patches/ ./patches/
 RUN pnpm install --no-frozen-lockfile
 
+# Cache bust: change this value to force rebuild
+ARG CACHEBUST=2026-04-13-v2
 COPY medmentoringatual/ .
 
 # Vite needs VITE_* vars at build time. Client ID is public (not a secret).
