@@ -318,7 +318,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   };
 
   if (systemPrompt.trim()) {
-    payload.system = systemPrompt.trim();
+    // Add JSON instruction to prevent markdown responses when JSON is expected
+    payload.system = systemPrompt.trim() + "\n\nIMPORTANT: When asked to return JSON, return ONLY valid JSON. No markdown, no code blocks, no explanations before or after. Just the raw JSON object.";
   }
 
   // Convert tools to Claude format

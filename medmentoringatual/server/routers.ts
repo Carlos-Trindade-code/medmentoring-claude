@@ -89,6 +89,32 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { ENV } from "./_core/env";
 import { invokeLLM } from "./_core/llm";
+
+// Helper: extract JSON from LLM response that may contain markdown
+function extractJSON(text: string): string {
+  // Try direct parse first
+  try { JSON.parse(text); return text; } catch {}
+  // Try extracting from markdown code block
+  const jsonBlock = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (jsonBlock) {
+    try { JSON.parse(jsonBlock[1].trim()); return jsonBlock[1].trim(); } catch {}
+  }
+  // Try finding first { to last }
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    const candidate = text.substring(start, end + 1);
+    try { JSON.parse(candidate); return candidate; } catch {}
+  }
+  // Try finding first [ to last ]
+  const startArr = text.indexOf("[");
+  const endArr = text.lastIndexOf("]");
+  if (startArr !== -1 && endArr !== -1 && endArr > startArr) {
+    const candidate = text.substring(startArr, endArr + 1);
+    try { JSON.parse(candidate); return candidate; } catch {}
+  }
+  return text;
+}
 import { pillarReportRouter } from "./routers/pillarReport";
 import { getPillarPartContent, upsertPillarPartContent } from "./db";
 import { generateReportPdf } from "./pdfPremium";
@@ -1937,7 +1963,7 @@ const pillarToolsRouter = router({
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      return JSON.parse(content);
+      return JSON.parse(extractJSON(content));
     }),
 
   // Pilar 7 — Gera resposta ética personalizada para objeção de paciente
@@ -1982,7 +2008,7 @@ const pillarToolsRouter = router({
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      return JSON.parse(content);
+      return JSON.parse(extractJSON(content));
     }),
 
   // Pilar 1 — Sugere especializações e áreas de atuação alinhadas ao propósito do médico
@@ -2069,7 +2095,7 @@ Cada sugestão deve ter:
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      const result = JSON.parse(content);
+      const result = JSON.parse(extractJSON(content));
 
       // Salva no banco para não precisar regerar
       await upsertPillarFeedback(input.menteeId, 1, {
@@ -2177,7 +2203,7 @@ Retorne um JSON com:
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      const result = JSON.parse(content);
+      const result = JSON.parse(extractJSON(content));
 
       // Salva no banco
       await upsertPillarFeedback(input.menteeId, 1, {
@@ -2282,7 +2308,7 @@ Retorne um JSON com:
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      const result = JSON.parse(content);
+      const result = JSON.parse(extractJSON(content));
 
       // Salva no banco
       await upsertPillarFeedback(input.menteeId, input.pillarId, {
@@ -2387,7 +2413,7 @@ Retorne um JSON com:
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      return JSON.parse(content);
+      return JSON.parse(extractJSON(content));
     }),
 
   // IA: Gera rascunho de feedback estruturado para o mentor revisar e editar
@@ -2468,7 +2494,7 @@ Retorne um JSON com:
         },
       });
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      return JSON.parse(content) as {
+      return JSON.parse(extractJSON(content)) as {
         pontos_fortes: string[];
         pontos_melhoria: string[];
         feedback_geral: string;
@@ -2633,7 +2659,7 @@ Retorne um JSON com:
       });
 
       const content = String(response?.choices?.[0]?.message?.content || "{}");
-      const conclusoesJson = JSON.parse(content) as Record<string, unknown>;
+      const conclusoesJson = JSON.parse(extractJSON(content)) as Record<string, unknown>;
       await upsertPillarConclusion(menteeId, pillarId, {
         conclusoesJson,
         geradoPorIa: true,
