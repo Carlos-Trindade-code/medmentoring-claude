@@ -194,13 +194,12 @@ export default function MenteeDetail() {
           <p className="text-sm text-muted-foreground mb-4">Roteiro de conduição, respostas do mentorado, ferramentas interativas e feedback — tudo em um lugar só.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
             {[
-              { id: 1, emoji: "🎯", label: "Pilar 1 — Identidade", desc: "Propósito, Missão, Visão e Valores", color: "bg-indigo-100", textColor: "text-indigo-600" },
-              { id: 2, emoji: "📌", label: "Pilar 2 — Posicionamento", desc: "Diferencial + Frase de posicionamento", color: "bg-sky-100", textColor: "text-sky-600" },
-              { id: 3, emoji: "📊", label: "Pilar 3 — Diagnóstico", desc: "iVMP + Custos reais + Potencial de crescimento", color: "bg-amber-100", textColor: "text-amber-600" },
-              { id: 4, emoji: "⚙️", label: "Pilar 4 — Gestão", desc: "Processos, equipe e gargalos", color: "bg-blue-100", textColor: "text-blue-600" },
-              { id: 5, emoji: "💰", label: "Pilar 5 — Precificação", desc: "Dinheiro invisível + Tabela de preços", color: "bg-emerald-100", textColor: "text-emerald-600" },
-              { id: 6, emoji: "📱", label: "Pilar 6 — Marketing", desc: "Estratégia digital + Prompt IA personalizado", color: "bg-pink-100", textColor: "text-pink-600" },
-              { id: 7, emoji: "🎤", label: "Pilar 7 — Vendas", desc: "Objeções + Script de apresentação", color: "bg-violet-100", textColor: "text-violet-600" },
+              { id: 1, emoji: "🎯", label: "Pilar 1 — Mapa Estratégico", desc: "Propósito, Missão, Visão e Valores", color: "bg-indigo-100", textColor: "text-indigo-600" },
+              { id: 2, emoji: "💡", label: "Pilar 2 — Produto Profissional", desc: "Diferencial + Serviços e subprodutos", color: "bg-sky-100", textColor: "text-sky-600" },
+              { id: 3, emoji: "📊", label: "Pilar 3 — Diagnóstico", desc: "iVMP + Custos reais + Precificação", color: "bg-amber-100", textColor: "text-amber-600" },
+              { id: 4, emoji: "🗺️", label: "Pilar 4 — Estratégia", desc: "Simulações + Plano de ação", color: "bg-blue-100", textColor: "text-blue-600" },
+              { id: 5, emoji: "📱", label: "Pilar 5 — Comunicação", desc: "Estratégia digital + Prompt IA", color: "bg-emerald-100", textColor: "text-emerald-600" },
+              { id: 6, emoji: "🤝", label: "Pilar 6 — Vendas", desc: "Protocolo de consulta + Técnicas", color: "bg-pink-100", textColor: "text-pink-600" },
             ].map((p) => (
               <button
                 key={p.id}
