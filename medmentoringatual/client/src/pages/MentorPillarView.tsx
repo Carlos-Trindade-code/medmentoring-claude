@@ -82,7 +82,7 @@ export default function MentorPillarView() {
     onSuccess: () => refetchAnswers(),
   });
   const generateConclusionsMutation = trpc.pillarTools.generatePillarConclusions.useMutation();
-  const generatePlanMutation = trpc.pillarTools.generateActionPlan.useMutation();
+  // generatePlanMutation removed — plano de ação é gerado dentro do relatório
   const saveConclusionsMutation = trpc.pillarTools.savePillarConclusions.useMutation();
   const { data: existingConclusions, refetch: refetchConclusions } = trpc.pillarTools.getPillarConclusions.useQuery({
     menteeId: menteeIdNum,
@@ -90,10 +90,7 @@ export default function MentorPillarView() {
   });
 
   // Auto-summary IA ao abrir pilar
-  const { data: autoSummary, isLoading: summaryLoading } = trpc.mentorAI.autoSummary.useQuery(
-    { menteeId: Number(menteeId), pillarId: dbPillarId },
-    { staleTime: 5 * 60 * 1000 }
-  );
+  // Auto-summary removed — use Chat IA instead
 
   // Inicializa conclusões existentes
   useEffect(() => {
@@ -313,27 +310,6 @@ export default function MentorPillarView() {
           )}
         </div>
 
-        {/* Auto-summary IA */}
-        {summaryLoading && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 animate-pulse">
-            <div className="h-4 bg-primary/10 rounded w-1/3 mb-2" />
-            <div className="h-3 bg-primary/10 rounded w-full mb-1" />
-            <div className="h-3 bg-primary/10 rounded w-2/3" />
-          </div>
-        )}
-        {autoSummary?.summary && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Resumo IA</span>
-              {autoSummary.cached && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Cache</span>
-              )}
-            </div>
-            <div className="text-sm text-foreground whitespace-pre-line leading-relaxed">{autoSummary.summary}</div>
-          </div>
-        )}
-
         <div className="border-b mb-6">
           <div className="flex">
             <button
@@ -450,7 +426,7 @@ export default function MentorPillarView() {
               pillarTitle={title || `Pilar ${pillarId}`}
             />
 
-            {/* Relatório do Pilar */}
+            {/* Relatório do Pilar — único bloco */}
             <div className="border-2 border-emerald-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
@@ -468,7 +444,7 @@ export default function MentorPillarView() {
                   {generatingConclusions ? (
                     <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>
                   ) : (
-                    <><Sparkles className="w-3.5 h-3.5" /> {conclusionsData ? "Regerar" : "Gerar com IA"}</>
+                    <><Sparkles className="w-3.5 h-3.5" /> {conclusionsData ? "Regerar" : "Gerar Relatório"}</>
                   )}
                 </Button>
               </div>
@@ -477,7 +453,6 @@ export default function MentorPillarView() {
                 <div className="space-y-4">
                   {Object.entries(conclusionsData).map(([key, val]) => {
                     const label = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-                    // Convert any value to readable text
                     const toText = (v: unknown): string => {
                       if (v === null || v === undefined) return "";
                       if (typeof v === "string") return v;
@@ -513,50 +488,12 @@ export default function MentorPillarView() {
                   <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Sparkles className="w-8 h-8 text-emerald-300" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">Nenhum relatorio gerado ainda</p>
-                  <p className="text-xs text-muted-foreground mt-1">Clique em "Gerar com IA" para criar o relatorio baseado nas respostas do mentorado.</p>
+                  <p className="text-sm font-medium text-foreground">Nenhum relatório gerado ainda</p>
+                  <p className="text-xs text-muted-foreground mt-1">Use o Chat IA acima para analisar e depois clique em "Gerar Relatório".</p>
                 </div>
               )}
 
-              {/* Feedback inline */}
-              <div className="mt-6 pt-4 border-t space-y-4">
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Pontos Fortes</label>
-                  <Textarea value={pontosFortes.join("\n")} onChange={e => setPontosFortes(e.target.value.split("\n"))} rows={3} className="text-sm" placeholder="Um por linha" />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Melhorias</label>
-                  <Textarea value={pontosMelhoria.join("\n")} onChange={e => setPontosMelhoria(e.target.value.split("\n"))} rows={3} className="text-sm" placeholder="Um por linha" />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Feedback Geral</label>
-                  <Textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Feedback personalizado..." />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Plano de Ação</label>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={async () => {
-                        try {
-                          toast.info("Gerando plano de ação...");
-                          const result = await generatePlanMutation.mutateAsync({ menteeId: menteeIdNum, pillarId: dbPillarId });
-                          setPlanoAcao(result.plano || "");
-                          toast.success("Plano de ação gerado!");
-                        } catch { toast.error("Erro ao gerar plano."); }
-                      }}
-                      disabled={generatePlanMutation.isPending}
-                      className="text-xs text-violet-600 hover:text-violet-700 gap-1"
-                    >
-                      {generatePlanMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Gerar com IA
-                    </Button>
-                  </div>
-                  <Textarea value={planoAcao} onChange={e => setPlanoAcao(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Próximos passos..." />
-                </div>
-              </div>
-
-              {/* Action buttons */}
+              {/* Botões de ação */}
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
                 <Button variant="outline" onClick={handleSaveFeedback} disabled={savingFeedback} size="sm" className="gap-1.5">
                   {savingFeedback ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
@@ -584,21 +521,10 @@ export default function MentorPillarView() {
                 {lastFeedbackSaved && (
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                    Salvo as {lastFeedbackSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    Salvo às {lastFeedbackSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 )}
               </div>
-            </div>
-
-            {/* Relatório Final Premium */}
-            <div className="border rounded-xl p-4">
-              <h3 className="font-semibold mb-4">Relatório Final</h3>
-              <PillarReportGenerator
-                menteeId={menteeIdNum}
-                menteeName={mentee?.nome ?? "Mentorado"}
-                pillarId={dbPillarId}
-                pillarName={title ?? `Pilar ${pillarId}`}
-              />
             </div>
           </div>
         )}
