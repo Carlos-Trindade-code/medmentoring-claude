@@ -100,10 +100,21 @@ export default function MentorPillarView() {
     if (existingConclusions?.conclusoesJson) {
       const data = existingConclusions.conclusoesJson as Record<string, unknown>;
       setConclusionsData(data);
+      const toText = (v: unknown): string => {
+        if (v === null || v === undefined) return "";
+        if (typeof v === "string") return v;
+        if (typeof v === "number" || typeof v === "boolean") return String(v);
+        if (Array.isArray(v)) return v.map(item => toText(item)).join("\n");
+        if (typeof v === "object") {
+          return Object.entries(v as Record<string, unknown>)
+            .map(([k, vv]) => `${k}: ${toText(vv)}`)
+            .join("\n");
+        }
+        return String(v);
+      };
       const edited: Record<string, string> = {};
       for (const [key, val] of Object.entries(data)) {
-        if (typeof val === "string") edited[key] = val;
-        else if (Array.isArray(val)) edited[key] = val.join("\n");
+        edited[key] = toText(val);
       }
       setEditedConclusions(edited);
     }
@@ -114,10 +125,21 @@ export default function MentorPillarView() {
     try {
       const result = await generateConclusionsMutation.mutateAsync({ menteeId: menteeIdNum, pillarId: dbPillarId });
       setConclusionsData(result as Record<string, unknown>);
+      const toTextGen = (v: unknown): string => {
+        if (v === null || v === undefined) return "";
+        if (typeof v === "string") return v;
+        if (typeof v === "number" || typeof v === "boolean") return String(v);
+        if (Array.isArray(v)) return v.map(item => toTextGen(item)).join("\n");
+        if (typeof v === "object") {
+          return Object.entries(v as Record<string, unknown>)
+            .map(([k, vv]) => `${k}: ${toTextGen(vv)}`)
+            .join("\n");
+        }
+        return String(v);
+      };
       const edited: Record<string, string> = {};
       for (const [key, val] of Object.entries(result as Record<string, unknown>)) {
-        if (typeof val === "string") edited[key] = val;
-        else if (Array.isArray(val)) edited[key] = (val as string[]).join("\n");
+        edited[key] = toTextGen(val);
       }
       setEditedConclusions(edited);
       toast.success("Conclusões geradas! Revise e ajuste antes de liberar.");
@@ -455,16 +477,30 @@ export default function MentorPillarView() {
                 <div className="space-y-4">
                   {Object.entries(conclusionsData).map(([key, val]) => {
                     const label = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-                    const isArray = Array.isArray(val);
+                    // Convert any value to readable text
+                    const toText = (v: unknown): string => {
+                      if (v === null || v === undefined) return "";
+                      if (typeof v === "string") return v;
+                      if (typeof v === "number" || typeof v === "boolean") return String(v);
+                      if (Array.isArray(v)) return v.map(item => toText(item)).join("\n");
+                      if (typeof v === "object") {
+                        return Object.entries(v as Record<string, unknown>)
+                          .map(([k, vv]) => `${k}: ${toText(vv)}`)
+                          .join("\n");
+                      }
+                      return String(v);
+                    };
+                    const textValue = editedConclusions[key] ?? toText(val);
+                    const lineCount = textValue.split("\n").length;
                     return (
                       <div key={key}>
                         <label className="text-xs font-semibold text-emerald-700 uppercase tracking-wide block mb-1.5">{label}</label>
                         <Textarea
-                          value={editedConclusions[key] ?? (isArray ? (val as string[]).join("\n") : String(val ?? ""))}
+                          value={textValue}
                           onChange={e => setEditedConclusions(prev => ({ ...prev, [key]: e.target.value }))}
-                          rows={isArray ? Math.max(3, (val as string[]).length + 1) : 3}
+                          rows={Math.max(3, lineCount + 1)}
                           className="text-sm border-emerald-200 bg-emerald-50/50"
-                          placeholder={isArray ? "Um item por linha" : `Escreva ${label.toLowerCase()}...`}
+                          placeholder={`Escreva ${label.toLowerCase()}...`}
                         />
                       </div>
                     );
