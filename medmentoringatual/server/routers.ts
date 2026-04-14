@@ -89,6 +89,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { ENV } from "./_core/env";
 import { invokeLLM } from "./_core/llm";
+import { getPillarPrompt } from "../shared/pillar-prompts";
 
 // Helper: extract JSON from LLM response that may contain markdown
 function extractJSON(text: string): string {
@@ -2244,15 +2245,16 @@ Retorne um JSON com:
         7: `Você é um especialista em comunicação médica e vendas éticas analisando o Pilar 7 — Comunicação e Vendas Éticas. Analise as respostas sobre comunicação com pacientes, apresentação de tratamentos, manejo de objeções e conversão de consultas. Identifique: barreiras de comunicação, oportunidades de melhoria na apresentação de valor, pontos de perda de pacientes e como o médico pode comunicar melhor seu trabalho sem ferir a ética.`,
       };
 
-      const systemPrompt = `${pillarContexts[input.pillarId] || "Você é um especialista em mentoria médica."}
+      const systemPrompt = `${getPillarPrompt(input.pillarId)}
 
-Retorne um JSON com:
-- resumo: string — diagnóstico geral do médico neste pilar (2-3 parágrafos)
-- pontos_fortes: array de strings — 3 a 5 pontos fortes identificados nas respostas
-- lacunas_criticas: array de objetos { lacuna, impacto, urgencia ("alta"|"media"|"baixa") } — 2 a 4 lacunas
-- recomendacoes: array de objetos { acao, prazo ("imediato"|"curto_prazo"|"medio_prazo"), resultado_esperado } — 3 a 5 recomendações concretas
-- frase_chave: string — uma frase de impacto que resume o momento deste médico neste pilar
-- nivel_maturidade: string — "iniciante", "em_desenvolvimento", "avançado" ou "expert"`;
+Alem da analise completa, retorne obrigatoriamente estes campos no JSON:
+- resumo: string — diagnostico geral (2-3 paragrafos)
+- pontos_fortes: array de strings — 3 a 5 pontos fortes
+- lacunas_criticas: array de objetos { lacuna, impacto, urgencia ("alta"|"media"|"baixa") }
+- recomendacoes: array de objetos { acao, prazo ("imediato"|"curto_prazo"|"medio_prazo"), resultado_esperado }
+- frase_chave: string — frase de impacto que resume o momento deste medico
+- nivel_maturidade: string — "iniciante", "em_desenvolvimento", "avancado" ou "expert"
+- recomendacao_mentor: string — orientacao para o Dr. Carlos conduzir a proxima sessao`;
 
       const response = await invokeLLM({
         messages: [
@@ -2641,7 +2643,7 @@ Retorne um JSON com:
         messages: [
           {
             role: "system",
-            content: `Você é um especialista em mentoria médica e business coaching para médicos brasileiros. Você está ajudando o mentor a construir as conclusões do ${ctx.nome} para um médico mentorado. Baseie-se EXCLUSIVAMENTE nas respostas fornecidas. Seja específico, prático e use as próprias palavras do médico sempre que possível. Responda em português brasileiro.`,
+            content: getPillarPrompt(pillarId) + `\n\nVoce esta gerando as conclusoes do pilar ${ctx.nome}. Baseie-se EXCLUSIVAMENTE nas respostas fornecidas. Use as proprias palavras do medico sempre que possivel. Responda em portugues brasileiro.`,
           },
           {
             role: "user",
