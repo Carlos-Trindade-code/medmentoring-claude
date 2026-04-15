@@ -162,6 +162,7 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
   const [taxaSalaHora, setTaxaSalaHora] = useState(180);
   const [horasDisponiveis, setHorasDisponiveis] = useState(128);
   const [horasOcupadas, setHorasOcupadas] = useState(80);
+  const [outrasReceitas, setOutrasReceitas] = useState(0);
 
   // ----------------------------------------------------------
   // STATE: Servicos e Mix
@@ -518,6 +519,7 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
         taxaSalaHora={taxaSalaHora}
         horasDisponiveis={horasDisponiveis}
         horasOcupadas={horasOcupadas}
+        outrasReceitas={outrasReceitas}
         editable={mode === "mentor"}
         onCustoFixoChange={setCustoFixoTotal}
         onImpostoChange={setImpostoDefault}
@@ -525,6 +527,7 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
         onTaxaSalaHoraChange={setTaxaSalaHora}
         onHorasDisponiveisChange={setHorasDisponiveis}
         onHorasOcupadasChange={setHorasOcupadas}
+        onOutrasReceitasChange={setOutrasReceitas}
       />
 
       {/* ============================== */}
@@ -559,7 +562,7 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
       {/* ============================== */}
       {/* SECAO 3: DASHBOARD KPIs        */}
       {/* ============================== */}
-      <KpiCards result={result} />
+      <KpiCards result={result} outrasReceitas={outrasReceitas} />
 
       {/* ============================== */}
       {/* SECAO 4: MODO META             */}
@@ -588,6 +591,7 @@ function GlobalParamsSection({
   taxaSalaHora,
   horasDisponiveis,
   horasOcupadas,
+  outrasReceitas,
   editable,
   onCustoFixoChange,
   onImpostoChange,
@@ -595,6 +599,7 @@ function GlobalParamsSection({
   onTaxaSalaHoraChange,
   onHorasDisponiveisChange,
   onHorasOcupadasChange,
+  onOutrasReceitasChange,
 }: {
   custoFixoTotal: number;
   impostoDefault: number;
@@ -602,6 +607,7 @@ function GlobalParamsSection({
   taxaSalaHora: number;
   horasDisponiveis: number;
   horasOcupadas: number;
+  outrasReceitas: number;
   editable: boolean;
   onCustoFixoChange: (v: number) => void;
   onImpostoChange: (v: number) => void;
@@ -609,6 +615,7 @@ function GlobalParamsSection({
   onTaxaSalaHoraChange: (v: number) => void;
   onHorasDisponiveisChange: (v: number) => void;
   onHorasOcupadasChange: (v: number) => void;
+  onOutrasReceitasChange: (v: number) => void;
 }) {
   const params = [
     {
@@ -652,6 +659,13 @@ function GlobalParamsSection({
       onChange: onHorasOcupadasChange,
       icon: <Clock className="w-4 h-4 text-[#1e3a5f]" />,
       step: 1,
+    },
+    {
+      label: "Outras Receitas (R$/Mes)",
+      value: outrasReceitas,
+      onChange: onOutrasReceitasChange,
+      icon: <DollarSign className="w-4 h-4 text-[#1e3a5f]" />,
+      step: 500,
     },
   ];
 
@@ -1112,23 +1126,26 @@ function WhatIfSliders({
 // ============================================================
 // SUB-COMPONENT: KpiCards
 // ============================================================
-function KpiCards({ result }: { result: SimulationResult }) {
+function KpiCards({ result, outrasReceitas = 0 }: { result: SimulationResult; outrasReceitas?: number }) {
+  const lucroTotal = result.lucroLiquido + outrasReceitas;
+  const receitaTotal = result.faturamentoBrutoTotal + outrasReceitas;
+  const margemTotal = receitaTotal > 0 ? (lucroTotal / receitaTotal) * 100 : 0;
   const kpis = [
     {
       title: "Faturamento Bruto",
-      value: formatBRL(result.faturamentoBrutoTotal),
+      value: formatBRL(receitaTotal),
       icon: <DollarSign className="w-4 h-4" />,
       variant: "neutral" as const,
     },
     {
       title: "Lucro Liquido",
-      value: formatBRL(result.lucroLiquido),
+      value: formatBRL(lucroTotal),
       icon: <TrendingUp className="w-4 h-4" />,
-      variant: result.lucroLiquido >= 0 ? ("success" as const) : ("danger" as const),
+      variant: lucroTotal >= 0 ? ("success" as const) : ("danger" as const),
     },
     {
       title: "Margem Liquida",
-      value: formatPercent(result.margemLiquida),
+      value: formatPercent(margemTotal),
       icon: <Percent className="w-4 h-4" />,
       variant: result.margemLiquida >= 40 ? ("success" as const) : result.margemLiquida >= 20 ? ("neutral" as const) : ("danger" as const),
     },
