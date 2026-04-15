@@ -758,7 +758,8 @@ function ServiceTable({
                 <TableHead className="text-center min-w-[70px]">Bonus%</TableHead>
                 <TableHead className="text-right min-w-[80px]">Equip(R$)</TableHead>
                 <TableHead className="text-center min-w-[70px]">Qtd/Mes</TableHead>
-                <TableHead className="text-right min-w-[100px]">Lucro Bruto</TableHead>
+                <TableHead className="text-right min-w-[100px]">Lucro/Consulta</TableHead>
+                <TableHead className="text-right min-w-[100px]">Lucro/Mes</TableHead>
                 <TableHead className="text-center min-w-[70px]">Margem%</TableHead>
                 {editable && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
@@ -923,7 +924,13 @@ function ServiceTable({
                         <span className="text-sm font-semibold">{qty}</span>
                       )}
                     </TableCell>
-                    {/* Lucro Bruto (calculated) */}
+                    {/* Lucro por consulta (calculated) */}
+                    <TableCell className="text-right">
+                      <span className={`text-sm font-semibold ${(sr?.lucroBruto ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                        {sr && qty > 0 ? formatBRL(sr.lucroBruto / qty) : "-"}
+                      </span>
+                    </TableCell>
+                    {/* Lucro mensal (calculated) */}
                     <TableCell className="text-right">
                       <span className={`text-sm font-semibold ${(sr?.lucroBruto ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
                         {sr ? formatBRL(sr.lucroBruto) : "-"}
@@ -968,6 +975,9 @@ function ServiceTable({
                 </TableCell>
                 <TableCell className="text-center font-bold">
                   {Object.values(mixAtendimentos).reduce((s, v) => s + v, 0)}
+                </TableCell>
+                <TableCell className="text-right font-bold text-muted-foreground text-xs">
+                  —
                 </TableCell>
                 <TableCell className="text-right font-bold text-emerald-700">
                   {formatBRL(result.porServico.reduce((s, r) => s + r.lucroBruto, 0))}
