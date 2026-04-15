@@ -471,11 +471,7 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                toast.info("Em breve", {
-                  description: "Exportacao para Excel sera disponibilizada em breve.",
-                })
-              }
+              onClick={() => window.open(`/api/excel/${menteeId}/pricing`, "_blank")}
             >
               <FileSpreadsheet className="w-4 h-4 mr-1.5" />
               Exportar Excel
@@ -483,11 +479,7 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                toast.info("Em breve", {
-                  description: "Exportacao para PDF sera disponibilizada em breve.",
-                })
-              }
+              onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/3`, "_blank")}
             >
               <Download className="w-4 h-4 mr-1.5" />
               Exportar PDF
