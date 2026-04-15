@@ -451,6 +451,39 @@ export default function MentorPillarView() {
 
         {activeTab === "mentor" && (
           <div className="space-y-6">
+            {/* Barra de ações rápidas */}
+            <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-xl sticky top-0 z-10">
+              <Button variant="outline" onClick={handleSaveFeedback} disabled={savingFeedback} size="sm" className="gap-1.5">
+                {savingFeedback ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                Salvar Tudo
+              </Button>
+              {conclusionsData && (
+                <Button onClick={() => handleSaveConclusions(false)} disabled={savingConclusions} variant="outline" size="sm" className="gap-1.5">
+                  Salvar Conclusões
+                </Button>
+              )}
+              {!existingFeedback?.conclusaoLiberada ? (
+                <Button onClick={handleRelease} disabled={savingFeedback} size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Unlock className="w-3.5 h-3.5" /> Liberar
+                </Button>
+              ) : (
+                <span className="flex items-center gap-1.5 text-emerald-600 text-sm font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Liberado
+                </span>
+              )}
+              {!!existingConclusions?.conclusoesJson && (
+                <Button onClick={() => window.open(`/api/pdf/pilar-conclusoes/${menteeId}/${dbPillarId}`, "_blank")} variant="outline" size="sm" className="gap-1.5">
+                  <FileDown className="w-3.5 h-3.5" /> PDF
+                </Button>
+              )}
+              {lastFeedbackSaved && (
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground ml-auto">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                  Salvo às {lastFeedbackSaved.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              )}
+            </div>
+
             {/* Chat IA */}
             <MentorAIChat
               menteeId={menteeIdNum}
