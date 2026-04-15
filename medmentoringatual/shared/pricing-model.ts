@@ -95,7 +95,9 @@ export function calculateSimulation(params: SimulationParams): SimulationResult 
     cargaHorariaNecessaria += horas;
   }
 
-  const lucroLiquido = faturamentoBrutoTotal - custosVariaveisTotal - params.custoFixoTotal;
+  // Lucro líquido inclui taxa de sala por serviço
+  const taxaSalaTotal = porServico.reduce((s, r) => s + r.taxaSala, 0);
+  const lucroLiquido = faturamentoBrutoTotal - custosVariaveisTotal - taxaSalaTotal - params.custoFixoTotal;
   const margemLiquida = faturamentoBrutoTotal > 0 ? (lucroLiquido / faturamentoBrutoTotal) * 100 : 0;
   const custoHora = params.horasDisponiveisMes > 0 ? params.custoFixoTotal / params.horasDisponiveisMes : 0;
   const avgCustosVariaveisPercent = faturamentoBrutoTotal > 0 ? (custosVariaveisTotal / faturamentoBrutoTotal) : 0.20;
