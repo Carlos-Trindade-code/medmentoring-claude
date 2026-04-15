@@ -640,14 +640,14 @@ function GlobalParamsSection({
       step: 10,
     },
     {
-      label: "Horas Disponiveis",
+      label: "Horas Disponiveis/Mes",
       value: horasDisponiveis,
       onChange: onHorasDisponiveisChange,
       icon: <Clock className="w-4 h-4 text-[#1e3a5f]" />,
       step: 1,
     },
     {
-      label: "Horas Ocupadas",
+      label: "Horas Ocupadas/Mes",
       value: horasOcupadas,
       onChange: onHorasOcupadasChange,
       icon: <Clock className="w-4 h-4 text-[#1e3a5f]" />,
@@ -1123,7 +1123,7 @@ function KpiCards({ result }: { result: SimulationResult }) {
       variant: result.margemLiquida >= 40 ? ("success" as const) : result.margemLiquida >= 20 ? ("neutral" as const) : ("danger" as const),
     },
     {
-      title: "Custo/Hora",
+      title: "Custo/Hora (mensal)",
       value: `${formatBRL(result.custoHora)}/h`,
       icon: <Clock className="w-4 h-4" />,
       variant: "neutral" as const,
