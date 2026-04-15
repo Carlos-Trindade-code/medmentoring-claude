@@ -139,7 +139,39 @@ export default function MentorPillarView() {
         edited[key] = toTextGen(val);
       }
       setEditedConclusions(edited);
-      toast.success("Conclusões geradas! Revise e ajuste antes de liberar.");
+
+      // Auto-preencher feedback a partir do JSON gerado
+      const r = result as Record<string, unknown>;
+      // Pontos fortes
+      if (r.pontos_fortes && Array.isArray(r.pontos_fortes)) {
+        setPontosFortes((r.pontos_fortes as string[]).filter(Boolean));
+      } else if (r.forcas && Array.isArray(r.forcas)) {
+        setPontosFortes((r.forcas as string[]).filter(Boolean));
+      } else if (r.top3_forcas && Array.isArray(r.top3_forcas)) {
+        setPontosFortes((r.top3_forcas as string[]).filter(Boolean));
+      }
+      // Melhorias
+      if (r.lacunas_criticas && Array.isArray(r.lacunas_criticas)) {
+        setPontosMelhoria((r.lacunas_criticas as Array<{lacuna?: string; gap?: string}>).map(l => l.lacuna || l.gap || toTextGen(l)).filter(Boolean));
+      } else if (r.gaps_identificados && Array.isArray(r.gaps_identificados)) {
+        setPontosMelhoria((r.gaps_identificados as Array<{gap?: string; descricao?: string}>).map(g => g.gap || g.descricao || toTextGen(g)).filter(Boolean));
+      } else if (r.top3_lacunas && Array.isArray(r.top3_lacunas)) {
+        setPontosMelhoria((r.top3_lacunas as string[]).filter(Boolean));
+      }
+      // Plano de ação
+      if (r.recomendacoes && Array.isArray(r.recomendacoes)) {
+        setPlanoAcao((r.recomendacoes as Array<{acao?: string}>).map(rec => rec.acao || toTextGen(rec)).filter(Boolean).join("\n"));
+      } else if (r.quick_wins && Array.isArray(r.quick_wins)) {
+        setPlanoAcao((r.quick_wins as Array<{acao?: string}>).map(q => q.acao || toTextGen(q)).filter(Boolean).join("\n"));
+      }
+      // Feedback geral
+      if (r.recomendacao_mentor && typeof r.recomendacao_mentor === "string") {
+        setFeedback(r.recomendacao_mentor);
+      } else if (r.diagnostico_geral && typeof r.diagnostico_geral === "string") {
+        setFeedback(r.diagnostico_geral);
+      }
+
+      toast.success("Relatório gerado! Feedback preenchido automaticamente. Revise e ajuste.");
       refetchConclusions();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
