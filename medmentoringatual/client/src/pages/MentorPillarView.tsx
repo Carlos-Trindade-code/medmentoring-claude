@@ -426,7 +426,39 @@ export default function MentorPillarView() {
               pillarTitle={title || `Pilar ${pillarId}`}
             />
 
-            {/* Relatório do Pilar — único bloco */}
+            {/* Ferramentas dinâmicas — conforme pilar */}
+            {dbPillarId === 3 && (
+              <>
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-teal-600" /> Despesas
+                  </h3>
+                  <ExpenseAnalysis menteeId={menteeIdNum} />
+                </div>
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-teal-600" /> iVMP
+                  </h3>
+                  <IvmpAnalysis menteeId={menteeIdNum} />
+                </div>
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-teal-600" /> Simulador
+                  </h3>
+                  <ScenarioSimulator menteeId={menteeIdNum} mode="mentor" />
+                </div>
+              </>
+            )}
+            {dbPillarId === 5 && (
+              <div className="border rounded-xl p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-teal-600" /> Precificação
+                </h3>
+                <PricingEditor menteeId={menteeIdNum} />
+              </div>
+            )}
+
+            {/* Relatório do Pilar */}
             <div className="border-2 border-emerald-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
@@ -525,6 +557,40 @@ export default function MentorPillarView() {
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* Feedback do Mentor */}
+            <div className="border rounded-xl p-4">
+              <h3 className="font-semibold mb-4">Feedback do Mentor</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-emerald-700 uppercase tracking-wide block mb-1.5">Pontos Fortes</label>
+                  <Textarea value={pontosFortes.join("\n")} onChange={e => setPontosFortes(e.target.value.split("\n"))} rows={3} className="text-sm" placeholder="Um por linha" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-amber-700 uppercase tracking-wide block mb-1.5">Melhorias</label>
+                  <Textarea value={pontosMelhoria.join("\n")} onChange={e => setPontosMelhoria(e.target.value.split("\n"))} rows={3} className="text-sm" placeholder="Um por linha" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Feedback Geral</label>
+                  <Textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Feedback personalizado..." />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">Plano de Ação</label>
+                  <Textarea value={planoAcao} onChange={e => setPlanoAcao(e.target.value)} rows={3} className="text-sm resize-none" placeholder="Próximos passos..." />
+                </div>
+              </div>
+            </div>
+
+            {/* Relatório Final Premium */}
+            <div className="border rounded-xl p-4">
+              <h3 className="font-semibold mb-4">Relatório Final</h3>
+              <PillarReportGenerator
+                menteeId={menteeIdNum}
+                menteeName={mentee?.nome ?? "Mentorado"}
+                pillarId={dbPillarId}
+                pillarName={title ?? `Pilar ${pillarId}`}
+              />
             </div>
           </div>
         )}
