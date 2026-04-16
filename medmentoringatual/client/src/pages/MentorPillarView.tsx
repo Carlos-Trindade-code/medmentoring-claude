@@ -33,6 +33,9 @@ import { ExpenseAnalysis } from "@/components/ExpenseAnalysis";
 import { IvmpAnalysis } from "@/components/IvmpAnalysis";
 import { ScenarioSimulator } from "@/components/ScenarioSimulator";
 import { PricingEditor } from "@/components/PricingEditor";
+import { ProductBuilder } from "@/components/ProductBuilder";
+import { ConsultationProtocol } from "@/components/ConsultationProtocol";
+import { MarketingPromptGenerator } from "@/components/MarketingPromptGenerator";
 
 // ============================================================
 // COMPONENTE PRINCIPAL
@@ -563,6 +566,27 @@ export default function MentorPillarView() {
                   <TrendingUp className="w-4 h-4 text-teal-600" /> Precificação
                 </h3>
                 <PricingEditor menteeId={menteeIdNum} />
+              </div>
+            )}
+
+            {/* Construtor de Produtos — Pilar 2 */}
+            {dbPillarId === 2 && (
+              <div className="border rounded-xl p-4">
+                <ProductBuilder menteeId={menteeIdNum} />
+              </div>
+            )}
+
+            {/* Gerador de Prompt Master — Pilar 6 (comunicação = dbPillarId 6, mas no novo sistema é pilar 5 = dbPillarId 6) */}
+            {dbPillarId === 6 && (
+              <div className="border rounded-xl p-4">
+                <MarketingPromptGenerator menteeId={menteeIdNum} pillarId={dbPillarId} />
+              </div>
+            )}
+
+            {/* Protocolo de Consulta — Pilar 7 (vendas = dbPillarId 7, novo pilar 6) */}
+            {dbPillarId === 7 && (
+              <div className="border rounded-xl p-4">
+                <ConsultationProtocol menteeId={menteeIdNum} />
               </div>
             )}
 
