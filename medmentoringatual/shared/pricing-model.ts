@@ -9,6 +9,7 @@ export interface Service {
   matMed: number;             // Material/Medicamento (R$)
   bonusPercent: number;       // Comissao/bonus (%)
   taxaEquipamento: number;    // Depreciacao equipamento por uso (R$)
+  frequencia?: "mensal" | "trimestral" | "semestral"; // Frequencia de cobrança para pacotes
 }
 
 export interface SimulationParams {
@@ -55,6 +56,8 @@ export interface SimulationResult {
   porServico: ServiceResult[];
 }
 
+const FREQ_MONTHS: Record<string, number> = { mensal: 1, trimestral: 3, semestral: 6 };
+
 // Calculate simulation from params
 export function calculateSimulation(params: SimulationParams): SimulationResult {
   const porServico: ServiceResult[] = [];
@@ -66,7 +69,10 @@ export function calculateSimulation(params: SimulationParams): SimulationResult 
     const qty = params.mixAtendimentos[servico.id] || 0;
     if (qty === 0) continue;
 
-    const faturamento = servico.precoVenda * qty;
+    // Para pacotes recorrentes: qty = nº de pacotes ativos, precoVenda = preço total do pacote
+    // Receita mensal = (precoVenda / meses) * qty
+    const freqMonths = FREQ_MONTHS[servico.frequencia || "mensal"] || 1;
+    const faturamento = (servico.precoVenda / freqMonths) * qty;
     const imposto = faturamento * (servico.impostoPercent / 100);
     const taxaCartao = faturamento * (servico.taxaCartaoPercent / 100);
     const mod = servico.mod * qty;
@@ -75,10 +81,12 @@ export function calculateSimulation(params: SimulationParams): SimulationResult 
     const taxaEquip = servico.taxaEquipamento * qty;
     const lucroBruto = faturamento - imposto - taxaCartao - mod - matMed - bonus - taxaEquip;
     const margemBruta = faturamento > 0 ? (lucroBruto / faturamento) * 100 : 0;
-    const taxaSala = params.taxaSalaHora * servico.duracaoHoras * qty;
+    // Horas e taxa de sala também ajustadas pela frequência
+    const horasPorOcorrencia = servico.duracaoHoras * qty;
+    const horas = horasPorOcorrencia / freqMonths;
+    const taxaSala = params.taxaSalaHora * horas;
     const lucroOp = lucroBruto - taxaSala;
     const margemOp = faturamento > 0 ? (lucroOp / faturamento) * 100 : 0;
-    const horas = servico.duracaoHoras * qty;
 
     porServico.push({
       serviceId: servico.id,

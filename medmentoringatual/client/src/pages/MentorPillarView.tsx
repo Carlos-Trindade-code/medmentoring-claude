@@ -38,6 +38,7 @@ import { ConsultationProtocol } from "@/components/ConsultationProtocol";
 import { MarketingPromptGenerator } from "@/components/MarketingPromptGenerator";
 import { CalendarEditorial } from "@/components/CalendarEditorial";
 import { PPTXGenerator } from "@/components/PPTXGenerator";
+import { ExamPanel } from "@/components/ExamPanel";
 
 // ============================================================
 // COMPONENTE PRINCIPAL
@@ -559,6 +560,9 @@ export default function MentorPillarView() {
                     <TrendingUp className="w-4 h-4 text-teal-600" /> Simulador
                   </h3>
                   <ScenarioSimulator menteeId={menteeIdNum} mode="mentor" />
+                </div>
+                <div className="border rounded-xl p-4">
+                  <ExamPanel menteeId={menteeIdNum} pillarId={dbPillarId} />
                 </div>
               </>
             )}

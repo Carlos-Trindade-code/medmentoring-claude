@@ -36,6 +36,53 @@ const EMPTY_PRODUCT: Product = {
   alinhamentoP1: "",
 };
 
+const SEED_PRODUCTS_NEFRO: Product[] = [
+  {
+    id: `seed_${Date.now()}_1`,
+    nome: "Consulta de Avaliacao Integral",
+    paraQuem: "Paciente novo com doenca renal cronica ou suspeita, hipertensos, diabeticos com comprometimento renal",
+    oQueInclui: "Anamnese detalhada (60min), avaliacao completa de exames, diagnostico de situacao, plano de saude por escrito impresso, orientacoes sobre sinais de alerta, contato para duvidas",
+    formato: "presencial",
+    duracao: "60 min",
+    precoSugerido: "R$ 1.200",
+    logicaClinica: "Primeira consulta precisa ser completa — o paciente precisa ser ouvido e compreendido antes de qualquer conduta. Vai alem da queixa, trata o entorno.",
+    alinhamentoP1: "Causa raiz acima do sintoma. Presenca real. O paciente sai seguro.",
+  },
+  {
+    id: `seed_${Date.now()}_2`,
+    nome: "Acompanhamento Longitudinal",
+    paraQuem: "Renal cronico estagios 2-4, pacientes com multiplas comorbidades que precisam de seguimento continuo",
+    oQueInclui: "Retornos agendados (40min cada) + acesso WhatsApp para duvidas pontuais entre consultas. Trimestral: 3 retornos R$ 2.400 (R$ 800/consulta). Semestral: 6 retornos R$ 4.500 (R$ 750/consulta).",
+    formato: "recorrente",
+    duracao: "40 min por retorno",
+    precoSugerido: "R$ 800/consulta",
+    logicaClinica: "DRC precisa de acompanhamento continuo. Sem recorrencia, o paciente so volta quando piora. Acompanhamento muda desfecho.",
+    alinhamentoP1: "Longitudinalidade acima de volume. Mudar o desfecho exige presenca continua.",
+  },
+  {
+    id: `seed_${Date.now()}_3`,
+    nome: "Check-up Renal Anual",
+    paraQuem: "Pacientes estaveis (DRC 1-2), hipertensos, diabeticos sem doenca renal diagnosticada, historico familiar de DRC",
+    oQueInclui: "Solicitacao de painel de exames padronizado + consulta de avaliacao (60min) + retorno para resultados. Painel: creatinina, TFG, potassio, hemoglobina, albumina, fosforo, PTH, proteinuria.",
+    formato: "presencial",
+    duracao: "60 min + 30 min retorno",
+    precoSugerido: "R$ 1.800 (consulta + retorno)",
+    logicaClinica: "Deteccao precoce de DRC muda prognostico. Estagio 2 tratado e diferente de estagio 4 descoberto tarde.",
+    alinhamentoP1: "Resultado clinico acima de resultado financeiro. Prevencao e a melhor conduta.",
+  },
+  {
+    id: `seed_${Date.now()}_4`,
+    nome: "Acesso Entre Consultas",
+    paraQuem: "Pacientes em acompanhamento longitudinal ativo",
+    oQueInclui: "Canal WhatsApp para duvidas pontuais (ate 2 mensagens). Questoes complexas = agendar retorno. Incluso no Acompanhamento Longitudinal.",
+    formato: "online",
+    duracao: "Sob demanda",
+    precoSugerido: "Incluso no Acompanhamento",
+    logicaClinica: "Paciente precisa se sentir seguro entre consultas. Acesso rapido reduz idas desnecessarias a emergencia.",
+    alinhamentoP1: "Porto seguro. Presenca real — nao de conveniencia.",
+  },
+];
+
 export function ProductBuilder({ menteeId }: { menteeId: number }) {
   const { data: simData, refetch } = trpc.mentor.getSimulationData.useQuery({ menteeId });
   const saveMutation = trpc.mentor.saveSimulationData.useMutation({
@@ -138,9 +185,14 @@ export function ProductBuilder({ menteeId }: { menteeId: number }) {
         <div className="text-center py-8 bg-muted/20 rounded-xl">
           <Package className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">Nenhum produto cadastrado.</p>
-          <Button onClick={addProduct} size="sm" variant="outline" className="mt-3 gap-1.5">
-            <Plus className="w-3.5 h-3.5" /> Criar primeiro produto
-          </Button>
+          <div className="flex gap-2 justify-center mt-3">
+            <Button onClick={addProduct} size="sm" variant="outline" className="gap-1.5">
+              <Plus className="w-3.5 h-3.5" /> Criar produto vazio
+            </Button>
+            <Button onClick={() => setProducts(SEED_PRODUCTS_NEFRO.map(p => ({ ...p, id: `prod_${Date.now()}_${Math.random().toString(36).slice(2)}` })))} size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Package className="w-3.5 h-3.5" /> Modelo Nefrologista
+            </Button>
+          </div>
         </div>
       )}
 

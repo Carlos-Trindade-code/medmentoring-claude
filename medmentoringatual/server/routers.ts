@@ -904,6 +904,7 @@ const mentorRouter = router({
         matMed: z.number(),
         bonusPercent: z.number(),
         taxaEquipamento: z.number(),
+        frequencia: z.enum(["mensal", "trimestral", "semestral"]).optional(),
       })),
       mixAtendimentos: z.record(z.string(), z.number()),
       params: z.object({
@@ -1386,6 +1387,7 @@ Seja específico, breve e útil. Máximo 2-3 frases.`,
         taxaEquipamento: z.number(),
         rateioPercent: z.number().optional(), // rateio medico/clinica
         quantidadeMes: z.number().optional(), // qtd atendimentos/mês (simulador)
+        frequencia: z.enum(["mensal", "trimestral", "semestral"]).optional(),
       })),
     }))
     .mutation(async ({ ctx, input }) => {

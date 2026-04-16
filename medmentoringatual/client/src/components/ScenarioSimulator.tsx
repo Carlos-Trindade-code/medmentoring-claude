@@ -812,6 +812,7 @@ function ServiceTable({
                 <TableHead className="min-w-[140px]">Servico</TableHead>
                 <TableHead className="text-center min-w-[70px]">Duracao(h)</TableHead>
                 <TableHead className="text-right min-w-[90px]">Preco(R$)</TableHead>
+                <TableHead className="text-center min-w-[80px]">Freq.</TableHead>
                 <TableHead className="text-center min-w-[70px]">Imposto%</TableHead>
                 <TableHead className="text-center min-w-[70px]">Cartao%</TableHead>
                 <TableHead className="text-right min-w-[80px]">MOD(R$)</TableHead>
@@ -873,6 +874,26 @@ function ServiceTable({
                         />
                       ) : (
                         <span className="text-sm">{formatBRL(s.precoVenda)}</span>
+                      )}
+                    </TableCell>
+                    {/* Frequencia */}
+                    <TableCell className="text-center">
+                      {editable ? (
+                        <select
+                          value={s.frequencia || "mensal"}
+                          onChange={(e) =>
+                            onUpdateService(s.id, "frequencia", e.target.value)
+                          }
+                          className="h-7 text-xs text-center w-20 mx-auto rounded border px-1"
+                        >
+                          <option value="mensal">Mensal</option>
+                          <option value="trimestral">Trim.</option>
+                          <option value="semestral">Sem.</option>
+                        </select>
+                      ) : (
+                        <span className="text-xs">
+                          {s.frequencia === "trimestral" ? "Trim." : s.frequencia === "semestral" ? "Sem." : "Mensal"}
+                        </span>
                       )}
                     </TableCell>
                     {/* Imposto */}
@@ -1031,7 +1052,7 @@ function ServiceTable({
             </TableBody>
             <TableFooter>
               <TableRow className="bg-[#1e3a5f]/5">
-                <TableCell colSpan={9} className="font-bold text-foreground">
+                <TableCell colSpan={10} className="font-bold text-foreground">
                   Total
                 </TableCell>
                 <TableCell className="text-center font-bold">
