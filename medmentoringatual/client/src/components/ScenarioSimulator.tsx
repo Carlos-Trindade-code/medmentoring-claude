@@ -722,9 +722,9 @@ function ServiceTable({
 }) {
   // Get per-service results for display
   const serviceResults = useMemo(() => {
-    const map: Record<string, { lucroBruto: number; margemBruta: number }> = {};
+    const map: Record<string, { lucroBruto: number; margemBruta: number; lucroOperacional: number; margemOperacional: number; taxaSala: number }> = {};
     for (const sr of result.porServico) {
-      map[sr.serviceId] = { lucroBruto: sr.lucroBruto, margemBruta: sr.margemBruta };
+      map[sr.serviceId] = { lucroBruto: sr.lucroBruto, margemBruta: sr.margemBruta, lucroOperacional: sr.lucroOperacional, margemOperacional: sr.margemOperacional, taxaSala: sr.taxaSala };
     }
     return map;
   }, [result]);
@@ -930,31 +930,31 @@ function ServiceTable({
                         <span className="text-sm font-semibold">{qty}</span>
                       )}
                     </TableCell>
-                    {/* Lucro por consulta (calculated) */}
+                    {/* Lucro por consulta — inclui taxa de sala */}
                     <TableCell className="text-right">
-                      <span className={`text-sm font-semibold ${(sr?.lucroBruto ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                        {sr && qty > 0 ? formatBRL(sr.lucroBruto / qty) : "-"}
+                      <span className={`text-sm font-semibold ${(sr?.lucroOperacional ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                        {sr && qty > 0 ? formatBRL(sr.lucroOperacional / qty) : "-"}
                       </span>
                     </TableCell>
-                    {/* Lucro mensal (calculated) */}
+                    {/* Lucro mensal — inclui taxa de sala */}
                     <TableCell className="text-right">
-                      <span className={`text-sm font-semibold ${(sr?.lucroBruto ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                        {sr ? formatBRL(sr.lucroBruto) : "-"}
+                      <span className={`text-sm font-semibold ${(sr?.lucroOperacional ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                        {sr ? formatBRL(sr.lucroOperacional) : "-"}
                       </span>
                     </TableCell>
-                    {/* Margem (calculated) */}
+                    {/* Margem operacional (inclui taxa de sala) */}
                     <TableCell className="text-center">
                       <Badge
                         variant="secondary"
                         className={`text-xs ${
-                          (sr?.margemBruta ?? 0) >= 50
+                          (sr?.margemOperacional ?? 0) >= 50
                             ? "bg-emerald-100 text-emerald-800"
-                            : (sr?.margemBruta ?? 0) >= 30
+                            : (sr?.margemOperacional ?? 0) >= 30
                               ? "bg-amber-100 text-amber-800"
                               : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {sr ? formatPercent(sr.margemBruta) : "-"}
+                        {sr ? formatPercent(sr.margemOperacional) : "-"}
                       </Badge>
                     </TableCell>
                     {/* Remove */}
@@ -986,12 +986,12 @@ function ServiceTable({
                   —
                 </TableCell>
                 <TableCell className="text-right font-bold text-emerald-700">
-                  {formatBRL(result.porServico.reduce((s, r) => s + r.lucroBruto, 0))}
+                  {formatBRL(result.porServico.reduce((s, r) => s + r.lucroOperacional, 0))}
                 </TableCell>
                 <TableCell className="text-center font-bold">
                   {result.faturamentoBrutoTotal > 0
                     ? formatPercent(
-                        (result.porServico.reduce((s, r) => s + r.lucroBruto, 0) /
+                        (result.porServico.reduce((s, r) => s + r.lucroOperacional, 0) /
                           result.faturamentoBrutoTotal) *
                           100
                       )
