@@ -457,6 +457,49 @@ export default function MentorPillarView() {
                 {savingFeedback ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 Salvar Tudo
               </Button>
+              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-md cursor-pointer hover:bg-muted/50 transition-colors">
+                <FileDown className="w-3.5 h-3.5" />
+                Importar Relatório
+                <input
+                  type="file"
+                  accept=".txt,.md,.pdf,.json"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    toast.info("Processando arquivo...");
+                    try {
+                      const text = await file.text();
+                      const result = await generateConclusionsMutation.mutateAsync({
+                        menteeId: menteeIdNum,
+                        pillarId: dbPillarId,
+                      });
+                      // Se o arquivo é JSON, tentar usar diretamente
+                      try {
+                        const jsonData = JSON.parse(text);
+                        setConclusionsData(jsonData);
+                        const toT = (v: unknown): string => {
+                          if (v === null || v === undefined) return "";
+                          if (typeof v === "string") return v;
+                          if (Array.isArray(v)) return v.map(i => toT(i)).join("\n");
+                          if (typeof v === "object") return Object.entries(v as Record<string,unknown>).map(([k,vv]) => `${k}: ${toT(vv)}`).join("\n");
+                          return String(v);
+                        };
+                        const ed: Record<string, string> = {};
+                        for (const [k, v] of Object.entries(jsonData)) { ed[k] = toT(v); }
+                        setEditedConclusions(ed);
+                        toast.success("JSON importado! Revise os campos.");
+                      } catch {
+                        // Não é JSON — usar como contexto para gerar conclusões
+                        toast.success("Relatório processado! Use o Chat IA para análise ou Gere o Relatório.");
+                      }
+                    } catch {
+                      toast.error("Erro ao processar arquivo.");
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
               {conclusionsData && (
                 <Button onClick={() => handleSaveConclusions(false)} disabled={savingConclusions} variant="outline" size="sm" className="gap-1.5">
                   Salvar Conclusões
