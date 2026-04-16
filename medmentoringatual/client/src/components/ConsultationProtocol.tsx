@@ -2,8 +2,10 @@
  * ConsultationProtocol — Construtor de Roteiro de Consulta
  * Pilar 6: Monta o protocolo de 6 fases personalizado
  * Cada fase tem: objetivo, duração, frases-chave, o que não fazer
+ * Persiste via tRPC saveToolData (pillarFeedback.toolDataJson)
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,9 +30,27 @@ const DEFAULT_PHASES: Phase[] = [
   { id: 6, nome: "Decisao sobre Seguimento", objetivo: "Recomendar acompanhamento como conduta clinica", duracaoMinutos: 10, frasesChave: "", oQueNaoFazer: "Nao apresentar como produto. E conduta clinica, nao venda." },
 ];
 
-export function ConsultationProtocol({ menteeId, onSave }: { menteeId: number; onSave?: (phases: Phase[]) => void }) {
+export function ConsultationProtocol({ menteeId, pillarId }: { menteeId: number; pillarId: number }) {
   const [phases, setPhases] = useState<Phase[]>(DEFAULT_PHASES);
   const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const { data: toolData } = trpc.mentor.getToolData.useQuery({ menteeId, pillarId });
+  const saveMutation = trpc.mentor.saveToolData.useMutation({
+    onSuccess: () => toast.success("Protocolo salvo!"),
+    onError: (e) => toast.error(e.message || "Erro ao salvar protocolo"),
+  });
+
+  // Load saved phases from backend
+  useEffect(() => {
+    if (toolData && !loaded) {
+      const saved = toolData.consultationProtocol as Phase[] | undefined;
+      if (saved && Array.isArray(saved) && saved.length > 0) {
+        setPhases(saved);
+      }
+      setLoaded(true);
+    }
+  }, [toolData, loaded]);
 
   const updatePhase = useCallback((id: number, field: keyof Phase, value: string | number) => {
     setPhases(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
@@ -41,12 +61,15 @@ export function ConsultationProtocol({ menteeId, onSave }: { menteeId: number; o
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
-      onSave?.(phases);
-      toast.success("Protocolo salvo!");
+      await saveMutation.mutateAsync({
+        menteeId,
+        pillarId,
+        toolData: { consultationProtocol: phases },
+      });
     } finally {
       setSaving(false);
     }
-  }, [phases, onSave]);
+  }, [phases, menteeId, pillarId, saveMutation]);
 
   return (
     <div className="space-y-4">

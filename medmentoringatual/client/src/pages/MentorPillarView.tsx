@@ -36,6 +36,8 @@ import { PricingEditor } from "@/components/PricingEditor";
 import { ProductBuilder } from "@/components/ProductBuilder";
 import { ConsultationProtocol } from "@/components/ConsultationProtocol";
 import { MarketingPromptGenerator } from "@/components/MarketingPromptGenerator";
+import { CalendarEditorial } from "@/components/CalendarEditorial";
+import { PPTXGenerator } from "@/components/PPTXGenerator";
 
 // ============================================================
 // COMPONENTE PRINCIPAL
@@ -576,18 +578,26 @@ export default function MentorPillarView() {
               </div>
             )}
 
-            {/* Gerador de Prompt Master — Pilar 6 (comunicação = dbPillarId 6, mas no novo sistema é pilar 5 = dbPillarId 6) */}
+            {/* Gerador de Prompt Master + Calendário Editorial — Pilar 5 (comunicação = dbPillarId 6) */}
             {dbPillarId === 6 && (
-              <div className="border rounded-xl p-4">
-                <MarketingPromptGenerator menteeId={menteeIdNum} pillarId={dbPillarId} />
-              </div>
+              <>
+                <div className="border rounded-xl p-4">
+                  <MarketingPromptGenerator menteeId={menteeIdNum} pillarId={dbPillarId} />
+                </div>
+                <div className="border rounded-xl p-4">
+                  <CalendarEditorial menteeId={menteeIdNum} pillarId={dbPillarId} />
+                </div>
+              </>
             )}
 
-            {/* Protocolo de Consulta — Pilar 7 (vendas = dbPillarId 7, novo pilar 6) */}
+            {/* Protocolo de Consulta + PPTX — Pilar 6 (vendas = dbPillarId 7) */}
             {dbPillarId === 7 && (
-              <div className="border rounded-xl p-4">
-                <ConsultationProtocol menteeId={menteeIdNum} />
-              </div>
+              <>
+                <div className="border rounded-xl p-4">
+                  <ConsultationProtocol menteeId={menteeIdNum} pillarId={dbPillarId} />
+                </div>
+                <PPTXGenerator menteeId={menteeIdNum} />
+              </>
             )}
 
             {/* Relatório do Pilar */}

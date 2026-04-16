@@ -840,6 +840,7 @@ export async function upsertPillarFeedback(
     aiAnalysisGeneratedAt: Date;
     aiDiagnosis: unknown;
     aiDiagnosisGeneratedAt: Date;
+    toolDataJson: unknown;
   }>
 ) {
   const db = await getDb();

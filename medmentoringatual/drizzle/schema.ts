@@ -375,6 +375,8 @@ export const pillarFeedback = mysqlTable("pillar_feedback", {
   // IA — Diagnóstico individualizado por pilar (visível apenas para o mentor)
   aiDiagnosis: json("aiDiagnosis"),
   aiDiagnosisGeneratedAt: timestamp("aiDiagnosisGeneratedAt"),
+  // Dados genéricos de ferramentas do pilar (protocolo consulta, calendário editorial, etc.)
+  toolDataJson: json("toolDataJson"),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type PillarFeedback = typeof pillarFeedback.$inferSelect;

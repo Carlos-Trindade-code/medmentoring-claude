@@ -14,6 +14,7 @@ import { pdfRouter } from "../pdfRouter";
 import { excelRouter } from "../excelRouter";
 import { reportPdfRouter } from "../reportPdfRouter";
 import { exportRouter } from "../exportRouter";
+import { pptxRouter } from "../pptxRouter";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -58,6 +59,8 @@ async function startServer() {
   app.use(excelRouter);
   // Relatório Final Premium — download PDF via Puppeteer
   app.use(reportPdfRouter);
+  // PPTX generation for consultation protocol
+  app.use(pptxRouter);
   // Data export for migration
   app.use(exportRouter);
   // tRPC API

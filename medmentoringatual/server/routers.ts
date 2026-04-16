@@ -960,6 +960,33 @@ const mentorRouter = router({
       if (!data || !data.params) return null;
       return calculateTarget(data.params.custoFixoTotal, data.params.custosVariaveisPercent, input.metaLucro);
     }),
+
+  // Tool data — salva/carrega dados de ferramentas por pilar (protocolo consulta, etc.)
+  saveToolData: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      pillarId: z.number(),
+      toolData: z.any(),
+    }))
+    .mutation(async ({ input }) => {
+      const existing = await getPillarFeedback(input.menteeId, input.pillarId);
+      const current = (existing?.toolDataJson as Record<string, unknown>) || {};
+      const merged = { ...current, ...input.toolData };
+      await upsertPillarFeedback(input.menteeId, input.pillarId, {
+        toolDataJson: merged,
+      });
+      return { success: true };
+    }),
+
+  getToolData: adminProcedure
+    .input(z.object({
+      menteeId: z.number(),
+      pillarId: z.number(),
+    }))
+    .query(async ({ input }) => {
+      const existing = await getPillarFeedback(input.menteeId, input.pillarId);
+      return (existing?.toolDataJson as Record<string, unknown>) || {};
+    }),
 });
 // ============================================================
 // MENTORADO ROUTER — Autenticado via cookie mentee_session
