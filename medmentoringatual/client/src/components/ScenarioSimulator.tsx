@@ -556,6 +556,61 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
       {/* ============================== */}
       <KpiCards result={result} outrasReceitas={outrasReceitas} />
 
+      {/* Detalhamento do cálculo */}
+      <Card className="border-blue-200 bg-blue-50/30">
+        <CardContent className="pt-4 pb-3">
+          <h4 className="text-xs font-semibold text-blue-800 uppercase tracking-wide mb-3">Como chegamos neste resultado</h4>
+          <div className="space-y-1.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-foreground font-medium">Faturamento Bruto</span>
+              <span className="font-semibold text-foreground">{formatBRL(result.faturamentoBrutoTotal)}</span>
+            </div>
+            {result.porServico.reduce((s, r) => s + r.imposto, 0) > 0 && (
+              <div className="flex justify-between text-red-600">
+                <span>- Impostos ({result.porServico[0] ? ((result.porServico[0].imposto / result.porServico[0].faturamentoBruto) * 100).toFixed(0) + "%" : ""})</span>
+                <span>-{formatBRL(result.porServico.reduce((s, r) => s + r.imposto, 0))}</span>
+              </div>
+            )}
+            {result.porServico.reduce((s, r) => s + r.taxaCartao, 0) > 0 && (
+              <div className="flex justify-between text-red-600">
+                <span>- Taxa Cartao</span>
+                <span>-{formatBRL(result.porServico.reduce((s, r) => s + r.taxaCartao, 0))}</span>
+              </div>
+            )}
+            {result.porServico.reduce((s, r) => s + r.mod + r.matMed + r.bonus + r.taxaEquipamento, 0) > 0 && (
+              <div className="flex justify-between text-red-600">
+                <span>- Custos diretos (MOD + materiais + bonus + equip)</span>
+                <span>-{formatBRL(result.porServico.reduce((s, r) => s + r.mod + r.matMed + r.bonus + r.taxaEquipamento, 0))}</span>
+              </div>
+            )}
+            {result.porServico.reduce((s, r) => s + r.taxaSala, 0) > 0 && (
+              <div className="flex justify-between text-red-600">
+                <span>- Taxa de Sala ({formatBRL(result.porServico[0]?.taxaSala / (result.porServico[0]?.quantidade || 1))}/consulta)</span>
+                <span>-{formatBRL(result.porServico.reduce((s, r) => s + r.taxaSala, 0))}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-red-600">
+              <span>- Custo Fixo Mensal</span>
+              <span>-{formatBRL(result.custoFixoTotal)}</span>
+            </div>
+            {outrasReceitas > 0 && (
+              <div className="flex justify-between text-emerald-600">
+                <span>+ Outras Receitas</span>
+                <span>+{formatBRL(outrasReceitas)}</span>
+              </div>
+            )}
+            <div className="border-t border-blue-200 pt-1.5 mt-1.5 flex justify-between font-bold">
+              <span className={result.lucroLiquido + outrasReceitas >= 0 ? "text-emerald-700" : "text-red-700"}>
+                = LUCRO LIQUIDO
+              </span>
+              <span className={result.lucroLiquido + outrasReceitas >= 0 ? "text-emerald-700" : "text-red-700"}>
+                {formatBRL(result.lucroLiquido + outrasReceitas)}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* ============================== */}
       {/* SECAO 4: MODO META             */}
       {/* ============================== */}
