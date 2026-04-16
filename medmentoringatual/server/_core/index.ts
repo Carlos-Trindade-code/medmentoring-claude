@@ -15,6 +15,7 @@ import { excelRouter } from "../excelRouter";
 import { reportPdfRouter } from "../reportPdfRouter";
 import { exportRouter } from "../exportRouter";
 import { pptxRouter } from "../pptxRouter";
+import { seedLuisRouter } from "../seedLuis";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -61,6 +62,8 @@ async function startServer() {
   app.use(reportPdfRouter);
   // PPTX generation for consultation protocol
   app.use(pptxRouter);
+  // Seed Dr. Luis data
+  app.use(seedLuisRouter);
   // Data export for migration
   app.use(exportRouter);
   // tRPC API
