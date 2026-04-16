@@ -132,7 +132,13 @@ function formatPercent(value: number): string {
 // COMPONENTE PRINCIPAL
 // ============================================================
 export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
-  const [impactoRevealed, setImpactoRevealed] = useState(false);
+  const [impactoRevealed, setImpactoRevealed] = useState(() => {
+    try { return localStorage.getItem(`impacto_${menteeId}`) === "true"; } catch { return false; }
+  });
+  const revealImpacto = () => {
+    setImpactoRevealed(true);
+    try { localStorage.setItem(`impacto_${menteeId}`, "true"); } catch {}
+  };
   const { data: analysisData, isLoading } = trpc.mentor.getExpenseAnalysis.useQuery({ menteeId });
 
   // Extrair dados da query
@@ -676,7 +682,7 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
               return !impactoRevealed ? (
                 <div className="mt-4 text-center">
                   <Button
-                    onClick={() => setImpactoRevealed(true)}
+                    onClick={revealImpacto}
                     className="bg-red-600 hover:bg-red-700 text-white gap-2"
                   >
                     <AlertTriangle className="w-4 h-4" />
