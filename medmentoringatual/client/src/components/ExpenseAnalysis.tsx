@@ -697,7 +697,18 @@ export function ExpenseAnalysis({ menteeId }: ExpenseAnalysisProps) {
                       <p className="text-sm font-semibold text-red-800">Impacto total estimado dos custos ocultos</p>
                       <p className="text-xs text-red-600 mt-0.5">Valor que o mentorado pode estar deixando de contabilizar por mes</p>
                     </div>
-                    <p className="text-xl font-bold text-red-700">{formatBRL(totalImpacto)}/mes</p>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-red-700">{formatBRL(totalImpacto)}/mes</p>
+                      <button
+                        onClick={() => {
+                          setImpactoRevealed(false);
+                          try { localStorage.removeItem(`impacto_${menteeId}`); } catch {}
+                        }}
+                        className="text-xs text-red-400 hover:text-red-600 mt-1 underline"
+                      >
+                        Recalcular
+                      </button>
+                    </div>
                   </div>
                   <p className="text-xs text-red-500 mt-2">
                     Isso representa {kpis.custoFixoTotal > 0 ? formatPercent((totalImpacto / kpis.custoFixoTotal) * 100) : "—"} sobre o custo fixo declarado de {formatBRL(kpis.custoFixoTotal)}
