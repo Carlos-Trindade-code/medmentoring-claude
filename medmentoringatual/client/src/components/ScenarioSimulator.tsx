@@ -7,7 +7,7 @@
  *
  * Calculos feitos client-side via calculateSimulation() para updates em tempo real.
  */
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import {
   Card,
@@ -775,14 +775,19 @@ function ServiceTable({
   onAddService: () => void;
   onRemoveService: (id: string) => void;
 }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   // Get per-service results for display
   const serviceResults = useMemo(() => {
-    const map: Record<string, { lucroBruto: number; margemBruta: number; lucroOperacional: number; margemOperacional: number; taxaSala: number }> = {};
+    const map: Record<string, { lucroBruto: number; margemBruta: number; lucroOperacional: number; margemOperacional: number; taxaSala: number; faturamentoBruto: number }> = {};
     for (const sr of result.porServico) {
-      map[sr.serviceId] = { lucroBruto: sr.lucroBruto, margemBruta: sr.margemBruta, lucroOperacional: sr.lucroOperacional, margemOperacional: sr.margemOperacional, taxaSala: sr.taxaSala };
+      map[sr.serviceId] = { lucroBruto: sr.lucroBruto, margemBruta: sr.margemBruta, lucroOperacional: sr.lucroOperacional, margemOperacional: sr.margemOperacional, taxaSala: sr.taxaSala, faturamentoBruto: sr.faturamentoBruto };
     }
     return map;
   }, [result]);
+
+  const FREQ_LABEL: Record<string, string> = { mensal: "Mensal", trimestral: "Trim.", semestral: "Sem." };
+  const FREQ_MONTHS: Record<string, number> = { mensal: 1, trimestral: 3, semestral: 6 };
 
   return (
     <Card>
@@ -794,6 +799,11 @@ function ServiceTable({
               {editable
                 ? "Edite servicos, precos e quantidades para simular cenarios"
                 : "Servicos configurados pelo mentor"}
+              {taxaSalaHora > 0 && (
+                <span className="ml-2 text-amber-700 font-medium">
+                  | Taxa sala: {formatBRL(taxaSalaHora)}/h
+                </span>
+              )}
             </CardDescription>
           </div>
           {editable && (
@@ -805,59 +815,44 @@ function ServiceTable({
         </div>
       </CardHeader>
       <CardContent className="px-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-[#1e3a5f]/5">
-                <TableHead className="min-w-[140px]">Servico</TableHead>
-                <TableHead className="text-center min-w-[70px]">Duracao(h)</TableHead>
-                <TableHead className="text-right min-w-[90px]">Preco(R$)</TableHead>
-                <TableHead className="text-center min-w-[80px]">Freq.</TableHead>
-                <TableHead className="text-center min-w-[70px]">Imposto%</TableHead>
-                <TableHead className="text-center min-w-[70px]">Cartao%</TableHead>
-                <TableHead className="text-right min-w-[80px]">MOD(R$)</TableHead>
-                <TableHead className="text-right min-w-[90px]">Mat/Med(R$)</TableHead>
-                <TableHead className="text-center min-w-[70px]">Bonus%</TableHead>
-                <TableHead className="text-right min-w-[80px]">Equip(R$)</TableHead>
-                <TableHead className="text-center min-w-[70px]">Qtd/Mes</TableHead>
-                <TableHead className="text-right min-w-[100px]">Lucro/Consulta</TableHead>
-                <TableHead className="text-right min-w-[100px]">Lucro/Mes</TableHead>
-                <TableHead className="text-center min-w-[70px]">Margem%</TableHead>
-                {editable && <TableHead className="w-[50px]"></TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {servicos.map((s) => {
-                const qty = mixAtendimentos[s.id] ?? 0;
-                const sr = serviceResults[s.id];
-                return (
-                  <TableRow key={s.id}>
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-[#1e3a5f]/5">
+              <TableHead className="min-w-[180px]">Servico</TableHead>
+              <TableHead className="text-right min-w-[100px]">Preco(R$)</TableHead>
+              <TableHead className="text-center min-w-[70px]">Freq.</TableHead>
+              <TableHead className="text-center min-w-[70px]">Qtd/Mes</TableHead>
+              <TableHead className="text-right min-w-[110px]">Lucro/Mes</TableHead>
+              <TableHead className="text-center min-w-[70px]">Margem</TableHead>
+              {editable && <TableHead className="w-[50px]"></TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {servicos.map((s) => {
+              const qty = mixAtendimentos[s.id] ?? 0;
+              const sr = serviceResults[s.id];
+              const expanded = expandedId === s.id;
+              const freq = s.frequencia || "mensal";
+              const freqMonths = FREQ_MONTHS[freq] || 1;
+              const monthlyPrice = s.precoVenda / freqMonths;
+
+              return (
+                <React.Fragment key={s.id}>
+                  <TableRow
+                    className={`cursor-pointer hover:bg-slate-50 ${expanded ? "bg-slate-50" : ""}`}
+                    onClick={() => setExpandedId(expanded ? null : s.id)}
+                  >
                     {/* Nome */}
                     <TableCell>
                       {editable ? (
                         <Input
                           value={s.nome}
                           onChange={(e) => onUpdateService(s.id, "nome", e.target.value)}
-                          className="h-7 text-xs min-w-[120px]"
+                          className="h-7 text-xs"
+                          onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
                         <span className="text-sm font-medium">{s.nome}</span>
-                      )}
-                    </TableCell>
-                    {/* Duracao */}
-                    <TableCell className="text-center">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.duracaoHoras}
-                          step={0.5}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "duracaoHoras", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-center w-16 mx-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{s.duracaoHoras}</span>
                       )}
                     </TableCell>
                     {/* Preco */}
@@ -870,129 +865,34 @@ function ServiceTable({
                           onChange={(e) =>
                             onUpdateService(s.id, "precoVenda", parseFloat(e.target.value) || 0)
                           }
-                          className="h-7 text-xs text-right w-20 ml-auto"
+                          className="h-7 text-xs text-right w-24 ml-auto"
+                          onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
                         <span className="text-sm">{formatBRL(s.precoVenda)}</span>
                       )}
+                      {freqMonths > 1 && (
+                        <div className="text-[10px] text-muted-foreground">{formatBRL(monthlyPrice)}/mes</div>
+                      )}
                     </TableCell>
-                    {/* Frequencia */}
+                    {/* Freq */}
                     <TableCell className="text-center">
                       {editable ? (
                         <select
-                          value={s.frequencia || "mensal"}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "frequencia", e.target.value)
-                          }
+                          value={freq}
+                          onChange={(e) => onUpdateService(s.id, "frequencia", e.target.value)}
                           className="h-7 text-xs text-center w-20 mx-auto rounded border px-1"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <option value="mensal">Mensal</option>
                           <option value="trimestral">Trim.</option>
                           <option value="semestral">Sem.</option>
                         </select>
                       ) : (
-                        <span className="text-xs">
-                          {s.frequencia === "trimestral" ? "Trim." : s.frequencia === "semestral" ? "Sem." : "Mensal"}
-                        </span>
+                        <span className="text-xs">{FREQ_LABEL[freq] || "Mensal"}</span>
                       )}
                     </TableCell>
-                    {/* Imposto */}
-                    <TableCell className="text-center">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.impostoPercent}
-                          step={0.5}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "impostoPercent", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-center w-16 mx-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{formatPercent(s.impostoPercent)}</span>
-                      )}
-                    </TableCell>
-                    {/* Cartao */}
-                    <TableCell className="text-center">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.taxaCartaoPercent}
-                          step={0.5}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "taxaCartaoPercent", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-center w-16 mx-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{formatPercent(s.taxaCartaoPercent)}</span>
-                      )}
-                    </TableCell>
-                    {/* MOD */}
-                    <TableCell className="text-right">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.mod}
-                          step={10}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "mod", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-right w-20 ml-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{formatBRL(s.mod)}</span>
-                      )}
-                    </TableCell>
-                    {/* MatMed */}
-                    <TableCell className="text-right">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.matMed}
-                          step={10}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "matMed", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-right w-20 ml-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{formatBRL(s.matMed)}</span>
-                      )}
-                    </TableCell>
-                    {/* Bonus */}
-                    <TableCell className="text-center">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.bonusPercent}
-                          step={0.5}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "bonusPercent", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-center w-16 mx-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{formatPercent(s.bonusPercent)}</span>
-                      )}
-                    </TableCell>
-                    {/* Equipamento */}
-                    <TableCell className="text-right">
-                      {editable ? (
-                        <Input
-                          type="number"
-                          value={s.taxaEquipamento}
-                          step={10}
-                          onChange={(e) =>
-                            onUpdateService(s.id, "taxaEquipamento", parseFloat(e.target.value) || 0)
-                          }
-                          className="h-7 text-xs text-right w-20 ml-auto"
-                        />
-                      ) : (
-                        <span className="text-sm">{formatBRL(s.taxaEquipamento)}</span>
-                      )}
-                    </TableCell>
-                    {/* Qtd/Mes */}
+                    {/* Qtd */}
                     <TableCell className="text-center">
                       {editable ? (
                         <Input
@@ -1001,24 +901,22 @@ function ServiceTable({
                           step={1}
                           onChange={(e) => onUpdateMix(s.id, parseInt(e.target.value) || 0)}
                           className="h-7 text-xs text-center w-16 mx-auto font-semibold"
+                          onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
                         <span className="text-sm font-semibold">{qty}</span>
                       )}
                     </TableCell>
-                    {/* Lucro por consulta — inclui taxa de sala */}
-                    <TableCell className="text-right">
-                      <span className={`text-sm font-semibold ${(sr?.lucroOperacional ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                        {sr && qty > 0 ? formatBRL(sr.lucroOperacional / qty) : "-"}
-                      </span>
-                    </TableCell>
-                    {/* Lucro mensal — inclui taxa de sala */}
+                    {/* Lucro/Mes */}
                     <TableCell className="text-right">
                       <span className={`text-sm font-semibold ${(sr?.lucroOperacional ?? 0) >= 0 ? "text-emerald-700" : "text-red-600"}`}>
                         {sr ? formatBRL(sr.lucroOperacional) : "-"}
                       </span>
+                      {sr && qty > 0 && (
+                        <div className="text-[10px] text-muted-foreground">{formatBRL(sr.lucroOperacional / qty)}/un</div>
+                      )}
                     </TableCell>
-                    {/* Margem operacional (inclui taxa de sala) */}
+                    {/* Margem */}
                     <TableCell className="text-center">
                       <Badge
                         variant="secondary"
@@ -1040,44 +938,98 @@ function ServiceTable({
                           variant="ghost"
                           size="sm"
                           className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => onRemoveService(s.id)}
+                          onClick={(e) => { e.stopPropagation(); onRemoveService(s.id); }}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </TableCell>
                     )}
                   </TableRow>
-                );
-              })}
-            </TableBody>
-            <TableFooter>
-              <TableRow className="bg-[#1e3a5f]/5">
-                <TableCell colSpan={10} className="font-bold text-foreground">
-                  Total
-                </TableCell>
-                <TableCell className="text-center font-bold">
-                  {Object.values(mixAtendimentos).reduce((s, v) => s + v, 0)}
-                </TableCell>
-                <TableCell className="text-right font-bold text-muted-foreground text-xs">
-                  —
-                </TableCell>
-                <TableCell className="text-right font-bold text-emerald-700">
-                  {formatBRL(result.porServico.reduce((s, r) => s + r.lucroOperacional, 0))}
-                </TableCell>
-                <TableCell className="text-center font-bold">
-                  {result.faturamentoBrutoTotal > 0
-                    ? formatPercent(
-                        (result.porServico.reduce((s, r) => s + r.lucroOperacional, 0) /
-                          result.faturamentoBrutoTotal) *
-                          100
-                      )
-                    : "-"}
-                </TableCell>
-                {editable && <TableCell></TableCell>}
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </div>
+                  {/* Detalhes expansíveis */}
+                  {expanded && (
+                    <TableRow className="bg-slate-50/80">
+                      <TableCell colSpan={editable ? 7 : 6} className="py-3">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs px-2">
+                          <div>
+                            <label className="text-muted-foreground block mb-1">Duracao (h)</label>
+                            {editable ? (
+                              <Input type="number" value={s.duracaoHoras} step={0.5} onChange={(e) => onUpdateService(s.id, "duracaoHoras", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{s.duracaoHoras}h</span>}
+                          </div>
+                          <div>
+                            <label className="text-muted-foreground block mb-1">Imposto %</label>
+                            {editable ? (
+                              <Input type="number" value={s.impostoPercent} step={0.5} onChange={(e) => onUpdateService(s.id, "impostoPercent", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{formatPercent(s.impostoPercent)}</span>}
+                          </div>
+                          <div>
+                            <label className="text-muted-foreground block mb-1">Cartao %</label>
+                            {editable ? (
+                              <Input type="number" value={s.taxaCartaoPercent} step={0.5} onChange={(e) => onUpdateService(s.id, "taxaCartaoPercent", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{formatPercent(s.taxaCartaoPercent)}</span>}
+                          </div>
+                          <div>
+                            <label className="text-muted-foreground block mb-1">MOD (R$)</label>
+                            {editable ? (
+                              <Input type="number" value={s.mod} step={10} onChange={(e) => onUpdateService(s.id, "mod", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{formatBRL(s.mod)}</span>}
+                          </div>
+                          <div>
+                            <label className="text-muted-foreground block mb-1">Mat/Med (R$)</label>
+                            {editable ? (
+                              <Input type="number" value={s.matMed} step={10} onChange={(e) => onUpdateService(s.id, "matMed", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{formatBRL(s.matMed)}</span>}
+                          </div>
+                          <div>
+                            <label className="text-muted-foreground block mb-1">Bonus %</label>
+                            {editable ? (
+                              <Input type="number" value={s.bonusPercent} step={0.5} onChange={(e) => onUpdateService(s.id, "bonusPercent", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{formatPercent(s.bonusPercent)}</span>}
+                          </div>
+                          <div>
+                            <label className="text-muted-foreground block mb-1">Equip. (R$)</label>
+                            {editable ? (
+                              <Input type="number" value={s.taxaEquipamento} step={10} onChange={(e) => onUpdateService(s.id, "taxaEquipamento", parseFloat(e.target.value) || 0)} className="h-7 text-xs w-20" />
+                            ) : <span>{formatBRL(s.taxaEquipamento)}</span>}
+                          </div>
+                          {sr && (
+                            <div>
+                              <label className="text-muted-foreground block mb-1">Taxa Sala</label>
+                              <span className="text-amber-700 font-medium">{formatBRL(sr.taxaSala)}/mes</span>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </TableBody>
+          <TableFooter>
+            <TableRow className="bg-[#1e3a5f]/5">
+              <TableCell className="font-bold text-foreground">Total</TableCell>
+              <TableCell className="text-right font-bold">{formatBRL(result.faturamentoBrutoTotal)}</TableCell>
+              <TableCell></TableCell>
+              <TableCell className="text-center font-bold">
+                {Object.values(mixAtendimentos).reduce((s, v) => s + v, 0)}
+              </TableCell>
+              <TableCell className="text-right font-bold text-emerald-700">
+                {formatBRL(result.porServico.reduce((s, r) => s + r.lucroOperacional, 0))}
+              </TableCell>
+              <TableCell className="text-center font-bold">
+                {result.faturamentoBrutoTotal > 0
+                  ? formatPercent(
+                      (result.porServico.reduce((s, r) => s + r.lucroOperacional, 0) /
+                        result.faturamentoBrutoTotal) *
+                        100
+                    )
+                  : "-"}
+              </TableCell>
+              {editable && <TableCell></TableCell>}
+            </TableRow>
+          </TableFooter>
+        </Table>
       </CardContent>
     </Card>
   );
