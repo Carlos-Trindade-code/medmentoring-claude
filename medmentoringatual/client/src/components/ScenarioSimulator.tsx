@@ -201,6 +201,12 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
   );
   const loadQuery = mode === "mentor" ? mentorQuery : menteeQuery;
 
+  // Load expense breakdown for custo fixo detail
+  const expenseQuery = trpc.mentor.getExpenseAnalysis.useQuery(
+    { menteeId },
+    { enabled: mode === "mentor" }
+  );
+
   const saveMutation = trpc.mentor.saveSimulationData.useMutation({
     onSuccess: () => toast.success("Simulacao salva com sucesso!"),
     onError: () => toast.error("Erro ao salvar simulacao"),
@@ -589,9 +595,27 @@ export function ScenarioSimulator({ menteeId, mode }: ScenarioSimulatorProps) {
                 <span>-{formatBRL(result.porServico.reduce((s, r) => s + r.taxaSala, 0))}</span>
               </div>
             )}
-            <div className="flex justify-between text-red-600">
-              <span>- Custo Fixo Mensal</span>
-              <span>-{formatBRL(result.custoFixoTotal)}</span>
+            <div className="text-red-600">
+              <div className="flex justify-between">
+                <span>- Custo Fixo Mensal</span>
+                <span>-{formatBRL(result.custoFixoTotal)}</span>
+              </div>
+              {expenseQuery.data?.expenses && Object.keys(expenseQuery.data.expenses).length > 0 && (
+                <div className="ml-4 mt-1 space-y-0.5 text-xs text-red-500/80">
+                  {Object.entries(expenseQuery.data.expenses as Record<string, number>)
+                    .filter(([, v]) => v > 0)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([key, value]) => {
+                      const label = key.split(".").pop()?.replace(/_/g, " ") || key;
+                      return (
+                        <div key={key} className="flex justify-between">
+                          <span className="capitalize">{label}</span>
+                          <span>{formatBRL(value)}</span>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
             {outrasReceitas > 0 && (
               <div className="flex justify-between text-emerald-600">
